@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import StatsCard from '@/components/dashboard/StatsCard.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -125,83 +126,57 @@ const getActivityTypeIcon = (actionType: string) => {
 
             <!-- Stats Cards -->
             <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-              <Card>
-                <CardHeader class="flex flex-row items-center justify-between space-y-0">
-                  <CardTitle class="text-sm font-medium">Subjects</CardTitle>
-                  <User class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div class="text-2xl font-bold">{{ stats.subjects }}</div>
-                  <p class="text-xs text-muted-foreground">
-                    Total subjects in your company
-                  </p>
-                </CardContent>
-              </Card>
+              <StatsCard 
+                title="Subjects" 
+                :value="stats.subjects" 
+                description="Total subjects" 
+                :icon="User" 
+                color="primary"
+                href="/subjects"
+              />
               
-              <Card>
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle class="text-sm font-medium">Documents</CardTitle>
-                  <FileText class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div class="text-2xl font-bold">{{ stats.documents }}</div>
-                  <p class="text-xs text-muted-foreground">
-                    Total documents
-                  </p>
-                </CardContent>
-              </Card>
+              <StatsCard 
+                title="Documents" 
+                :value="stats.documents" 
+                description="Total documents" 
+                :icon="FileText" 
+                color="success"
+                href="/documents"
+              />
               
-              <Card>
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle class="text-sm font-medium">Subject Types</CardTitle>
-                  <Tags class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div class="text-2xl font-bold">{{ stats.subjectTypes }}</div>
-                  <p class="text-xs text-muted-foreground">
-                    Subject classifications
-                  </p>
-                </CardContent>
-              </Card>
+              <StatsCard 
+                title="Subject Types" 
+                :value="stats.subjectTypes" 
+                description="Subject classifications" 
+                :icon="Tags" 
+                color="default"
+                href="/subject-types"
+              />
               
-              <Card>
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle class="text-sm font-medium">Document Types</CardTitle>
-                  <BookType class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div class="text-2xl font-bold">{{ stats.documentTypes }}</div>
-                  <p class="text-xs text-muted-foreground">
-                    Document classifications
-                  </p>
-                </CardContent>
-              </Card>
+              <StatsCard 
+                title="Document Types" 
+                :value="stats.documentTypes" 
+                description="Document classifications" 
+                :icon="BookType" 
+                color="default"
+                href="/document-types"
+              />
               
-              <Card>
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle class="text-sm font-medium">Users</CardTitle>
-                  <Users class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div class="text-2xl font-bold">{{ stats.users }}</div>
-                  <p class="text-xs text-muted-foreground">
-                    Team members
-                  </p>
-                </CardContent>
-              </Card>
+              <StatsCard 
+                title="Users" 
+                :value="stats.users" 
+                description="Team members" 
+                :icon="Users" 
+                color="primary"
+              />
               
-              <Card>
-                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle class="text-sm font-medium">Expiring Soon</CardTitle>
-                  <AlertCircle class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div class="text-2xl font-bold">{{ stats.expiringDocuments }}</div>
-                  <p class="text-xs text-muted-foreground">
-                    Expiring in 30 days
-                  </p>
-                </CardContent>
-              </Card>
+              <StatsCard 
+                title="Expiring Soon" 
+                :value="stats.expiringDocuments" 
+                description="Expiring in 30 days" 
+                :icon="AlertCircle" 
+                color="warning"
+              />
             </div>
 
             <!-- Two column layout for lists -->

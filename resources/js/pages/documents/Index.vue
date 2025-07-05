@@ -5,6 +5,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import { type Document } from '@/types/models';
+import { route } from 'ziggy-js';
 
 interface Props {
   documents?: Document[];
@@ -61,12 +62,12 @@ const isExpired = (dateString: string | undefined) => {
       <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold text-foreground">Documents</h1>
         <div class="flex gap-2">
-          <Link href="/document-types">
+          <Link :href="route('document-types.index')">
             <Button variant="outline" class="mr-2">
               Document Types
             </Button>
           </Link>
-          <Link href="/documents/create">
+          <Link :href="route('documents.create')">
             <Button class="bg-primary text-primary-foreground hover:bg-primary/90">
               Upload Document
             </Button>

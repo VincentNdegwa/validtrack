@@ -3,7 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document;
+use App\Models\DocumentType;
+use App\Models\Subject;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
 {
@@ -12,15 +17,40 @@ class DocumentController extends Controller
      */
     public function index()
     {
-        //
+        $documents = Document::with(['subject', 'documentType'])
+            ->where('company_id', Auth::user()->company_id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return Inertia::render('documents/Index', [
+            'documents' => $documents
+        ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        //
+        $subjects = Subject::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+            
+        $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+            
+        $selectedSubject = null;
+        if ($request->has('subject_id')) {
+            $selectedSubject = Subject::findOrFail($request->subject_id);
+        }
+
+        return Inertia::render('documents/Create', [
+            'subjects' => $subjects,
+            'documentTypes' => $documentTypes,
+            'selectedSubject' => $selectedSubject,
+        ]);
     }
 
     /**
@@ -28,7 +58,39 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'document_type_id' => 'nullable|exists:document_types,id',
+            'file' => 'required|file|max:10240', // Max 10MB
+            'issue_date' => 'required|date',
+            'expiry_date' => 'nullable|date|after_or_equal:issue_date',
+            'status' => 'required|integer',
+            'notes' => 'nullable|string',
+        ]);
+
+        // Make sure the subject belongs to the user's company
+        $subject = Subject::findOrFail($validated['subject_id']);
+        if ($subject->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Store the file
+        $path = $request->file('file')->store('documents/' . $subject->id, 'public');
+        
+        $document = new Document();
+        $document->subject_id = $validated['subject_id'];
+        $document->document_type_id = $validated['document_type_id'] ?? null;
+        $document->file_url = $path;
+        $document->issue_date = $validated['issue_date'];
+        $document->expiry_date = $validated['expiry_date'] ?? null;
+        $document->status = $validated['status'];
+        $document->uploaded_by = Auth::id();
+        $document->notes = $validated['notes'] ?? null;
+        $document->company_id = Auth::user()->company_id;
+        $document->save();
+
+        return redirect()->route('documents.show', $document->id)
+            ->with('success', 'Document uploaded successfully.');
     }
 
     /**
@@ -36,7 +98,17 @@ class DocumentController extends Controller
      */
     public function show(Document $document)
     {
-        //
+        // Make sure the document belongs to the user's company
+        if ($document->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $document->load(['subject', 'documentType', 'uploader']);
+
+        return Inertia::render('documents/Show', [
+            'document' => $document,
+            'fileUrl' => Storage::url($document->file_url),
+        ]);
     }
 
     /**
@@ -44,7 +116,25 @@ class DocumentController extends Controller
      */
     public function edit(Document $document)
     {
-        //
+        // Make sure the document belongs to the user's company
+        if ($document->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $subjects = Subject::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+            
+        $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('documents/Edit', [
+            'document' => $document,
+            'subjects' => $subjects,
+            'documentTypes' => $documentTypes,
+            'fileUrl' => Storage::url($document->file_url),
+        ]);
     }
 
     /**
@@ -52,7 +142,49 @@ class DocumentController extends Controller
      */
     public function update(Request $request, Document $document)
     {
-        //
+        // Make sure the document belongs to the user's company
+        if ($document->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'document_type_id' => 'nullable|exists:document_types,id',
+            'file' => 'nullable|file|max:10240', // Max 10MB
+            'issue_date' => 'required|date',
+            'expiry_date' => 'nullable|date|after_or_equal:issue_date',
+            'status' => 'required|integer',
+            'notes' => 'nullable|string',
+        ]);
+
+        // Make sure the subject belongs to the user's company
+        $subject = Subject::findOrFail($validated['subject_id']);
+        if ($subject->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Handle file update if provided
+        if ($request->hasFile('file')) {
+            // Delete the old file
+            if (Storage::exists($document->file_url)) {
+                Storage::delete($document->file_url);
+            }
+
+            // Store the new file
+            $path = $request->file('file')->store('documents/' . $subject->id, 'public');
+            $document->file_url = $path;
+        }
+
+        $document->subject_id = $validated['subject_id'];
+        $document->document_type_id = $validated['document_type_id'] ?? null;
+        $document->issue_date = $validated['issue_date'];
+        $document->expiry_date = $validated['expiry_date'] ?? null;
+        $document->status = $validated['status'];
+        $document->notes = $validated['notes'] ?? null;
+        $document->save();
+
+        return redirect()->route('documents.show', $document->id)
+            ->with('success', 'Document updated successfully.');
     }
 
     /**
@@ -60,6 +192,19 @@ class DocumentController extends Controller
      */
     public function destroy(Document $document)
     {
-        //
+        // Make sure the document belongs to the user's company
+        if ($document->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Delete the file from storage
+        if (Storage::exists($document->file_url)) {
+            Storage::delete($document->file_url);
+        }
+
+        $document->delete();
+
+        return redirect()->route('documents.index')
+            ->with('success', 'Document deleted successfully.');
     }
 }

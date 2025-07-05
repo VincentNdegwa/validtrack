@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
+use App\Models\SubjectType;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class SubjectController extends Controller
 {
@@ -12,7 +15,14 @@ class SubjectController extends Controller
      */
     public function index()
     {
-        //
+        $subjects = Subject::with('subjectType')
+            ->where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('subjects/Index', [
+            'subjects' => $subjects
+        ]);
     }
 
     /**
@@ -20,7 +30,13 @@ class SubjectController extends Controller
      */
     public function create()
     {
-        //
+        $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('subjects/Create', [
+            'subjectTypes' => $subjectTypes
+        ]);
     }
 
     /**
@@ -28,7 +44,24 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'subject_type_id' => 'nullable|exists:subject_types,id',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+            'status' => 'required|integer',
+        ]);
+
+        $validated['company_id'] = Auth::user()->company_id;
+        $validated['user_id'] = Auth::id();
+
+        $subject = Subject::create($validated);
+
+        return redirect()->route('subjects.show', $subject->id)
+            ->with('success', 'Subject created successfully.');
     }
 
     /**
@@ -36,7 +69,19 @@ class SubjectController extends Controller
      */
     public function show(Subject $subject)
     {
-        //
+        // Make sure the subject belongs to the user's company
+        if ($subject->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $subject->load('subjectType');
+        
+        $documents = $subject->documents()->with('documentType')->get();
+
+        return Inertia::render('subjects/Show', [
+            'subject' => $subject,
+            'documents' => $documents
+        ]);
     }
 
     /**
@@ -44,7 +89,19 @@ class SubjectController extends Controller
      */
     public function edit(Subject $subject)
     {
-        //
+        // Make sure the subject belongs to the user's company
+        if ($subject->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('subjects/Edit', [
+            'subject' => $subject,
+            'subjectTypes' => $subjectTypes
+        ]);
     }
 
     /**
@@ -52,7 +109,26 @@ class SubjectController extends Controller
      */
     public function update(Request $request, Subject $subject)
     {
-        //
+        // Make sure the subject belongs to the user's company
+        if ($subject->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'subject_type_id' => 'nullable|exists:subject_types,id',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+            'status' => 'required|integer',
+        ]);
+
+        $subject->update($validated);
+
+        return redirect()->route('subjects.show', $subject->id)
+            ->with('success', 'Subject updated successfully.');
     }
 
     /**
@@ -60,6 +136,14 @@ class SubjectController extends Controller
      */
     public function destroy(Subject $subject)
     {
-        //
+        // Make sure the subject belongs to the user's company
+        if ($subject->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $subject->delete();
+
+        return redirect()->route('subjects.index')
+            ->with('success', 'Subject deleted successfully.');
     }
 }

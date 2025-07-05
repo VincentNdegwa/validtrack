@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\SubjectType;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class SubjectTypeController extends Controller
 {
@@ -12,7 +14,13 @@ class SubjectTypeController extends Controller
      */
     public function index()
     {
-        //
+        $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('subjects/types/Index', [
+            'subjectTypes' => $subjectTypes
+        ]);
     }
 
     /**
@@ -20,7 +28,7 @@ class SubjectTypeController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('subjects/types/Create');
     }
 
     /**
@@ -28,7 +36,27 @@ class SubjectTypeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        // Check for unique name within company
+        $exists = SubjectType::where('company_id', Auth::user()->company_id)
+            ->where('name', $validated['name'])
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'name' => 'A subject type with this name already exists in your company.'
+            ]);
+        }
+
+        $validated['company_id'] = Auth::user()->company_id;
+
+        SubjectType::create($validated);
+
+        return redirect()->route('subject-types.index')
+            ->with('success', 'Subject type created successfully.');
     }
 
     /**
@@ -36,7 +64,17 @@ class SubjectTypeController extends Controller
      */
     public function show(SubjectType $subjectType)
     {
-        //
+        // Make sure the subject type belongs to the user's company
+        if ($subjectType->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $subjects = $subjectType->subjects;
+
+        return Inertia::render('subjects/types/Show', [
+            'subjectType' => $subjectType,
+            'subjects' => $subjects
+        ]);
     }
 
     /**
@@ -44,7 +82,14 @@ class SubjectTypeController extends Controller
      */
     public function edit(SubjectType $subjectType)
     {
-        //
+        // Make sure the subject type belongs to the user's company
+        if ($subjectType->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return Inertia::render('subjects/types/Edit', [
+            'subjectType' => $subjectType
+        ]);
     }
 
     /**
@@ -52,7 +97,31 @@ class SubjectTypeController extends Controller
      */
     public function update(Request $request, SubjectType $subjectType)
     {
-        //
+        // Make sure the subject type belongs to the user's company
+        if ($subjectType->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        // Check for unique name within company, excluding the current subject type
+        $exists = SubjectType::where('company_id', Auth::user()->company_id)
+            ->where('name', $validated['name'])
+            ->where('id', '!=', $subjectType->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'name' => 'A subject type with this name already exists in your company.'
+            ]);
+        }
+
+        $subjectType->update($validated);
+
+        return redirect()->route('subject-types.index')
+            ->with('success', 'Subject type updated successfully.');
     }
 
     /**
@@ -60,6 +129,21 @@ class SubjectTypeController extends Controller
      */
     public function destroy(SubjectType $subjectType)
     {
-        //
+        // Make sure the subject type belongs to the user's company
+        if ($subjectType->company_id !== Auth::user()->company_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Check if there are any subjects using this type
+        if ($subjectType->subjects()->count() > 0) {
+            return back()->withErrors([
+                'delete' => 'Cannot delete this subject type because it is being used by one or more subjects.'
+            ]);
+        }
+
+        $subjectType->delete();
+
+        return redirect()->route('subject-types.index')
+            ->with('success', 'Subject type deleted successfully.');
     }
 }

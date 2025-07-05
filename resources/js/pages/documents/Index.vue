@@ -60,11 +60,18 @@ const isExpired = (dateString: string | undefined) => {
     <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
       <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold text-foreground">Documents</h1>
-        <Link href="/documents/create">
-          <Button class="bg-primary text-primary-foreground hover:bg-primary/90">
-            Upload Document
-          </Button>
-        </Link>
+        <div class="flex gap-2">
+          <Link href="/document-types">
+            <Button variant="outline" class="mr-2">
+              Document Types
+            </Button>
+          </Link>
+          <Link href="/documents/create">
+            <Button class="bg-primary text-primary-foreground hover:bg-primary/90">
+              Upload Document
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div class="rounded-xl border border-border bg-card">

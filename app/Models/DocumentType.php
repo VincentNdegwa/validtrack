@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DocumentType extends Model
 {
-    use HasFactory;
+    use HasFactory, HasSlug;
+
+    protected $appends = ['slug'];
 
     /**
      * The attributes that are mass assignable.

@@ -23,7 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
   {
     title: props.document.document_type?.name || 'Document Detail',
-    href: `/documents/${props.document?.id}`,
+    href: `/documents/${props.document?.slug}`,
   },
 ];
 
@@ -80,7 +80,7 @@ const getFileType = (url: string) => {
           {{ document.document_type?.name || 'Document' }}
         </h1>
         <div class="flex space-x-3">
-          <Link :href="`/documents/${document.id}/edit`">
+          <Link :href="`/documents/${document.slug}/edit`">
             <Button variant="outline">Edit</Button>
           </Link>
           <Link href="/documents">

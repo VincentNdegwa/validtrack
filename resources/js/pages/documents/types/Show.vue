@@ -23,7 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
   {
     title: props.documentType.name,
-    href: `/document-types/${props.documentType.id}`,
+    href: `/document-types/${props.documentType.slug}`,
   },
 ];
 
@@ -66,7 +66,7 @@ const getStatusClass = (status: number) => {
       <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold text-foreground">{{ documentType.name }}</h1>
         <div class="flex gap-2">
-          <Link :href="`/document-types/${documentType.id}/edit`">
+          <Link :href="`/document-types/${documentType.slug}/edit`">
             <Button variant="outline">Edit</Button>
           </Link>
           <Button
@@ -140,7 +140,7 @@ const getStatusClass = (status: number) => {
               </tr>
               <tr v-for="document in documents" :key="document.id" class="border-t border-border hover:bg-muted/30">
                 <td class="px-6 py-4 font-medium">
-                  <Link :href="`/subjects/${document.subject_id}`" class="text-blue-600 hover:underline">
+                  <Link :href="`/subjects/${document.slug}`" class="text-blue-600 hover:underline">
                     {{ document.subject?.name || 'Unknown Subject' }}
                   </Link>
                 </td>
@@ -160,8 +160,8 @@ const getStatusClass = (status: number) => {
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex space-x-2">
-                    <Link :href="`/documents/${document.id}`" class="text-blue-600 hover:underline">View</Link>
-                    <Link :href="`/documents/${document.id}/edit`" class="text-amber-600 hover:underline">Edit</Link>
+                    <Link :href="`/documents/${document.slug}`" class="text-blue-600 hover:underline">View</Link>
+                    <Link :href="`/documents/${document.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
                   </div>
                 </td>
               </tr>

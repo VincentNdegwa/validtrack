@@ -67,8 +67,11 @@ class SubjectController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Subject $subject)
+    public function show($id)
     {
+        // Try to find the subject by ID or slug
+        $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
+        
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -87,8 +90,11 @@ class SubjectController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Subject $subject)
+    public function edit($id)
     {
+        // Try to find the subject by ID or slug
+        $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
+        
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -107,8 +113,11 @@ class SubjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Subject $subject)
+    public function update(Request $request, $id)
     {
+        // Try to find the subject by ID or slug
+        $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
+        
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -134,8 +143,11 @@ class SubjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Subject $subject)
+    public function destroy($id)
     {
+        // Try to find the subject by ID or slug
+        $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
+        
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');

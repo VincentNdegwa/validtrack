@@ -142,7 +142,7 @@ const getStatusText = (status: number) => {
                     Expires: {{ new Date(document.expiry_date).toLocaleDateString() }}
                   </p>
                 </div>
-                <Link :href="`/documents/${document.id}`" class="text-primary hover:underline text-sm">View</Link>
+                <Link :href="`/documents/${document.slug}`" class="text-primary hover:underline text-sm">View</Link>
               </div>
             </div>
           </div>

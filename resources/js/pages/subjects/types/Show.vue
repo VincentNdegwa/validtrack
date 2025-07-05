@@ -57,7 +57,7 @@ const getStatusText = (status: number) => {
           <p class="text-muted-foreground">{{ subjects.length }} subjects in this category</p>
         </div>
         <div class="flex space-x-3">
-          <Link :href="`/subject-types/${subjectType.id}/edit`">
+          <Link :href="`/subject-types/${subjectType.slug}/edit`">
             <Button variant="outline">Edit</Button>
           </Link>
           <Link href="/subject-types">

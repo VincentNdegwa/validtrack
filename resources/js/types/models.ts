@@ -13,6 +13,7 @@ export interface User {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  slug: string;
 }
 
 export interface Company {
@@ -26,6 +27,7 @@ export interface Company {
   location?: string;
   created_at: string;
   updated_at: string;
+  slug: string;
 }
 
 export interface SubjectType {
@@ -35,6 +37,7 @@ export interface SubjectType {
   created_at: string;
   updated_at: string;
   company?: Company;
+  slug: string;
 }
 
 export interface Subject {
@@ -55,6 +58,7 @@ export interface Subject {
   subject_type?: SubjectType;
   user?: User;
   documents?: Document[];
+  slug: string;
 }
 
 export interface DocumentType {
@@ -67,6 +71,7 @@ export interface DocumentType {
   created_at: string;
   updated_at: string;
   company?: Company;
+  slug: string;
 }
 
 export interface Document {
@@ -86,6 +91,7 @@ export interface Document {
   document_type?: DocumentType;
   uploader?: User;
   company?: Company;
+  slug: string;
 }
 
 export interface ActivityLog {
@@ -100,4 +106,5 @@ export interface ActivityLog {
   updated_at: string;
   user?: User;
   company?: Company;
+  slug: string;
 }

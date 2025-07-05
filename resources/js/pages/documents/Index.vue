@@ -112,8 +112,8 @@ const isExpired = (dateString: string | undefined) => {
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex space-x-2">
-                    <Link :href="`/documents/${document.id}`" class="text-blue-600 hover:underline">View</Link>
-                    <Link :href="`/documents/${document.id}/edit`" class="text-amber-600 hover:underline">Edit</Link>
+                    <Link :href="`/documents/${document.slug}`" class="text-blue-600 hover:underline">View</Link>
+                    <Link :href="`/documents/${document.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
                     <button class="text-red-600 hover:underline">Delete</button>
                   </div>
                 </td>

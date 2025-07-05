@@ -96,8 +96,11 @@ class DocumentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Document $document)
+    public function show($id)
     {
+        // Try to find the document by ID or slug
+        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
+        
         // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -114,8 +117,11 @@ class DocumentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Document $document)
+    public function edit($id)
     {
+        // Try to find the document by ID or slug
+        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
+        
         // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -140,8 +146,11 @@ class DocumentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Document $document)
+    public function update(Request $request, $id)
     {
+        // Try to find the document by ID or slug
+        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
+        
         // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -190,8 +199,11 @@ class DocumentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Document $document)
+    public function destroy($id)
     {
+        // Try to find the document by ID or slug
+        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
+        
         // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');

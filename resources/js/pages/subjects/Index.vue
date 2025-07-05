@@ -101,8 +101,8 @@ const getStatusText = (status: number) => {
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex space-x-2">
-                                        <Link :href="`/subjects/${subject.id}`" class="text-blue-600 hover:underline">View</Link>
-                                        <Link :href="`/subjects/${subject.id}/edit`" class="text-amber-600 hover:underline">Edit</Link>
+                                        <Link :href="`/subjects/${subject.slug}`" class="text-blue-600 hover:underline">View</Link>
+                                        <Link :href="`/subjects/${subject.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
                                         <button class="text-red-600 hover:underline">Delete</button>
                                     </div>
                                 </td>

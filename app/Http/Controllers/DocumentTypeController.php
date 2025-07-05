@@ -65,8 +65,11 @@ class DocumentTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(DocumentType $documentType)
+    public function show($id)
     {
+        // Try to find the document type by ID or slug
+        $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
+        
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -83,8 +86,11 @@ class DocumentTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(DocumentType $documentType)
+    public function edit($id)
     {
+        // Try to find the document type by ID or slug
+        $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
+        
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -98,8 +104,11 @@ class DocumentTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, DocumentType $documentType)
+    public function update(Request $request, $id)
     {
+        // Try to find the document type by ID or slug
+        $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
+        
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -133,8 +142,11 @@ class DocumentTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(DocumentType $documentType)
+    public function destroy($id)
     {
+        // Try to find the document type by ID or slug
+        $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
+        
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');

@@ -239,7 +239,7 @@ const getActivityTypeIcon = (actionType: string) => {
                     <div v-for="document in recentDocuments" :key="document.id" class="flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
                       <div class="space-y-1">
                         <p class="text-sm font-medium leading-none">
-                          <Link :href="`/documents/${document.id}`" class="hover:underline">
+                          <Link :href="`/documents/${document.slug}`" class="hover:underline">
                             {{ document.subject?.name || 'Unknown Subject' }}
                           </Link>
                         </p>
@@ -279,7 +279,7 @@ const getActivityTypeIcon = (actionType: string) => {
                     <div v-for="document in expiringDocuments" :key="document.id" class="flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
                       <div class="space-y-1">
                         <p class="text-sm font-medium leading-none">
-                          <Link :href="`/documents/${document.id}`" class="hover:underline">
+                          <Link :href="`/documents/${document.slug}`" class="hover:underline">
                             {{ document.subject?.name || 'Unknown Subject' }}
                           </Link>
                         </p>

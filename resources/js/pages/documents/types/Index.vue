@@ -72,8 +72,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex space-x-2">
-                    <Link :href="`/document-types/${type.id}`" class="text-blue-600 hover:underline">View</Link>
-                    <Link :href="`/document-types/${type.id}/edit`" class="text-amber-600 hover:underline">Edit</Link>
+                    <Link :href="`/document-types/${type.slug}`" class="text-blue-600 hover:underline">View</Link>
+                    <Link :href="`/document-types/${type.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
                     <button 
                       @click.prevent="$inertia.delete(`/document-types/${type.id}`)" 
                       class="text-red-600 hover:underline"

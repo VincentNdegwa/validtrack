@@ -62,9 +62,10 @@ class SubjectTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(SubjectType $subjectType)
+    public function show($id)
     {
-        // Make sure the subject type belongs to the user's company
+        $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
+        
         if ($subjectType->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
         }
@@ -80,8 +81,11 @@ class SubjectTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(SubjectType $subjectType)
+    public function edit($id)
     {
+        // Try to find the subject type by ID or slug
+        $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
+        
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -95,8 +99,11 @@ class SubjectTypeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, SubjectType $subjectType)
+    public function update(Request $request, $id)
     {
+        // Try to find the subject type by ID or slug
+        $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
+        
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
@@ -127,8 +134,11 @@ class SubjectTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(SubjectType $subjectType)
+    public function destroy($id)
     {
+        // Try to find the subject type by ID or slug
+        $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
+        
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');

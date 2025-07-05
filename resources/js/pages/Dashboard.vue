@@ -1,8 +1,58 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+import { Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { 
+  Users, 
+  FileText, 
+  User, 
+  Tags, 
+  BookType, 
+  AlertCircle,
+  ChevronRight,
+  Calendar,
+  Clock,
+  Activity
+} from 'lucide-vue-next';
+import { type Subject, type Document, type Company, type ActivityLog } from '@/types/models';
+
+interface Stats {
+  subjects: number;
+  documents: number;
+  subjectTypes: number;
+  documentTypes: number;
+  users: number;
+  expiringDocuments: number;
+}
+
+interface Props {
+  stats?: Stats;
+  recentSubjects?: Subject[];
+  recentDocuments?: Document[];
+  recentActivities?: ActivityLog[];
+  expiringDocuments?: Document[];
+  company?: Company;
+}
+
+const props = defineProps<Props>();
+
+const stats = ref(props.stats || {
+  subjects: 0,
+  documents: 0,
+  subjectTypes: 0,
+  documentTypes: 0,
+  users: 0,
+  expiringDocuments: 0,
+});
+
+const recentSubjects = ref(props.recentSubjects || []);
+const recentDocuments = ref(props.recentDocuments || []);
+const recentActivities = ref(props.recentActivities || []);
+const expiringDocuments = ref(props.expiringDocuments || []);
+const company = ref(props.company);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -10,6 +60,51 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/dashboard',
     },
 ];
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString();
+};
+
+const formatDateTime = (date: string) => {
+  return new Date(date).toLocaleString();
+};
+
+const getStatusLabel = (status: number) => {
+  switch (status) {
+    case 0: return 'Draft';
+    case 1: return 'Active';
+    case 2: return 'Expired';
+    case 3: return 'Archived';
+    default: return 'Unknown';
+  }
+};
+
+const getStatusClass = (status: number) => {
+  switch (status) {
+    case 0: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+    case 1: return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
+    case 2: return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+    case 3: return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+  }
+};
+
+const getDaysUntilExpiry = (expiryDate: string) => {
+  const today = new Date();
+  const expiry = new Date(expiryDate);
+  const diffTime = expiry.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
+
+const getActivityTypeIcon = (actionType: string) => {
+  switch (actionType) {
+    case 'create': return 'plus-circle';
+    case 'update': return 'edit';
+    case 'delete': return 'trash';
+    default: return 'activity';
+  }
+};
 </script>
 
 <template>
@@ -17,20 +112,255 @@ const breadcrumbs: BreadcrumbItem[] = [
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
-            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
-                <div class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                    <PlaceholderPattern />
-                </div>
+            <!-- Company Info Section -->
+            <div v-if="company" class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+              <div>
+                <h1 class="text-2xl font-bold text-foreground">{{ company.name }}</h1>
+                <p class="text-muted-foreground">{{ company.location || 'No location set' }}</p>
+              </div>
+              <div class="mt-2 sm:mt-0">
+                <span class="text-muted-foreground">{{ formatDate(company.created_at) }}</span>
+              </div>
             </div>
-            <div class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                <PlaceholderPattern />
+
+            <!-- Stats Cards -->
+            <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+              <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0">
+                  <CardTitle class="text-sm font-medium">Subjects</CardTitle>
+                  <User class="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div class="text-2xl font-bold">{{ stats.subjects }}</div>
+                  <p class="text-xs text-muted-foreground">
+                    Total subjects in your company
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle class="text-sm font-medium">Documents</CardTitle>
+                  <FileText class="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div class="text-2xl font-bold">{{ stats.documents }}</div>
+                  <p class="text-xs text-muted-foreground">
+                    Total documents
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle class="text-sm font-medium">Subject Types</CardTitle>
+                  <Tags class="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div class="text-2xl font-bold">{{ stats.subjectTypes }}</div>
+                  <p class="text-xs text-muted-foreground">
+                    Subject classifications
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle class="text-sm font-medium">Document Types</CardTitle>
+                  <BookType class="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div class="text-2xl font-bold">{{ stats.documentTypes }}</div>
+                  <p class="text-xs text-muted-foreground">
+                    Document classifications
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle class="text-sm font-medium">Users</CardTitle>
+                  <Users class="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div class="text-2xl font-bold">{{ stats.users }}</div>
+                  <p class="text-xs text-muted-foreground">
+                    Team members
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle class="text-sm font-medium">Expiring Soon</CardTitle>
+                  <AlertCircle class="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div class="text-2xl font-bold">{{ stats.expiringDocuments }}</div>
+                  <p class="text-xs text-muted-foreground">
+                    Expiring in 30 days
+                  </p>
+                </CardContent>
+              </Card>
             </div>
+
+            <!-- Two column layout for lists -->
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <!-- Recent Subjects -->
+              <Card >
+                <CardHeader>
+                  <div class="flex items-center justify-between">
+                    <CardTitle>Recent Subjects</CardTitle>
+                    <Link href="/subjects">
+                      <Button variant="ghost" size="sm" class="text-xs">
+                        View All
+                        <ChevronRight class="ml-1 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div class="space-y-2">
+                    <div v-if="recentSubjects.length === 0" class="text-center text-muted-foreground text-sm py-4">
+                      No subjects found
+                    </div>
+                    <div v-for="subject in recentSubjects" :key="subject.id" class="flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
+                      <div class="space-y-1">
+                        <p class="text-sm font-medium leading-none">
+                          <Link :href="`/subjects/${subject.id}`" class="hover:underline">
+                            {{ subject.name }}
+                          </Link>
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                          {{ subject.subject_type?.name || 'No type' }}
+                        </p>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <p class="text-xs text-muted-foreground">{{ formatDate(subject.created_at) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <!-- Recent Documents -->
+              <Card>
+                <CardHeader>
+                  <div class="flex items-center justify-between">
+                    <CardTitle>Recent Documents</CardTitle>
+                    <Link href="/documents">
+                      <Button variant="ghost" size="sm" class="text-xs">
+                        View All
+                        <ChevronRight class="ml-1 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div class="space-y-2">
+                    <div v-if="recentDocuments.length === 0" class="text-center text-muted-foreground text-sm py-4">
+                      No documents found
+                    </div>
+                    <div v-for="document in recentDocuments" :key="document.id" class="flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
+                      <div class="space-y-1">
+                        <p class="text-sm font-medium leading-none">
+                          <Link :href="`/documents/${document.id}`" class="hover:underline">
+                            {{ document.subject?.name || 'Unknown Subject' }}
+                          </Link>
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                          {{ document.document_type?.name || 'No type' }}
+                        </p>
+                      </div>
+                      <div class="flex flex-col items-end">
+                        <div class="flex items-center gap-2">
+                          <span 
+                            class="px-2 py-1 rounded-full text-xs" 
+                            :class="getStatusClass(document.status)"
+                          >
+                            {{ getStatusLabel(document.status) }}
+                          </span>
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1">{{ formatDate(document.created_at) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <!-- Expiring Documents -->
+              <Card>
+                <CardHeader>
+                  <div class="flex items-center justify-between">
+                    <CardTitle>Expiring Documents</CardTitle>
+                    <Calendar class="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div class="space-y-2">
+                    <div v-if="expiringDocuments.length === 0" class="text-center text-muted-foreground text-sm py-4">
+                      No documents expiring soon
+                    </div>
+                    <div v-for="document in expiringDocuments" :key="document.id" class="flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
+                      <div class="space-y-1">
+                        <p class="text-sm font-medium leading-none">
+                          <Link :href="`/documents/${document.id}`" class="hover:underline">
+                            {{ document.subject?.name || 'Unknown Subject' }}
+                          </Link>
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                          {{ document.document_type?.name || 'No type' }}
+                        </p>
+                      </div>
+                      <div v-if="document.expiry_date" class="flex flex-col items-end">
+                        <div 
+                          class="px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                        >
+                          {{ getDaysUntilExpiry(document.expiry_date) }} days left
+                        </div>
+                        <p class="text-xs text-muted-foreground mt-1">{{ formatDate(document.expiry_date) }}</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <!-- Recent Activity -->
+            <Card>
+              <CardHeader>
+                <div class="flex items-center justify-between">
+                  <CardTitle>Recent Activity</CardTitle>
+                  <Activity class="h-4 w-4 text-muted-foreground" />
+                </div>
+                <CardDescription>Recent actions performed by users in your company</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div class="space-y-4">
+                  <div v-if="recentActivities.length === 0" class="text-center text-muted-foreground text-sm py-4">
+                    No recent activity found
+                  </div>
+                  <div v-for="activity in recentActivities" :key="activity.id" class="flex">
+                    <div class="flex-shrink-0 mr-4">
+                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                        <component :is="getActivityTypeIcon(activity.action_type)" class="h-4 w-4 text-primary" />
+                      </div>
+                    </div>
+                    <div class="flex-grow">
+                      <p class="text-sm">
+                        <span class="font-medium">{{ activity.user?.name || 'Unknown User' }}</span> 
+                        <span> {{ activity.action_type }}</span>
+                        <span> a {{ activity.target_type }}</span>
+                      </p>
+                      <div class="flex items-center text-xs text-muted-foreground">
+                        <Clock class="mr-1 h-3 w-3" />
+                        <span>{{ formatDateTime(activity.created_at) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
         </div>
     </AppLayout>
 </template>

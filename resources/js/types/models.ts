@@ -14,6 +14,36 @@ export interface User {
   created_at: string;
   updated_at: string;
   slug: string;
+  roles?: Role[];
+}
+
+// Add Role and Permission interfaces
+export interface Role {
+  id: number;
+  name: string;
+  display_name?: string;
+  description?: string;
+  company_id: number;
+  created_at: string;
+  updated_at: string;
+  slug: string;
+  permissions?: Permission[];
+  users?: User[];
+  users_count?: number;
+  permissions_count?: number;
+}
+
+export interface Permission {
+  id: number;
+  name: string;
+  display_name?: string;
+  description?: string;
+  company_id: number | null;
+  created_at: string;
+  updated_at: string;
+  slug: string;
+  roles?: Role[];
+  roles_count?: number;
 }
 
 export interface Company {
@@ -25,9 +55,13 @@ export interface Company {
   website?: string;
   logo?: string;
   location?: string;
+  description?: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
   slug: string;
+  users_count?: number;
+  users?: User[];
 }
 
 export interface SubjectType {

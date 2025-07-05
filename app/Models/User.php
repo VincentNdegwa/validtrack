@@ -7,11 +7,12 @@ use App\Traits\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laratrust\Traits\HasRolesAndPermissions;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasSlug;
+    use HasFactory, Notifiable, HasSlug, HasRolesAndPermissions;
 
     /**
      * The attributes that are mass assignable.
@@ -92,5 +93,51 @@ class User extends Authenticatable
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class);
+    }
+    
+    /**
+     * Check if the user has a specific permission.
+     *
+     * @param string $permission
+     * @return bool
+     */
+    public function hasPermission(string $permission): bool
+    {
+        if (!$this->roles) {
+            return false;
+        }
+        
+        // Check each role's permissions
+        foreach ($this->roles as $role) {
+            foreach ($role->permissions as $perm) {
+                if ($perm->name === $permission) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Get all permissions for the user through their roles.
+     * 
+     * @return array
+     */
+    public function getAllPermissions(): array
+    {
+        if (!$this->roles) {
+            return [];
+        }
+        
+        $permissions = [];
+        
+        foreach ($this->roles as $role) {
+            foreach ($role->permissions as $permission) {
+                $permissions[] = $permission->name;
+            }
+        }
+        
+        return array_unique($permissions);
     }
 }

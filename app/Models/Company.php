@@ -30,6 +30,17 @@ class Company extends Model
         'website',
         'logo',
         'location',
+        'description',
+        'is_active',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 
     /**

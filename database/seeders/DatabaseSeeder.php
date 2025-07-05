@@ -59,7 +59,8 @@ class DatabaseSeeder extends Seeder
             ->first();
             
         if ($superAdminUser && $superAdminRole) {
-            $superAdminUser->roles()->attach($superAdminRole->id, ['company_id' => null]);
+            // Don't specify company_id in the pivot data
+            $superAdminUser->roles()->attach($superAdminRole->id);
         }
         
         // Assign user role to the rest of the users

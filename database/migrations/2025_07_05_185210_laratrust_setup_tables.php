@@ -48,14 +48,15 @@ return new class extends Migration
             $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('user_id');
             $table->string('user_type');
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedBigInteger('company_id')->nullable(); 
 
             $table->foreign('role_id')->references('id')->on('roles')
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('company_id')->references('id')->on('companies')
                 ->onUpdate('cascade')->onDelete('cascade');
 
-            $table->primary(['user_id', 'role_id', 'user_type', 'company_id']);
+            // Use unique constraint instead of primary key to allow nullable company_id
+            $table->unique(['user_id', 'role_id', 'user_type', 'company_id']);
         });
 
         // Create table for associating permissions to users (Many To Many Polymorphic)
@@ -63,21 +64,22 @@ return new class extends Migration
             $table->unsignedBigInteger('permission_id');
             $table->unsignedBigInteger('user_id');
             $table->string('user_type');
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedBigInteger('company_id')->nullable();
 
             $table->foreign('permission_id')->references('id')->on('permissions')
                 ->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('company_id')->references('id')->on('companies')
                 ->onUpdate('cascade')->onDelete('cascade');
 
-            $table->primary(['user_id', 'permission_id', 'user_type', 'company_id']);
+            // Use unique constraint instead of primary key to allow nullable company_id
+            $table->unique(['user_id', 'permission_id', 'user_type', 'company_id']);
         });
 
         // Create table for associating permissions to roles (Many-to-Many)
         Schema::create('permission_role', function (Blueprint $table) {
             $table->unsignedBigInteger('permission_id');
             $table->unsignedBigInteger('role_id');
-            $table->unsignedBigInteger('company_id');
+            $table->unsignedBigInteger('company_id')->nullable(); 
 
             $table->foreign('permission_id')->references('id')->on('permissions')
                 ->onUpdate('cascade')->onDelete('cascade');
@@ -86,7 +88,8 @@ return new class extends Migration
             $table->foreign('company_id')->references('id')->on('companies')
                 ->onUpdate('cascade')->onDelete('cascade');
 
-            $table->primary(['permission_id', 'role_id', 'company_id']);
+            // Use unique constraint instead of primary key to allow nullable company_id
+            $table->unique(['permission_id', 'role_id', 'company_id']);
         });
     }
 

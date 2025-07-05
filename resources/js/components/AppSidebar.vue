@@ -6,16 +6,22 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { type NavItem } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Dock, FileBadge2Icon, Users, ShieldCheck, Key, Settings, FileText } from 'lucide-vue-next';
+import { LayoutGrid, Dock, FileBadge2Icon, Users, ShieldCheck, Key, Settings, FileText, Building } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
-// Get user permissions from Inertia page props
+// Get user permissions and roles from Inertia page props
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const hasPermission = (permission: string): boolean => {
     return user.value?.permissions?.includes(permission) || false;
 };
+
+// Check if user is super admin
+const isSuperAdmin = computed((): boolean => {
+    if (!user.value?.roles) return false;
+    return user.value.roles.some(role => role.name === 'super-admin');
+});
 
 // Define nav items with conditional permission checks
 const mainNavItems = computed(() => {
@@ -25,6 +31,13 @@ const mainNavItems = computed(() => {
             href: '/dashboard',
             icon: LayoutGrid,
             show: hasPermission('dashboard-view'),
+        },
+        // Company management for super admins
+        {
+            title: 'Companies',
+            href: '/companies',
+            icon: Building,
+            show: isSuperAdmin.value,
         },
         {
             title: 'Subjects',

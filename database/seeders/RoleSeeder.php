@@ -29,12 +29,9 @@ class RoleSeeder extends Seeder
             $companyPermissions = Permission::where('company_id', $company->id)->get();
             
             // Attach all company permissions to admin role
-            $permissionsData = [];
-            foreach ($companyPermissions as $permission) {
-                $permissionsData[$permission->id] = ['company_id' => $company->id];
-            }
-            
-            $adminRole->permissions()->sync($permissionsData);
+            $permissionIds = $companyPermissions->pluck('id')->toArray();
+            $adminRole->permissions()->detach();
+            $adminRole->permissions()->attach($permissionIds);
             
             $managerRole = Role::firstOrCreate(
                 ['name' => 'manager', 'company_id' => $company->id],
@@ -52,12 +49,9 @@ class RoleSeeder extends Seeder
                 ->get();
             
             // Attach view permissions to manager role
-            $viewPermissionsData = [];
-            foreach ($viewPermissions as $permission) {
-                $viewPermissionsData[$permission->id] = ['company_id' => $company->id];
-            }
-            
-            $managerRole->permissions()->sync($viewPermissionsData);
+            $viewPermissionIds = $viewPermissions->pluck('id')->toArray();
+            $managerRole->permissions()->detach();
+            $managerRole->permissions()->attach($viewPermissionIds);
             
             // Create a User role with limited access
             $userRole = Role::firstOrCreate(
@@ -80,12 +74,9 @@ class RoleSeeder extends Seeder
                 ->get();
             
             // Attach basic permissions to user role
-            $basicPermissionsData = [];
-            foreach ($basicPermissions as $permission) {
-                $basicPermissionsData[$permission->id] = ['company_id' => $company->id];
-            }
-            
-            $userRole->permissions()->sync($basicPermissionsData);
+            $basicPermissionIds = $basicPermissions->pluck('id')->toArray();
+            $userRole->permissions()->detach();
+            $userRole->permissions()->attach($basicPermissionIds);
         }
         
         // Create a global administrator role if it doesn't exist
@@ -100,12 +91,12 @@ class RoleSeeder extends Seeder
         // Get global permissions
         $globalPermissions = Permission::whereNull('company_id')->get();
         
-        // Attach global permissions to super admin role
-        $globalPermissionsData = [];
-        foreach ($globalPermissions as $permission) {
-            $globalPermissionsData[$permission->id] = ['company_id' => null];
-        }
+        // Detach any existing permissions first
+        $superAdminRole->permissions()->detach();
         
-        $superAdminRole->permissions()->sync($globalPermissionsData);
+        // Attach global permissions to super admin role without using company_id in pivot
+        foreach ($globalPermissions as $permission) {
+            $superAdminRole->permissions()->attach($permission->id);
+        }
     }
 }

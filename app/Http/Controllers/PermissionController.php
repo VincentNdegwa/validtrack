@@ -8,23 +8,11 @@ use Inertia\Inertia;
 
 class PermissionController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     */
-    public function __construct()
-    {
-        $this->middleware('permission:roles-view');
-    }
-    
-    /**
-     * Display a listing of the permissions.
-     * Shows all available permissions that can be assigned to roles.
-     */
+
     public function index()
     {
         $permissions = Permission::where(function ($query) {
-                $query->where('company_id', Auth::user()->company_id)
-                    ->orWhereNull('company_id'); // Include global permissions
+                $query->where('company_id', Auth::user()->company_id);
             })
             ->withCount('roles')
             ->orderBy('name')

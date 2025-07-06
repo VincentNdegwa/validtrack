@@ -37,8 +37,7 @@ class RoleController extends Controller
     public function create()
     {
         $permissions = Permission::where(function ($query) {
-                $query->where('company_id', Auth::user()->company_id)
-                    ->orWhereNull('company_id'); // Include global permissions
+                $query->where('company_id', Auth::user()->company_id);
             })
             ->orderBy('name')
             ->get();
@@ -78,10 +77,8 @@ class RoleController extends Controller
 
         // Attach permissions if provided
         if (!empty($validated['permissions'])) {
-            // Only attach permissions that belong to the user's company or are global
             $permissionIds = Permission::where(function ($query) {
-                    $query->where('company_id', Auth::user()->company_id)
-                        ->orWhereNull('company_id'); // Include global permissions
+                    $query->where('company_id', Auth::user()->company_id);
                 })
                 ->whereIn('id', $validated['permissions'])
                 ->pluck('id')
@@ -128,8 +125,7 @@ class RoleController extends Controller
         }
 
         $permissions = Permission::where(function ($query) {
-                $query->where('company_id', Auth::user()->company_id)
-                    ->orWhereNull('company_id'); // Include global permissions
+                $query->where('company_id', Auth::user()->company_id);
             })
             ->orderBy('name')
             ->get();
@@ -181,8 +177,7 @@ class RoleController extends Controller
         if (isset($validated['permissions'])) {
             // Only sync permissions that belong to the user's company or are global
             $permissionIds = Permission::where(function ($query) {
-                    $query->where('company_id', Auth::user()->company_id)
-                        ->orWhereNull('company_id'); // Include global permissions
+                    $query->where('company_id', Auth::user()->company_id);
                 })
                 ->whereIn('id', $validated['permissions'])
                 ->pluck('id')
@@ -203,21 +198,16 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        // Try to find the role by ID or slug
-        $role = is_numeric($id) ? Role::findOrFail($id) : Role::findBySlugOrFail($id);
-        
-        // Make sure the role belongs to the current company
+        $role = is_numeric($id) ? Role::findOrFail($id) : Role::findBySlugOrFail($id);        
         if ($role->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Check if the role is in use
         if ($role->users()->count() > 0) {
             return redirect()->route('roles.index')
                 ->with('error', 'Cannot delete role that is assigned to users.');
         }
 
-        // Delete the role
         $role->permissions()->detach();
         $role->delete();
 

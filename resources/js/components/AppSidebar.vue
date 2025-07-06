@@ -23,7 +23,7 @@ const isSuperAdmin = computed((): boolean => {
 });
 
 const mainNavItems = computed(() => {
-    // Different navigation menu for super-admin
+
     if (isSuperAdmin.value) {
         return [
             {
@@ -66,7 +66,6 @@ const mainNavItems = computed(() => {
         ];
     }
     
-    // Standard navigation for regular users
     const items: NavItem[] = [
         {
             title: 'Dashboard',
@@ -125,7 +124,6 @@ const mainNavItems = computed(() => {
         }
     ];
     
-    // Only show items that are explicitly marked as show: true
     return items.filter(item => item.show === true);
 });
 

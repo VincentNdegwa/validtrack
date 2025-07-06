@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         $superAdminUser = User::factory()->create([
             'name' => 'Super Admin',
             'email' => 'superadmin@example.com',
-            'company_id' => $company->id, // Assigned to a company but has global permissions
+            'company_id' => $company->id,
         ]);
         
         // Create additional test users
@@ -59,8 +59,7 @@ class DatabaseSeeder extends Seeder
             ->first();
             
         if ($superAdminUser && $superAdminRole) {
-            // Don't specify company_id in the pivot data
-            $superAdminUser->roles()->attach($superAdminRole->id);
+            $superAdminUser->roles()->attach($superAdminRole->id, ['company_id' => null]);
         }
         
         // Assign user role to the rest of the users

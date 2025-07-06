@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\ImpersonationService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,19 @@ class CompanyContext
                 $isSuperAdmin = true;
                 break;
             }
+        }
+        
+        // Check if we're impersonating someone
+        $impersonationService = app(ImpersonationService::class);
+        $isImpersonating = $impersonationService->isImpersonating();
+        
+        // If we're impersonating, share that information with the frontend
+        if ($isImpersonating) {
+            \Inertia\Inertia::share([
+                'impersonating' => true,
+                'impersonatorId' => $impersonationService->getImpersonatorId(),
+                'impersonatedUserId' => $impersonationService->getImpersonatedId()
+            ]);
         }
         
         // If user is super-admin and there's an active company context in session

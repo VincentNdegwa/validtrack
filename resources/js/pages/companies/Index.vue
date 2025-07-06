@@ -64,11 +64,6 @@ const switchToCompany = () => {
     if (companyToSwitch.value) {
         router.post('/companies/switch', {
             company_id: companyToSwitch.value.id
-        }, {
-            onSuccess: () => {
-                showSwitchDialog.value = false;
-                companyToSwitch.value = null;
-            }
         });
     }
 };
@@ -130,7 +125,7 @@ const clearCompanyContext = () => {
                                     <div class="flex space-x-2">
                                         <Link :href="`/companies/${company.slug}`" class="text-blue-600 hover:underline">View</Link>
                                         <Link :href="`/companies/${company.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
-                                        <button @click="confirmSwitch(company)" class="text-indigo-600 hover:underline">Switch</button>
+                                        <button @click="confirmSwitch(company)" class="text-indigo-600 hover:underline">Impersonate</button>
                                         <button @click="confirmDelete(company)" class="text-red-600 hover:underline">Delete</button>
                                     </div>
                                 </td>
@@ -164,19 +159,19 @@ const clearCompanyContext = () => {
         <Dialog :open="showSwitchDialog" @update:open="showSwitchDialog = $event">
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Switch Company Context</DialogTitle>
+                    <DialogTitle>Select Company</DialogTitle>
                 </DialogHeader>
                 <div class="py-4">
                     <p>
-                        Switch to view data in the context of <span class="font-semibold">{{ companyToSwitch?.name }}</span>?
+                        Switch to <span class="font-semibold">{{ companyToSwitch?.name }}</span>?
                     </p>
                     <p class="text-sm text-muted-foreground mt-2">
-                        This will allow you to view and manage resources within this company's context.
+                        This will show you a list of users in this company that you can impersonate.
                     </p>
                 </div>
                 <div class="flex justify-end space-x-2">
                     <Button variant="outline" @click="cancelSwitch">Cancel</Button>
-                    <Button variant="primary" @click="switchToCompany">Switch</Button>
+                    <Button @click="switchToCompany">Switch</Button>
                 </div>
             </DialogContent>
         </Dialog>

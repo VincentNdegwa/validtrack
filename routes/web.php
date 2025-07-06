@@ -36,7 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('super-admin')->group(function () {
         Route::resource('companies', CompanyController::class);
         Route::post('companies/switch', [CompanyController::class, 'switchCompany'])->name('companies.switch');
+        Route::post('impersonate', [CompanyController::class, 'impersonateUser'])->name('impersonate.start');
     });
+    
+    // Route available to all authenticated users to stop impersonation
+    Route::post('impersonate/stop', [CompanyController::class, 'stopImpersonation'])->name('impersonate.stop');
 });
 
 require __DIR__.'/settings.php';

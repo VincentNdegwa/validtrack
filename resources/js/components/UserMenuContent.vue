@@ -3,7 +3,7 @@ import UserInfo from '@/components/UserInfo.vue';
 import { DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import type { User } from '@/types';
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { LogOut, Settings, Building, SwitchCamera, Check } from 'lucide-vue-next';
+import { LogOut, Settings, Building, SwitchCamera, AlertTriangle } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 interface Props {
@@ -18,6 +18,7 @@ const handleLogout = () => {
 
 const page = usePage();
 const activeCompanyId = computed(() => page.props.activeCompanyId as number | undefined);
+const isImpersonating = computed(() => page.props.impersonating as boolean);
 
 const isSuperAdmin = (user: User) => {
     if (!user.roles) return false;
@@ -33,6 +34,10 @@ const clearCompanyContext = () => {
         company_id: null
     });
 };
+
+const stopImpersonation = () => {
+    router.post('/impersonate/stop');
+};
 </script>
 
 <template>
@@ -42,6 +47,23 @@ const clearCompanyContext = () => {
         </div>
     </DropdownMenuLabel>
     <DropdownMenuSeparator />
+    
+    <!-- Impersonation Notice -->
+    <template v-if="isImpersonating">
+        <div class="flex items-center justify-between px-2 py-1.5 text-xs bg-amber-100 dark:bg-amber-900/30">
+            <span class="text-amber-700 dark:text-amber-400 font-medium">
+                <AlertTriangle class="inline-block h-3 w-3 mr-1" />
+                You are impersonating this user
+            </span>
+            <button 
+                @click="stopImpersonation"
+                class="ml-2 text-xs text-blue-600 hover:underline font-medium"
+            >
+                Exit
+            </button>
+        </div>
+        <DropdownMenuSeparator />
+    </template>
     
     <!-- Super Admin Company Management -->
     <template v-if="isSuperAdmin(user)">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
@@ -121,19 +122,14 @@ class CompanyController extends Controller
         return redirect()->route('companies.index')
             ->with('success', 'Company deleted successfully');
     }
-    
-    /**
-     * Switch the user's active company context.
-     * This doesn't change the user's assigned company, but sets a session
-     * variable to view data in the context of a different company.
-     */
+
     public function switchCompany(Request $request)
     {
         $companyId = $request->input('company_id');
         
         if (!$companyId) {
-            // Clear the current company context
             Session::forget('active_company_id');
+            app(\App\Services\ImpersonationService::class)->stopImpersonating();
             return redirect()->back()->with('success', 'Switched to global view');
         }
         
@@ -142,10 +138,61 @@ class CompanyController extends Controller
         if (!$company) {
             return redirect()->back()->with('error', 'Company not found');
         }
-        
-        // Set the active company context in session
         Session::put('active_company_id', $company->id);
+        $users = $company->users()->where('is_active', true)->get();
         
-        return redirect()->back()->with('success', 'Switched to ' . $company->name);
+        return Inertia::render('companies/UserSelection', [
+            'company' => $company,
+            'users' => $users,
+        ]);
+    }
+    
+    /**
+     * Impersonate a user in the selected company.
+     */
+    public function impersonateUser(Request $request)
+    {
+        $userId = $request->input('user_id');
+        
+        if (!$userId) {
+            return redirect()->back()->with('error', 'No user selected');
+        }
+        
+        $user = User::find($userId);
+        
+        if (!$user) {
+            return redirect()->back()->with('error', 'User not found');
+        }
+        
+        $currentUser = Auth::user();
+        $isSuperAdmin = false;
+        foreach ($currentUser->roles as $role) {
+            if ($role->name === 'super-admin') {
+                $isSuperAdmin = true;
+                break;
+            }
+        }
+        
+        if (!$isSuperAdmin) {
+            return redirect()->route('dashboard')->with('error', 'Unauthorized action');
+        }
+        
+        app(\App\Services\ImpersonationService::class)->impersonate($user);
+        
+        return redirect()->route('dashboard')->with('success', 'You are now viewing as ' . $user->name);
+    }
+    
+    /**
+     * Stop impersonating a user and return to the super admin account.
+     */
+    public function stopImpersonation()
+    {
+        $impersonationService = app(\App\Services\ImpersonationService::class);
+        
+        if ($impersonationService->stopImpersonating()) {
+            return redirect()->route('dashboard')->with('success', 'Returned to your account');
+        }
+        
+        return redirect()->route('dashboard')->with('error', 'Not currently impersonating');
     }
 }

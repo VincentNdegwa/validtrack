@@ -60,7 +60,7 @@ interface Props {
     users: User[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const selectedUserId = ref('');
 
 const breadcrumbs: BreadcrumbItem[] = [

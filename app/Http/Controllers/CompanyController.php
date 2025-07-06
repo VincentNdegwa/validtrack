@@ -64,8 +64,10 @@ class CompanyController extends Controller
     /**
      * Display the specified company.
      */
-    public function show(Company $company)
+    public function show($id)
     {
+        $company = is_numeric($id) ? Company::findOrFail($id) : Company::findBySlugOrFail($id);
+
         $company->load(['users' => function($query) {
             $query->orderBy('name');
         }]);
@@ -78,8 +80,10 @@ class CompanyController extends Controller
     /**
      * Show the form for editing the specified company.
      */
-    public function edit(Company $company)
+    public function edit($id)
     {
+        $company = is_numeric($id) ? Company::findOrFail($id) : Company::findBySlugOrFail($id);
+
         return Inertia::render('companies/Edit', [
             'company' => $company
         ]);
@@ -96,7 +100,6 @@ class CompanyController extends Controller
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
-            'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
         

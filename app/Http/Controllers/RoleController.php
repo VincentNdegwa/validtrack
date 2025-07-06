@@ -14,7 +14,24 @@ class RoleController extends Controller
 {
     use RespectsCompanyContext;
     
-    // The middleware is applied in the routes file
+    private function getAvailablePermissions()
+    {
+        return Permission::where(function ($query) {
+                $query->where('company_id', Auth::user()->company_id);
+            })
+            ->orderBy('name')
+            ->get();
+    }
+    
+    private function filterPermissionIds(array $permissionIds)
+    {
+        return Permission::where(function ($query) {
+                $query->where('company_id', Auth::user()->company_id);
+            })
+            ->whereIn('id', $permissionIds)
+            ->pluck('id')
+            ->toArray();
+    }
     
     /**
      * Display a listing of the roles.
@@ -36,11 +53,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permissions = Permission::where(function ($query) {
-                $query->where('company_id', Auth::user()->company_id);
-            })
-            ->orderBy('name')
-            ->get();
+        $permissions = $this->getAvailablePermissions();
 
         return Inertia::render('roles/Create', [
             'permissions' => $permissions
@@ -77,14 +90,12 @@ class RoleController extends Controller
 
         // Attach permissions if provided
         if (!empty($validated['permissions'])) {
-            $permissionIds = Permission::where(function ($query) {
-                    $query->where('company_id', Auth::user()->company_id);
-                })
-                ->whereIn('id', $validated['permissions'])
-                ->pluck('id')
-                ->toArray();
+            $permissionIds = $this->filterPermissionIds($validated['permissions']);
             
-            $role->permissions()->attach($permissionIds, ['company_id' => Auth::user()->company_id]);
+            if (!empty($permissionIds)) {
+                $attachData = array_fill_keys($permissionIds, ['company_id' => Auth::user()->company_id]);
+                $role->permissions()->attach($attachData);
+            }
         }
 
         return redirect()->route('roles.index')
@@ -116,19 +127,13 @@ class RoleController extends Controller
      */
     public function edit($id)
     {
-        // Try to find the role by ID or slug
         $role = is_numeric($id) ? Role::findOrFail($id) : Role::findBySlugOrFail($id);
         
-        // Make sure the role belongs to the current company
         if ($role->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        $permissions = Permission::where(function ($query) {
-                $query->where('company_id', Auth::user()->company_id);
-            })
-            ->orderBy('name')
-            ->get();
+        $permissions = $this->getAvailablePermissions();
 
         $role->load('permissions');
 
@@ -173,20 +178,13 @@ class RoleController extends Controller
         $role->description = $validated['description'] ?? null;
         $role->save();
 
-        // Update permissions if provided
         if (isset($validated['permissions'])) {
-            // Only sync permissions that belong to the user's company or are global
-            $permissionIds = Permission::where(function ($query) {
-                    $query->where('company_id', Auth::user()->company_id);
-                })
-                ->whereIn('id', $validated['permissions'])
-                ->pluck('id')
-                ->toArray();
-            
-            // Detach all existing permissions for this role and company
+            $permissionIds = $this->filterPermissionIds($validated['permissions']);
             $role->permissions()->detach();
-            // Attach new permissions with company_id
-            $role->permissions()->attach($permissionIds, ['company_id' => Auth::user()->company_id]);
+            if (!empty($permissionIds)) {
+                $attachData = array_fill_keys($permissionIds, ['company_id' => Auth::user()->company_id]);
+                $role->permissions()->attach($attachData);
+            }
         }
 
         return redirect()->route('roles.index')

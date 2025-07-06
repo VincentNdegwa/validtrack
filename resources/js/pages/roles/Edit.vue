@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,6 +42,19 @@ const form = useForm({
 
 const submit = () => {
     form.put(`/roles/${props.role.slug}`);
+};
+
+const updatePermission = (permissionId: number, checked: boolean) => {
+    if (checked) {
+        if (!form.permissions.includes(permissionId)) {
+            form.permissions.push(permissionId);
+        }
+    } else {
+        const index = form.permissions.indexOf(permissionId);
+        if (index !== -1) {
+            form.permissions.splice(index, 1);
+        }
+    }
 };
 
 // Group permissions by category based on their names
@@ -127,19 +139,18 @@ const groupedPermissions = computed(() => {
                                     
                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                                         <div v-for="permission in perms" :key="permission.id" class="flex items-center space-x-2">
-                                            <Checkbox 
-                                                :id="`permission-${permission.id}`" 
-                                                v-model:checked="form.permissions" 
-                                                :value="permission.id" 
-                                            />
-                                            <Label :for="`permission-${permission.id}`" class="cursor-pointer">
+                                            <div class="flex items-center h-4">
+                                                <input 
+                                                    type="checkbox"
+                                                    :id="`permission-${permission.id}`" 
+                                                    :checked="form.permissions.includes(permission.id)"
+                                                    @change="(e) => updatePermission(permission.id, (e.target as HTMLInputElement).checked)"
+                                                    :value="permission.id"
+                                                    class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/80" 
+                                                />
+                                            </div>
+                                            <Label :for="`permission-${permission.id}`" class="cursor-pointer ml-2">
                                                 {{ permission.display_name || permission.name }}
-                                                <span 
-                                                    v-if="permission.company_id === null" 
-                                                    class="ml-1 text-xs rounded-full bg-blue-100 px-2 py-0.5 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                                                >
-                                                    global
-                                                </span>
                                             </Label>
                                         </div>
                                     </div>

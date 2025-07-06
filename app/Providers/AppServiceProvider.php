@@ -28,25 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $router->aliasMiddleware('super-admin', \App\Http\Middleware\SuperAdmin::class);
         $router->aliasMiddleware('company-context', \App\Http\Middleware\CompanyContext::class);
         
-        // Share permissions with every view for authorization in the frontend
         Inertia::share([
-            'auth' => function () {
-                $user = Auth::user();
-                
-                if (!$user) {
-                    return null;
-                }
-                
-                // Use the getAllPermissions method to get permissions
-                $permissions = $user->getAllPermissions();
-                
-                return [
-                    'user' => array_merge($user->only('id', 'name', 'email'), [
-                        'roles' => $user->roles,
-                        'permissions' => $permissions,
-                    ]),
-                ];
-            },
             'flash' => function () {
                 return [
                     'success' => Session::get('success'),

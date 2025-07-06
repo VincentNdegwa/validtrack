@@ -10,20 +10,18 @@ import { LayoutGrid, Dock, FileBadge2Icon, Users, ShieldCheck, Key, Settings, Fi
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
-// Get user permissions and roles from Inertia page props
 const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const hasPermission = (permission: string): boolean => {
-    return user.value?.permissions?.includes(permission) || false;
+    if (!user.value?.permissions) return false;
+    return user.value.permissions.includes(permission) || false;
 };
 
-// Check if user is super admin
 const isSuperAdmin = computed((): boolean => {
     if (!user.value?.roles) return false;
     return user.value.roles.some(role => role.name === 'super-admin');
 });
 
-// Define nav items with conditional permission checks
 const mainNavItems = computed(() => {
     const items: NavItem[] = [
         {
@@ -90,7 +88,8 @@ const mainNavItems = computed(() => {
         }
     ];
     
-    return items.filter(item => item.show !== false);
+    // Only show items that are explicitly marked as show: true
+    return items.filter(item => item.show === true);
 });
 
 const footerNavItems: NavItem[] = [];

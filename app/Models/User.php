@@ -126,6 +126,8 @@ class User extends Authenticatable
      */
     public function getAllPermissions(): array
     {
+        $this->load('roles.permissions');
+        
         if (!$this->roles) {
             return [];
         }

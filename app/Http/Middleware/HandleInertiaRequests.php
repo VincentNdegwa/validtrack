@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -43,9 +44,24 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
-            'auth' => [
-                'user' => $request->user(),
-            ],
+            'auth' => function() {
+                $user = Auth::user();
+                
+                if (!$user) {
+                    return [
+                        'user' => null,
+                    ];
+                }
+                
+                $permissions = $user->getAllPermissions();
+                
+                return [
+                    'user' => array_merge($user->only('id', 'name', 'email', 'company_id', 'slug'), [
+                        'roles' => $user->roles,
+                        'permissions' => array_unique($permissions),
+                    ]),
+                ];
+            },
             'ziggy' => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

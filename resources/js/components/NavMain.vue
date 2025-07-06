@@ -19,7 +19,6 @@ const toggleExpanded = (title: string) => {
 const isItemActive = (item: NavItem): boolean => {
     if (item.href && item.href === (page.url as string)) return true;
     
-    // Check if any child is active
     if (item.children) {
         return item.children.some(child => isItemActive(child));
     }
@@ -28,20 +27,17 @@ const isItemActive = (item: NavItem): boolean => {
 };
 
 const isExpanded = computed(() => (title: string) => {
-    // Auto-expand if a child is active
     return expandedItems.value[title] ?? false;
 });
 
-// Filter visible children
 const getVisibleChildren = (item: NavItem): NavItem[] => {
     if (!item.children) return [];
-    return item.children.filter(child => child.show !== false);
+    return item.children.filter(child => child.show === true);
 };
 
-// Check if item has visible children
 const hasVisibleChildren = (item: NavItem): boolean => {
     if (!item.children) return false;
-    return item.children.some(child => child.show !== false);
+    return item.children.some(child => child.show === true);
 };
 </script>
 
@@ -50,8 +46,8 @@ const hasVisibleChildren = (item: NavItem): boolean => {
         <SidebarGroupLabel>Platform</SidebarGroupLabel>
         <SidebarMenu>
             <template v-for="item in items" :key="item.title">
-                <!-- Standard menu item -->
-                <SidebarMenuItem v-if="!item.children">
+                <!-- Standard menu item - only show if show property is true or undefined -->
+                <SidebarMenuItem v-if="!item.children && item.show !== false">
                     <SidebarMenuButton 
                         as-child 
                         :is-active="item.href === (page.url as string)" 
@@ -64,7 +60,7 @@ const hasVisibleChildren = (item: NavItem): boolean => {
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 
-                <!-- Dropdown menu item -->
+                <!-- Dropdown menu item - only show if it has visible children -->
                 <template v-else-if="hasVisibleChildren(item)">
                     <SidebarMenuItem>
                         <SidebarMenuButton 

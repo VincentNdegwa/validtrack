@@ -16,22 +16,18 @@ const handleLogout = () => {
     router.flushAll();
 };
 
-// Get the page properties including active company context
 const page = usePage();
 const activeCompanyId = computed(() => page.props.activeCompanyId as number | undefined);
 
-// Check if the user has the super-admin role
 const isSuperAdmin = (user: User) => {
     if (!user.roles) return false;
     return user.roles.some(role => role.name === 'super-admin');
 };
 
-// Helper to display the active company context
 const isCompanyActive = computed(() => {
     return !!activeCompanyId.value;
 });
 
-// Clear the active company context
 const clearCompanyContext = () => {
     router.post('/companies/switch', {
         company_id: null

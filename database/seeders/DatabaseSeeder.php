@@ -14,46 +14,54 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $company = $this->createCompany();
-        $users = $this->createUsers($company);
+        $superAdminCompany = $this->createCompany('ValidTrack System Administration', 'admin@validtrack.com', true);
+        $clientCompany = $this->createCompany('Demo Client Company', 'info@democompany.com');
+        
+        $users = $this->createUsers($clientCompany, $superAdminCompany);
         
         $this->seedPermissionsAndRoles();
-        $this->assignRolesToUsers($users, $company);
+        $this->assignRolesToUsers($users, $clientCompany, $superAdminCompany);
     }
 
     /**
-     * Create the default company
+     * Create a company with the given details
      */
-    private function createCompany(): Company
+    private function createCompany(string $name, string $email, bool $isAdmin = false): Company
     {
         return Company::factory()->create([
-            'name' => 'Demo Company',
-            'email' => 'info@democompany.com',
+            'name' => $name,
+            'email' => $email,
+            'location' => $isAdmin ? 'System Administration HQ' : 'Client Location',
         ]);
     }
 
-
-    private function createUsers(Company $company): array
+    private function createUsers(Company $regularCompany, Company $adminCompany): array
     {
+        $superAdminUser = User::factory()->create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@validtrack.com',
+            'company_id' => $adminCompany->id,
+            'role'=> 'super-admin',
+        ]);
+
         $adminUser = User::factory()->create([
             'name' => 'Admin User',
             'email' => 'admin@example.com',
-            'company_id' => $company->id,
+            'company_id' => $regularCompany->id,
+            'role'=>'admin',
         ]);
         
-        $superAdminUser = User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@example.com',
-            'company_id' => $company->id,
-        ]);
         
-        User::factory(5)->create([
-            'company_id' => $company->id,
+        User::factory(2)->create([
+            'company_id' => $regularCompany->id,
+            'role' => 'user',
         ]);
 
         return [
             'admin' => $adminUser,
-            'superAdmin' => $superAdminUser
+            'superAdmin' => $superAdminUser,
+            'regularCompany' => $regularCompany,
+            'adminCompany' => $adminCompany
         ];
     }
 
@@ -71,11 +79,18 @@ class DatabaseSeeder extends Seeder
     /**
      * Assign roles to users
      */
-    private function assignRolesToUsers(array $users, Company $company): void
+    private function assignRolesToUsers(array $users, Company $regularCompany, Company $adminCompany): void
     {
-        $this->assignAdminRole($users['admin'], $company);
-        $this->assignSuperAdminRole($users['superAdmin']);
-        $this->assignUserRolesToRegularUsers($users['admin']->id, $users['superAdmin']->id, $company);
+        // For the regular company: assign admin role to the admin user and user roles to regular users
+        $this->assignAdminRole($users['admin'], $regularCompany);
+        $this->assignUserRolesToRegularUsers(
+            $users['admin']->id, 
+            $users['superAdmin']->id, 
+            $regularCompany
+        );
+        
+        // For the admin company: assign super-admin role to the super admin user only
+        $this->assignSuperAdminRole($users['superAdmin'], $adminCompany);
     }
 
     /**
@@ -92,17 +107,28 @@ class DatabaseSeeder extends Seeder
         }
     }
 
-    /**
-     * Assign super-admin role to the super admin user
-     */
-    private function assignSuperAdminRole(User $superAdminUser): void
+    private function assignSuperAdminRole(User $superAdminUser, Company $adminCompany): void
     {
+        // 1. Assign the global super-admin role (in their own company)
         $superAdminRole = Role::where('name', 'super-admin')
             ->whereNull('company_id')
             ->first();
             
         if ($superAdminRole) {
-            $superAdminUser->roles()->attach($superAdminRole->id, ['company_id' => $superAdminUser->company_id]);
+            $superAdminUser->roles()->attach($superAdminRole->id, ['company_id' => $adminCompany->id]);
+        }
+
+        // 2. Also give the super-admin user admin access to all other companies
+        $otherCompanies = Company::where('id', '!=', $adminCompany->id)->get();
+        
+        foreach ($otherCompanies as $company) {
+            $adminRole = Role::where('name', 'admin')
+                ->where('company_id', $company->id)
+                ->first();
+                
+            if ($adminRole) {
+                $superAdminUser->roles()->attach($adminRole->id, ['company_id' => $company->id]);
+            }
         }
     }
 

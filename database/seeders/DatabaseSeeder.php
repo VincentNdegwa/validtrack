@@ -102,7 +102,6 @@ class DatabaseSeeder extends Seeder
             ->first();
             
         if ($superAdminRole) {
-            // Use the user's company_id since role_user.company_id cannot be NULL
             $superAdminUser->roles()->attach($superAdminRole->id, ['company_id' => $superAdminUser->company_id]);
         }
     }

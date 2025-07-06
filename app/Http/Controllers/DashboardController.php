@@ -22,7 +22,13 @@ class DashboardController extends Controller
         $user = Auth::user();
         $companyId = $user->company_id;
         
-        // Get counts for various entities
+        $isSuperAdmin = $user->roles()->where('name', 'super-admin')->exists();
+        
+        if ($isSuperAdmin) {
+            return $this->superAdminDashboard();
+        }
+        
+        // Regular dashboard for company users
         $stats = [
             'subjects' => Subject::where('company_id', $companyId)->count(),
             'documents' => Document::where('company_id', $companyId)->count(),
@@ -77,6 +83,31 @@ class DashboardController extends Controller
             'recentActivities' => $recentActivities,
             'expiringDocuments' => $expiringDocuments,
             'company' => $company,
+        ]);
+    }
+    
+    /**
+     * Display the super-admin dashboard with system-wide statistics and company management.
+     */
+    private function superAdminDashboard()
+    {
+        // Get all companies with user counts
+        $companies = \App\Models\Company::withCount('users')->orderBy('name')->get();
+        
+        // Get total counts across all companies
+        $stats = [
+            'totalCompanies' => \App\Models\Company::count(),
+            'totalUsers' => \App\Models\User::count(),
+            'totalSubjects' => \App\Models\Subject::count(),
+            'totalDocuments' => \App\Models\Document::count(),
+            'totalSubjectTypes' => \App\Models\SubjectType::count(),
+            'totalDocumentTypes' => \App\Models\DocumentType::count(),
+        ];
+        
+        // Return specialized super-admin dashboard view
+        return Inertia::render('SuperAdminDashboard', [
+            'stats' => $stats,
+            'companies' => $companies,
         ]);
     }
 }

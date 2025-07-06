@@ -23,19 +23,56 @@ const isSuperAdmin = computed((): boolean => {
 });
 
 const mainNavItems = computed(() => {
+    // Different navigation menu for super-admin
+    if (isSuperAdmin.value) {
+        return [
+            {
+                title: 'Dashboard',
+                href: '/dashboard',
+                icon: LayoutGrid,
+                show: true
+            },
+            {
+                title: 'Companies',
+                href: '/companies',
+                icon: Building,
+                show: true
+            },
+            {
+                title: 'Users Management',
+                icon: Users,
+                show: true,
+                children: [
+                    {
+                        title: 'Users',
+                        href: '/users',
+                        icon: Users,
+                        show: true
+                    },
+                    {
+                        title: 'Roles',
+                        href: '/roles',
+                        icon: ShieldCheck,
+                        show: true
+                    },
+                    {
+                        title: 'Permissions',
+                        href: '/permissions',
+                        icon: Key,
+                        show: true
+                    }
+                ]
+            }
+        ];
+    }
+    
+    // Standard navigation for regular users
     const items: NavItem[] = [
         {
             title: 'Dashboard',
             href: '/dashboard',
             icon: LayoutGrid,
             show: hasPermission('dashboard-view'),
-        },
-        // Company management for super admins
-        {
-            title: 'Companies',
-            href: '/companies',
-            icon: Building,
-            show: isSuperAdmin.value,
         },
         {
             title: 'Subjects',

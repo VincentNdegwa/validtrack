@@ -15,7 +15,6 @@ class UserController extends Controller
 {
     use RespectsCompanyContext;
     
-    // The middleware is applied in the routes file
     
     /**
      * Display a listing of the users.

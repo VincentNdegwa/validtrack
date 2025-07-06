@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Role, type User } from '@/types/models';
@@ -46,6 +46,19 @@ const form = useForm({
 
 const submit = () => {
     form.put(`/users/${props.user.slug}`);
+};
+
+const updateRole = (roleId: number, checked: boolean) => {
+    if (checked) {
+        if (!form.roles.includes(roleId)) {
+            form.roles.push(roleId);
+        }
+    } else {
+        const index = form.roles.indexOf(roleId);
+        if (index !== -1) {
+            form.roles.splice(index, 1);
+        }
+    }
 };
 </script>
 
@@ -113,12 +126,17 @@ const submit = () => {
                             <Label>Roles</Label>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                                 <div v-for="role in roles" :key="role.id" class="flex items-center space-x-2">
-                                    <Checkbox 
-                                        :id="`role-${role.id}`" 
-                                        v-model:checked="form.roles" 
-                                        :value="role.id" 
-                                    />
-                                    <Label :for="`role-${role.id}`" class="cursor-pointer">
+                                    <div class="flex items-center h-4">
+                                        <input 
+                                            type="checkbox"
+                                            :id="`role-${role.id}`" 
+                                            :checked="form.roles.includes(role.id)"
+                                            @change="(e) => updateRole(role.id, (e.target as HTMLInputElement).checked)"
+                                            :value="role.id"
+                                            class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/80" 
+                                        />
+                                    </div>
+                                    <Label :for="`role-${role.id}`" class="cursor-pointer ml-2">
                                         {{ role.display_name || role.name }}
                                     </Label>
                                 </div>
@@ -126,10 +144,18 @@ const submit = () => {
                             <p v-if="form.errors.roles" class="text-xs text-red-500 mt-1">{{ form.errors.roles }}</p>
                         </div>
 
-                        <div class="flex items-center space-x-2">
-                            <Checkbox id="is_active" v-model:checked="form.is_active" />
-                            <Label for="is_active" class="cursor-pointer">Active</Label>
-                            <p v-if="form.errors.is_active" class="text-xs text-red-500 mt-1">{{ form.errors.is_active }}</p>
+                        <div class="flex flex-col gap-2 justify-between">
+                            <div class="flex items-center space-x-2">
+                                <Label for="is_active" class="cursor-pointer">User Status</Label>
+                                <p v-if="form.errors.is_active" class="text-xs text-red-500 mt-1">{{ form.errors.is_active }}</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-muted-foreground">{{ form.is_active ? 'Active' : 'Inactive' }}</span>
+                                <Switch
+                                    id="is_active"
+                                    v-model="form.is_active"
+                                />
+                            </div>
                         </div>
                     </div>
                 </Card>

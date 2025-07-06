@@ -12,8 +12,8 @@ class RoleSeeder extends Seeder
   
     public function run(): void
     {
-        $this->seedCompanyRoles();
         $this->seedSuperAdminRole();
+        $this->seedCompanyRoles();
     }
 
     /**

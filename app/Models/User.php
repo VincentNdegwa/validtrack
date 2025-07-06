@@ -136,7 +136,7 @@ class User extends Authenticatable
         
         foreach ($this->roles as $role) {
             foreach ($role->permissions as $permission) {
-                $permissions[] = $permission->name;
+                $permissions[] = $permission;
             }
         }
         

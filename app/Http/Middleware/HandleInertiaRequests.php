@@ -53,12 +53,17 @@ class HandleInertiaRequests extends Middleware
                     ];
                 }
                 
-                $permissions = $user->getAllPermissions();
+                $permissionsCollection = $user->getAllPermissions();
+                
+                $permissionNames = [];
+                foreach ($permissionsCollection as $permission) {
+                    $permissionNames[] = $permission->name;
+                }
                 
                 return [
                     'user' => array_merge($user->only('id', 'name', 'email', 'company_id', 'slug'), [
                         'roles' => $user->roles,
-                        'permissions' => array_unique($permissions),
+                        'permissions' => $permissionNames,
                     ]),
                 ];
             },

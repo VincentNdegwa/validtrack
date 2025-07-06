@@ -14,7 +14,7 @@ const page = usePage();
 const user = computed(() => page.props.auth?.user);
 const hasPermission = (permission: string): boolean => {
     if (!user.value?.permissions) return false;
-    return user.value.permissions.includes(permission) || false;
+    return user.value?.permissions?.includes(permission) || false;
 };
 
 const isSuperAdmin = computed((): boolean => {

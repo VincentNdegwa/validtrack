@@ -11,17 +11,47 @@ use Inertia\Inertia;
 
 class CompanyController extends Controller
 {
-    // The middleware is applied in the routes file
     
     /**
      * Display a listing of all companies.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $companies = Company::withCount('users')->orderBy('name')->get();
+        $sortField = $request->input('sort', 'name');
+        $sortDirection = $request->input('direction', 'asc');
+        $perPage = (int) $request->input('per_page', 10);
+        $search = $request->input('search', '');
+        
+        $perPage = in_array($perPage, [5, 10, 25, 50, 100]) ? $perPage : 10;
+        
+        $query = Company::withCount('users');
+        
+        if (!empty($search)) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+        
+        $allowedSortFields = ['name', 'email', 'created_at', 'is_active', 'users_count'];
+        $allowedDirections = ['asc', 'desc'];
+        
+        if (in_array($sortField, $allowedSortFields) && in_array(strtolower($sortDirection), $allowedDirections)) {
+            $query->orderBy($sortField, $sortDirection);
+        } else {
+            $query->orderBy('name', 'asc');
+        }
+        
+        $companies = $query->paginate($perPage)->withQueryString();
         
         return Inertia::render('companies/Index', [
-            'companies' => $companies
+            'companies' => $companies,
+            'filters' => [
+                'sort' => $sortField,
+                'direction' => $sortDirection,
+                'search' => $search,
+                'per_page' => $perPage
+            ]
         ]);
     }
     

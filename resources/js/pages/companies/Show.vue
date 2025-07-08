@@ -86,49 +86,30 @@
                         </Link>
                     </CardHeader>
                     <CardContent>
-                        <div class="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>Email</TableHead>
-                                        <TableHead>Role</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead class="w-[100px]">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    <TableRow v-if="company.users.length === 0">
-                                        <TableCell colspan="5" class="text-center">No users found</TableCell>
-                                    </TableRow>
-                                    <TableRow v-for="user in company.users" :key="user.id">
-                                        <TableCell>{{ user.name }}</TableCell>
-                                        <TableCell>{{ user.email }}</TableCell>
-                                        <TableCell>
-                                            <span v-if="user.roles && user.roles.length > 0">
-                                                {{ user.roles[0].display_name }}
-                                            </span>
-                                            <span v-else>-</span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <span
-                                                class="inline-flex items-center rounded-full px-2 py-1 text-xs"
-                                                :class="user.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
-                                            >
-                                                {{ user.is_active ? 'Active' : 'Inactive' }}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div class="flex items-center space-x-2">
-                                                <Link :href="`/users/${user.slug}`" class="text-blue-600 hover:underline">View</Link>
-                                                <Link :href="`/users/${user.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
-                                                <button @click="impersonateSpecificUser(user.id)" class="text-indigo-600 hover:underline">Impersonate</button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </div>
+                        <DataTable
+                            :data="company.users"
+                            :columns="userColumns"
+                            empty-message="No users found"
+                        >
+                            <template #role="{ item: user }">
+                                <span v-if="user.roles && user.roles.length > 0">
+                                    {{ user.roles[0].display_name }}
+                                </span>
+                                <span v-else>-</span>
+                            </template>
+                            
+                            <template #status="{ item: user }">
+                                <StatusBadge :active="user.is_active" />
+                            </template>
+                            
+                            <template #actions="{ item: user }">
+                                <div class="flex items-center space-x-2">
+                                    <Link :href="`/users/${user.slug}`" class="text-blue-600 hover:underline">View</Link>
+                                    <Link :href="`/users/${user.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
+                                    <button @click="impersonateSpecificUser(user.id)" class="text-indigo-600 hover:underline">Impersonate</button>
+                                </div>
+                            </template>
+                        </DataTable>
                     </CardContent>
                 </Card>
             </div>
@@ -161,7 +142,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DataTable } from '@/components/ui/data-table';
+import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Company, type User } from '@/types/models';
@@ -177,6 +159,15 @@ interface Props {
 const props = defineProps<Props>();
 const showSwitchDialog = ref(false);
 const companyToSwitch = ref<Company | null>(null);
+
+// Define columns for users DataTable
+const userColumns = [
+    { key: 'name', label: 'Name' },
+    { key: 'email', label: 'Email' },
+    { key: 'role', label: 'Role' },
+    { key: 'status', label: 'Status' },
+    { key: '_actions', label: 'Actions', class: 'w-[100px]' }
+];
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

@@ -74,30 +74,6 @@ const mainNavItems = computed(() => {
             show: hasPermission('dashboard-view'),
         },
         {
-            title: 'Subjects',
-            href: '/subjects',
-            icon: Dock,
-            show: hasPermission('subjects-view'),
-        },
-        {
-            title: 'Subject Types',
-            href: '/subject-types',
-            icon: Settings,
-            show: hasPermission('subject-types-view'),
-        },
-        {
-            title: 'Documents',
-            href: '/documents',
-            icon: FileBadge2Icon,
-            show: hasPermission('documents-view'),
-        },
-        {
-            title: 'Document Types',
-            href: '/document-types',
-            icon: FileText,
-            show: hasPermission('document-types-view'),
-        },
-        {
             title: 'Users Management',
             icon: Users,
             show: hasPermission('users-view') || hasPermission('roles-view'),
@@ -121,7 +97,19 @@ const mainNavItems = computed(() => {
                     show: hasPermission('roles-view'),
                 }
             ]
-        }
+        },
+        {
+            title: 'Subjects',
+            href: '/subjects',
+            icon: Dock,
+            show: hasPermission('subjects-view'),
+        },
+        {
+            title: 'Documents',
+            href: '/documents',
+            icon: FileBadge2Icon,
+            show: hasPermission('documents-view'),
+        },
     ];
     
     return items.filter(item => item.show === true);

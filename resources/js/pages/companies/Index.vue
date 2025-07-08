@@ -1,18 +1,80 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DataTable } from '@/components/ui/data-table';
+import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
+import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Company } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { Eye, Edit, UserRound, Trash, View } from 'lucide-vue-next';
 
+// Define props for parent-driven data loading mode
 interface Props {
-    companies?: Company[];
+    companies?: {
+        data: Company[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    filters?: {
+        sort: string;
+        direction: string;
+        search: string;
+        per_page: number;
+    };
 }
 
 const props = defineProps<Props>();
-const companies = ref(props.companies || []);
+
+const search = ref(props.filters?.search || '');
+const sortField = ref(props.filters?.sort || 'name');
+const sortDirection = ref<'asc' | 'desc'>(props.filters?.direction as 'asc' | 'desc' || 'asc');
+const perPage = ref(props.filters?.per_page || 10);
+
+// Computed pagination object for parent-driven mode
+const pagination = computed(() => {
+    if (!props.companies) return null;
+    return {
+        currentPage: props.companies.current_page,
+        lastPage: props.companies.last_page,
+        perPage: props.companies.per_page,
+        total: props.companies.total
+    };
+});
+
+// Define columns for the DataTable
+const columns = computed(() => [
+    { 
+        key: 'name', 
+        label: 'Name', 
+        class: 'font-medium',
+        sortable: true,
+        sortDirection: sortField.value === 'name' ? sortDirection.value : null
+    },
+    { 
+        key: 'email', 
+        label: 'Email',
+        sortable: true,
+        sortDirection: sortField.value === 'email' ? sortDirection.value : null
+    },
+    { 
+        key: 'users_count', 
+        label: 'Users',
+        sortable: true,
+        sortDirection: sortField.value === 'users_count' ? sortDirection.value : null
+    },
+    { 
+        key: 'status', 
+        label: 'Status',
+        sortable: true,
+        sortDirection: sortField.value === 'is_active' ? sortDirection.value : null
+    },
+    { key: '_actions', label: 'Actions' }
+]);
 const showDeleteDialog = ref(false);
 const companyToDelete = ref<Company | null>(null);
 const showSwitchDialog = ref(false);
@@ -29,7 +91,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const confirmDelete = (company: Company) => {
+const confirmDelete = (company: Company, event?: Event) => {
+    event?.preventDefault();
     companyToDelete.value = company;
     showDeleteDialog.value = true;
 };
@@ -50,7 +113,8 @@ const deleteCompany = () => {
     }
 };
 
-const confirmSwitch = (company: Company) => {
+const confirmSwitch = (company: Company, event?: Event) => {
+    event?.preventDefault();
     companyToSwitch.value = company;
     showSwitchDialog.value = true;
 };
@@ -68,10 +132,89 @@ const switchToCompany = () => {
     }
 };
 
-const clearCompanyContext = () => {
-    router.post('/companies/switch', {
-        company_id: null
+const handlePageChange = (page: number) => {
+    router.get('/companies', {
+        page: page,
+        sort: sortField.value,
+        direction: sortDirection.value,
+        search: search.value,
+        per_page: perPage.value
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['companies']
     });
+};
+
+// Handle sort change
+const handleSort = (field: string) => {
+    if (field === sortField.value) {
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortField.value = field;
+        sortDirection.value = 'asc';
+    }
+    
+    router.get('/companies', {
+        sort: sortField.value,
+        direction: sortDirection.value,
+        search: search.value,
+        per_page: perPage.value
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['companies']
+    });
+};
+
+// Handle search
+const handleSearch = () => {
+    router.get('/companies', {
+        search: search.value,
+        sort: sortField.value,
+        direction: sortDirection.value,
+        per_page: perPage.value
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['companies']
+    });
+};
+
+// Handle per page change
+const handlePerPageChange = (value: number) => {
+    perPage.value = value;
+    router.get('/companies', {
+        search: search.value,
+        sort: sortField.value,
+        direction: sortDirection.value,
+        per_page: perPage.value
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['companies']
+    });
+};
+
+const handleMenuAction = (action: string, companyId: string | number) => {
+    const company = props.companies?.data.find(c => c.id === companyId);
+    
+    if (!company) return;
+    
+    switch (action) {
+        case 'view':
+            router.visit(`/companies/${company.slug}`);
+            break;
+        case 'edit':
+            router.visit(`/companies/${company.slug}/edit`);
+            break;
+        case 'impersonate':
+            confirmSwitch(company);
+            break;
+        case 'delete':
+            confirmDelete(company);
+            break;
+    }
 };
 </script>
 
@@ -86,54 +229,65 @@ const clearCompanyContext = () => {
                     <p class="text-muted-foreground">Manage companies in the platform</p>
                 </div>
                 <div class="flex gap-2">
-                    <Button variant="outline" @click="clearCompanyContext">Clear Company Context</Button>
+                    <div class="relative mr-2">
+                        <input 
+                            type="text" 
+                            v-model="search"
+                            placeholder="Search companies..." 
+                            class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            @keyup.enter="handleSearch"
+                        />
+                    </div>
+
+               
                     <Link href="/companies/create">
                         <Button class="bg-primary text-primary-foreground hover:bg-primary/90">Add Company</Button>
                     </Link>
                 </div>
             </div>
 
-            <div class="rounded-xl border border-border bg-card">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-muted/50 text-xs uppercase">
-                            <tr>
-                                <th scope="col" class="px-6 py-3">Name</th>
-                                <th scope="col" class="px-6 py-3">Email</th>
-                                <th scope="col" class="px-6 py-3">Users</th>
-                                <th scope="col" class="px-6 py-3">Status</th>
-                                <th scope="col" class="px-6 py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="companies.length === 0">
-                                <td colspan="5" class="px-6 py-4 text-center">No companies found</td>
-                            </tr>
-                            <tr v-for="company in companies" :key="company.id" class="border-t border-border hover:bg-muted/30">
-                                <td class="px-6 py-4 font-medium">{{ company.name }}</td>
-                                <td class="px-6 py-4">{{ company.email }}</td>
-                                <td class="px-6 py-4">{{ company.users_count || 0 }}</td>
-                                <td class="px-6 py-4">
-                                    <span
-                                        class="inline-flex items-center rounded-full px-2 py-1 text-xs"
-                                        :class="company.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
-                                    >
-                                        {{ company.is_active ? 'Active' : 'Inactive' }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex space-x-2">
-                                        <Link :href="`/companies/${company.slug}`" class="text-blue-600 hover:underline">View</Link>
-                                        <Link :href="`/companies/${company.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
-                                        <button @click="confirmSwitch(company)" class="text-indigo-600 hover:underline">Impersonate</button>
-                                        <button @click="confirmDelete(company)" class="text-red-600 hover:underline">Delete</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <DataTable
+                :data="props.companies?.data || []"
+                :columns="columns"
+                :pagination="pagination || undefined"
+                :show-pagination="!!pagination"
+                empty-message="No companies found"
+                @page-change="handlePageChange"
+                @sort="handleSort"
+                @per-page-change="handlePerPageChange"
+            >
+                <template #status="{ item: company }">
+                    <StatusBadge :active="company.is_active" />
+                </template>
+                
+                <template #actions="{ item: company }">
+                    <ActionMenu :item-id="company.id" @select="handleMenuAction">
+                        <template #menu-items="{ handleAction }">
+                            <ActionMenuButton 
+                                :icon="Eye" 
+                                text="View" 
+                                @click="(e) => handleAction('view', e)" 
+                            />
+                            <ActionMenuButton 
+                                :icon="Edit" 
+                                text="Edit" 
+                                @click="(e) => handleAction('edit', e)" 
+                            />
+                            <ActionMenuButton 
+                                :icon="UserRound" 
+                                text="Impersonate" 
+                                @click="(e) => handleAction('impersonate', e)" 
+                            />
+                            <ActionMenuButton 
+                                :icon="Trash" 
+                                text="Delete" 
+                                variant="destructive"
+                                @click="(e) => handleAction('delete', e)" 
+                            />
+                        </template>
+                    </ActionMenu>
+                </template>
+            </DataTable>
         </div>
 
         <!-- Delete Dialog -->

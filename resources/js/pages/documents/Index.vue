@@ -1,18 +1,86 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/ui/data-table';
+import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import { type Document } from '@/types/models';
 import { route } from 'ziggy-js';
+import { Eye, Edit, Download, Trash } from 'lucide-vue-next';
 
+// Define props for parent-driven data loading mode
 interface Props {
-  documents?: Document[];
+  documents?: {
+    data: Document[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+  filters?: {
+    sort: string;
+    direction: string;
+    search: string;
+    per_page: number;
+  };
 }
 
 const props = defineProps<Props>();
-const documents = ref(props.documents || []);
+const search = ref(props.filters?.search || '');
+const sortField = ref(props.filters?.sort || 'created_at');
+const sortDirection = ref<'asc' | 'desc'>(props.filters?.direction as 'asc' | 'desc' || 'desc');
+const perPage = ref(props.filters?.per_page || 10);
+
+// Computed pagination object for parent-driven mode
+const pagination = computed(() => {
+  if (!props.documents) return null;
+  return {
+    currentPage: props.documents.current_page,
+    lastPage: props.documents.last_page,
+    perPage: props.documents.per_page,
+    total: props.documents.total
+  };
+});
+
+// Define columns for the DataTable
+const columns = computed(() => [
+  { 
+    key: 'name', 
+    label: 'Name',
+    class: 'font-medium',
+    sortable: true,
+    sortDirection: sortField.value === 'name' ? sortDirection.value : null
+  },
+  { 
+    key: 'subject', 
+    label: 'Subject',
+    sortable: false
+  },
+  { 
+    key: 'document_type', 
+    label: 'Type',
+    sortable: false
+  },
+  {
+    key: 'expiry_date',
+    label: 'Expiry Date',
+    sortable: true,
+  },
+  { 
+    key: 'created_at', 
+    label: 'Date Added',
+    sortable: true,
+    sortDirection: sortField.value === 'created_at' ? sortDirection.value : null
+  },
+  { 
+    key: 'status', 
+    label: 'Status',
+    sortable: false
+  },
+  { key: '_actions', label: 'Actions' }
+]);
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -48,10 +116,92 @@ const formatDate = (dateString: string | undefined) => {
   return new Date(dateString).toLocaleDateString();
 };
 
-const isExpired = (dateString: string | undefined) => {
-  if (!dateString) return false;
-  return new Date(dateString) < new Date();
+const handlePageChange = (page: number) => {
+  router.get('/documents', {
+    page: page,
+    sort: sortField.value,
+    direction: sortDirection.value,
+    search: search.value,
+    per_page: perPage.value
+  }, {
+    preserveState: true,
+    preserveScroll: true,
+    only: ['documents']
+  });
 };
+
+// Handle sort change
+const handleSort = (field: string) => {
+  if (field === sortField.value) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField.value = field;
+    sortDirection.value = 'asc';
+  }
+  
+  router.get('/documents', {
+    sort: sortField.value,
+    direction: sortDirection.value,
+    search: search.value,
+    per_page: perPage.value
+  }, {
+    preserveState: true,
+    preserveScroll: true,
+    only: ['documents']
+  });
+};
+
+// Handle search
+const handleSearch = () => {
+  router.get('/documents', {
+    search: search.value,
+    sort: sortField.value,
+    direction: sortDirection.value,
+    per_page: perPage.value
+  }, {
+    preserveState: true,
+    preserveScroll: true,
+    only: ['documents']
+  });
+};
+
+// Handle per page change
+const handlePerPageChange = (value: number) => {
+  perPage.value = value;
+  router.get('/documents', {
+    search: search.value,
+    sort: sortField.value,
+    direction: sortDirection.value,
+    per_page: perPage.value
+  }, {
+    preserveState: true,
+    preserveScroll: true,
+    only: ['documents']
+  });
+};
+
+// Handle menu action selection
+const handleMenuAction = (action: string, documentId: string | number) => {
+  const document = props.documents?.data.find(d => d.id === documentId);
+  
+  if (!document) return;
+  
+  switch (action) {
+    case 'view':
+      router.visit(`/documents/${document.slug}`);
+      break;
+    case 'edit':
+      router.visit(`/documents/${document.slug}/edit`);
+      break;
+    case 'download':
+      window.open(route('documents.download', document.id), '_blank');
+      break;
+    case 'delete':
+      router.delete(`/documents/${document.slug}`);
+      break;
+  }
+};
+
 </script>
 
 <template>
@@ -62,6 +212,13 @@ const isExpired = (dateString: string | undefined) => {
       <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold text-foreground">Documents</h1>
         <div class="flex gap-2">
+          <div class="flex items-center mb-0">
+            <div class="relative mr-2">
+              <input type="text" v-model="search" placeholder="Search documents..."
+                class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                @keyup.enter="handleSearch" />
+            </div>
+          </div>
           <Link :href="route('document-types.index')">
             <Button variant="outline" class="mr-2">
               Document Types
@@ -75,53 +232,59 @@ const isExpired = (dateString: string | undefined) => {
         </div>
       </div>
 
-      <div class="rounded-xl border border-border bg-card">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm text-left">
-            <thead class="text-xs uppercase bg-muted/50">
-              <tr>
-                <th scope="col" class="px-6 py-3">Document</th>
-                <th scope="col" class="px-6 py-3">Subject</th>
-                <th scope="col" class="px-6 py-3">Type</th>
-                <th scope="col" class="px-6 py-3">Issue Date</th>
-                <th scope="col" class="px-6 py-3">Expiry Date</th>
-                <th scope="col" class="px-6 py-3">Status</th>
-                <th scope="col" class="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="documents.length === 0">
-                <td colspan="7" class="px-6 py-4 text-center">No documents found</td>
-              </tr>
-              <tr v-for="document in documents" :key="document.id" class="border-t border-border hover:bg-muted/30">
-                <td class="px-6 py-4 font-medium">
-                  <div>{{ document.document_type?.name || 'Document' }}</div>
-                  <div class="text-xs text-muted-foreground" v-if="document.notes">{{ document.notes }}</div>
-                </td>
-                <td class="px-6 py-4">{{ document.subject?.name || 'N/A' }}</td>
-                <td class="px-6 py-4">{{ document.document_type?.name || 'N/A' }}</td>
-                <td class="px-6 py-4">{{ formatDate(document.issue_date) }}</td>
-                <td class="px-6 py-4" :class="{ 'text-red-500': isExpired(document.expiry_date) }">
-                  {{ formatDate(document.expiry_date) }}
-                </td>
-                <td class="px-6 py-4">
-                  <span class="inline-flex items-center">
-                    <span :class="[getStatusColor(document.status), 'w-2 h-2 mr-2 rounded-full']"></span>
-                    {{ getStatusText(document.status) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <div class="flex space-x-2">
-                    <Link :href="`/documents/${document.slug}`" class="text-blue-600 hover:underline">View</Link>
-                    <Link :href="`/documents/${document.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
-                    <button class="text-red-600 hover:underline">Delete</button>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable 
+        :data="props.documents?.data || []" 
+        :columns="columns" 
+        :pagination="pagination || undefined"
+        :show-pagination="!!pagination" 
+        empty-message="No documents found" 
+        @page-change="handlePageChange"
+        @sort="handleSort" 
+        @per-page-change="handlePerPageChange"
+      >
+        <template #name="{ item: document }">
+          <div>
+            <div>{{ document.name }}</div>
+            <div class="text-xs text-muted-foreground" v-if="document.notes">{{ document.notes }}</div>
+          </div>
+        </template>
+        
+        <template #subject="{ item: document }">
+          <div>{{ document.subject?.name || 'N/A' }}</div>
+        </template>
+        
+        <template #document_type="{ item: document }">
+          <div>{{ document.document_type?.name || 'N/A' }}</div>
+        </template>
+
+        <template #expiry_date="{ item: document }">
+          <div>
+            {{ document.expiry_date ? formatDate(document.expiry_date) : 'N/A' }}
+          </div>
+        </template>
+        
+        <template #created_at="{ item: document }">
+          <div>{{ formatDate(document.created_at) }}</div>
+        </template>
+        
+        <template #status="{ item: document }">
+          <span class="inline-flex items-center">
+            <span :class="[getStatusColor(document.status), 'w-2 h-2 mr-2 rounded-full']"></span>
+            {{ getStatusText(document.status) }}
+          </span>
+        </template>
+        
+        <template #actions="{ item: document }">
+          <ActionMenu :item-id="document.id" @select="handleMenuAction">
+            <template #menu-items="{ handleAction }">
+              <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
+              <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
+              <ActionMenuButton :icon="Download" text="Download" @click="(e) => handleAction('download', e)" />
+              <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
+            </template>
+          </ActionMenu>
+        </template>
+      </DataTable>
     </div>
   </AppLayout>
 </template>

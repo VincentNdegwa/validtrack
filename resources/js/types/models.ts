@@ -71,6 +71,7 @@ export interface SubjectType {
   created_at: string;
   updated_at: string;
   company?: Company;
+  subjects_count?: number;
   slug: string;
 }
 
@@ -105,6 +106,7 @@ export interface DocumentType {
   created_at: string;
   updated_at: string;
   company?: Company;
+  documents_count: number;
   slug: string;
 }
 

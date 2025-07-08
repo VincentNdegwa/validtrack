@@ -15,15 +15,45 @@ class DocumentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $documents = Document::with(['subject', 'documentType'])
-            ->where('company_id', Auth::user()->company_id)
-            ->orderByDesc('created_at')
-            ->get();
+        $query = Document::with(['subject', 'documentType'])
+            ->where('company_id', Auth::user()->company_id);
+            
+        // Handle search if provided
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('file_name', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Handle sorting
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+        
+        // Validate sort field to prevent SQL injection
+        $allowedSortFields = ['name', 'created_at', 'updated_at', 'expiry_date', 'file_name', 'file_size'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'created_at';
+        }
+        
+        $query->orderBy($sortField, $sortDirection);
+        
+        // Paginate the results
+        $perPage = $request->get('per_page', 10);
+        $documents = $query->paginate($perPage);
 
         return Inertia::render('documents/Index', [
-            'documents' => $documents
+            'documents' => $documents,
+            'filters' => [
+                'search' => $request->get('search', ''),
+                'sort' => $sortField,
+                'direction' => $sortDirection,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 

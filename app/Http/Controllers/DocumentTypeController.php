@@ -12,14 +12,39 @@ class DocumentTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
-            ->orderBy('name')
-            ->get();
+        $query = DocumentType::where('company_id', Auth::user()->company_id);
+        
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        $sortField = $request->get('sort', 'name');
+        $sortDirection = $request->get('direction', 'asc');
+        
+        $allowedSortFields = ['name', 'created_at', 'is_active'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'name';
+        }
+        
+        $query->withCount('documents')->orderBy($sortField, $sortDirection);
+        
+        $perPage = $request->get('per_page', 10);
+        $documentTypes = $query->paginate($perPage);
 
         return Inertia::render('documents/types/Index', [
-            'documentTypes' => $documentTypes
+            'documentTypes' => $documentTypes,
+            'filters' => [
+                'search' => $request->get('search', ''),
+                'sort' => $sortField,
+                'direction' => $sortDirection,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 

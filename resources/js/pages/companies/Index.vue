@@ -9,7 +9,7 @@ import { type BreadcrumbItem } from '@/types';
 import { type Company } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
-import { Eye, Edit, UserRound, Trash, View } from 'lucide-vue-next';
+import { Eye, Edit, UserRound, Trash, } from 'lucide-vue-next';
 
 // Define props for parent-driven data loading mode
 interface Props {

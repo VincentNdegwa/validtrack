@@ -19,21 +19,49 @@ class UserController extends Controller
     /**
      * Display a listing of the users.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Get users for the current company context (respects super admin company switching)
-        $users = $this->scopeToCompany(User::query())
-            ->with('roles')
-            ->orderBy('name')
-            ->get();
-
+        $query = $this->scopeToCompany(User::query())
+            ->with('roles');
+        
+        // Handle search if provided
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('email', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Handle sorting
+        $sortField = $request->get('sort', 'name');
+        $sortDirection = $request->get('direction', 'asc');
+        
+        // Validate sort field to prevent SQL injection
+        $allowedSortFields = ['name', 'email', 'is_active', 'created_at'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'name';
+        }
+        
+        $query->orderBy($sortField, $sortDirection);
+        
+        // Paginate the results
+        $perPage = $request->get('per_page', 10);
+        $users = $query->paginate($perPage);
+        
         $roles = $this->scopeToCompany(Role::query())
             ->orderBy('name')
             ->get();
 
         return Inertia::render('users/Index', [
             'users' => $users,
-            'roles' => $roles
+            'roles' => $roles,
+            'filters' => [
+                'search' => $request->get('search', ''),
+                'sort' => $sortField,
+                'direction' => $sortDirection,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 

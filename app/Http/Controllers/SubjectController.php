@@ -13,15 +13,50 @@ class SubjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $subjects = Subject::with('subjectType')
-            ->where('company_id', Auth::user()->company_id)
+        $query = Subject::with('subjectType')
+            ->where('company_id', Auth::user()->company_id);
+        
+        // Handle search if provided
+        if ($request->has('search')) {
+            $searchTerm = $request->get('search');
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('email', 'like', "%{$searchTerm}%")
+                  ->orWhere('phone', 'like', "%{$searchTerm}%");
+            });
+        }
+        
+        // Handle sorting
+        $sortField = $request->get('sort', 'name');
+        $sortDirection = $request->get('direction', 'asc');
+        
+        // Validate sort field to prevent SQL injection
+        $allowedSortFields = ['name', 'email', 'phone', 'created_at'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'name';
+        }
+        
+        $query->orderBy($sortField, $sortDirection);
+        
+        // Paginate the results
+        $perPage = $request->get('per_page', 10);
+        $subjects = $query->paginate($perPage);
+        
+        $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
 
         return Inertia::render('subjects/Index', [
-            'subjects' => $subjects
+            'subjects' => $subjects,
+            'subjectTypes' => $subjectTypes,
+            'filters' => [
+                'search' => $request->get('search', ''),
+                'sort' => $sortField,
+                'direction' => $sortDirection,
+                'per_page' => $perPage,
+            ],
         ]);
     }
 

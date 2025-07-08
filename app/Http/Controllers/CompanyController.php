@@ -44,7 +44,6 @@ class CompanyController extends Controller
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
-            'description' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
         
@@ -68,7 +67,7 @@ class CompanyController extends Controller
     {
         $company = is_numeric($id) ? Company::findOrFail($id) : Company::findBySlugOrFail($id);
 
-        $company->load(['users' => function($query) {
+        $company->load(['users.roles' => function($query) {
             $query->orderBy('name');
         }]);
         

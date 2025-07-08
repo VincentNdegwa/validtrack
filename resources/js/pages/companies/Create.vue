@@ -113,19 +113,9 @@ const submit = () => {
                                 <p v-if="form.errors.address" class="text-sm text-red-500">{{ form.errors.address }}</p>
                             </div>
 
-                            <div class="space-y-2 md:col-span-2">
-                                <Label for="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    v-model="form.description"
-                                    :error="form.errors.description"
-                                    placeholder="Enter company description"
-                                />
-                                <p v-if="form.errors.description" class="text-sm text-red-500">{{ form.errors.description }}</p>
-                            </div>
 
                             <div class="flex items-center space-x-2">
-                                <Switch id="is_active" v-model:checked="form.is_active" />
+                                <Switch id="is_active" v-model="form.is_active" />
                                 <Label for="is_active">Active</Label>
                                 <p v-if="form.errors.is_active" class="text-sm text-red-500">{{ form.errors.is_active }}</p>
                             </div>

@@ -41,7 +41,7 @@ const cancelDelete = () => {
 
 const deleteCompany = () => {
     if (companyToDelete.value) {
-        router.delete(`/companies/${companyToDelete.value.slug}`, {
+        router.delete(`/companies/${companyToDelete.value.id}`, {
             onSuccess: () => {
                 showDeleteDialog.value = false;
                 companyToDelete.value = null;

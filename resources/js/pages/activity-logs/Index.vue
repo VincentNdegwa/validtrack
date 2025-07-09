@@ -4,8 +4,8 @@ import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
 import { Eye } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 // Define props for parent-driven data loading mode
 interface ActivityLog {
@@ -48,7 +48,7 @@ interface Props {
 const props = defineProps<Props>();
 const search = ref(props.filters?.search || '');
 const sortField = ref(props.filters?.sort || 'created_at');
-const sortDirection = ref<'asc' | 'desc'>(props.filters?.direction as 'asc' | 'desc' || 'desc');
+const sortDirection = ref<'asc' | 'desc'>((props.filters?.direction as 'asc' | 'desc') || 'desc');
 const perPage = ref(props.filters?.per_page || 10);
 
 // Computed pagination object for parent-driven mode
@@ -58,7 +58,7 @@ const pagination = computed(() => {
         currentPage: props.activityLogs.current_page,
         lastPage: props.activityLogs.last_page,
         perPage: props.activityLogs.per_page,
-        total: props.activityLogs.total
+        total: props.activityLogs.total,
     };
 });
 
@@ -68,31 +68,31 @@ const columns = computed(() => [
         key: 'created_at',
         label: 'Date/Time',
         sortable: true,
-        sortDirection: sortField.value === 'created_at' ? sortDirection.value : null
+        sortDirection: sortField.value === 'created_at' ? sortDirection.value : null,
     },
     {
         key: 'message',
         label: 'Activity',
-        sortable: false
+        sortable: false,
     },
     {
         key: 'user',
         label: 'User',
-        sortable: false
+        sortable: false,
     },
     {
         key: 'action_type',
         label: 'Action',
         sortable: true,
-        sortDirection: sortField.value === 'action_type' ? sortDirection.value : null
+        sortDirection: sortField.value === 'action_type' ? sortDirection.value : null,
     },
     {
         key: 'target_type',
         label: 'Target',
         sortable: true,
-        sortDirection: sortField.value === 'target_type' ? sortDirection.value : null
+        sortDirection: sortField.value === 'target_type' ? sortDirection.value : null,
     },
-    { key: '_actions', label: 'Actions' }
+    { key: '_actions', label: 'Actions' },
 ]);
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -122,17 +122,21 @@ const formatActionType = (actionType: string): string => {
 };
 
 const handlePageChange = (page: number) => {
-    router.get('/activity-logs', {
-        page: page,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['activityLogs']
-    });
+    router.get(
+        '/activity-logs',
+        {
+            page: page,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['activityLogs'],
+        },
+    );
 };
 
 // Handle sort change
@@ -143,54 +147,66 @@ const handleSort = (field: string) => {
         sortField.value = field;
         sortDirection.value = 'asc';
     }
-    
-    router.get('/activity-logs', {
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['activityLogs']
-    });
+
+    router.get(
+        '/activity-logs',
+        {
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['activityLogs'],
+        },
+    );
 };
 
 // Handle search
 const handleSearch = () => {
-    router.get('/activity-logs', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['activityLogs']
-    });
+    router.get(
+        '/activity-logs',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['activityLogs'],
+        },
+    );
 };
 
 // Handle per page change
 const handlePerPageChange = (value: number) => {
     perPage.value = value;
-    router.get('/activity-logs', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['activityLogs']
-    });
+    router.get(
+        '/activity-logs',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['activityLogs'],
+        },
+    );
 };
 
 // Handle menu action selection
 const handleMenuAction = (action: string, logId: string | number) => {
-    const activityLog = props.activityLogs?.data.find(l => l.id === logId);
-    
+    const activityLog = props.activityLogs?.data.find((l) => l.id === logId);
+
     if (!activityLog) return;
-    
+
     if (action === 'view') {
         router.visit(`/activity-logs/${activityLog.slug}`);
     }
@@ -208,24 +224,28 @@ const handleMenuAction = (action: string, logId: string | number) => {
                     <p class="text-muted-foreground">View system activity and audit trail</p>
                 </div>
                 <div class="flex gap-2">
-                    <div class="flex items-center mb-0">
+                    <div class="mb-0 flex items-center">
                         <div class="relative mr-2">
-                            <input type="text" v-model="search" placeholder="Search logs..."
-                                class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                                @keyup.enter="handleSearch" />
+                            <input
+                                type="text"
+                                v-model="search"
+                                placeholder="Search logs..."
+                                class="rounded-md border px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
+                                @keyup.enter="handleSearch"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <DataTable 
-                :data="props.activityLogs?.data || []" 
-                :columns="columns" 
+            <DataTable
+                :data="props.activityLogs?.data || []"
+                :columns="columns"
                 :pagination="pagination || undefined"
-                :show-pagination="!!pagination" 
-                empty-message="No activity logs found" 
+                :show-pagination="!!pagination"
+                empty-message="No activity logs found"
                 @page-change="handlePageChange"
-                @sort="handleSort" 
+                @sort="handleSort"
                 @per-page-change="handlePerPageChange"
             >
                 <template #created_at="{ item: log }">
@@ -238,30 +258,30 @@ const handleMenuAction = (action: string, logId: string | number) => {
                 <template #message="{ item: log }">
                     <div>{{ log.message }}</div>
                 </template>
-                
+
                 <template #user="{ item: log }">
                     <div>{{ log.user?.name || 'Unknown' }}</div>
                 </template>
-                
+
                 <template #action_type="{ item: log }">
                     <div>
-                        <span 
+                        <span
                             :class="{
-                                'px-2 py-1 rounded-full text-xs': true,
+                                'rounded-full px-2 py-1 text-xs': true,
                                 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': log.action_type === 'created',
                                 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400': log.action_type === 'updated',
-                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': log.action_type === 'deleted'
+                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': log.action_type === 'deleted',
                             }"
                         >
                             {{ formatActionType(log.action_type) }}
                         </span>
                     </div>
                 </template>
-                
+
                 <template #target_type="{ item: log }">
                     <div>{{ formatTargetType(log.target_type) }}</div>
                 </template>
-                
+
                 <template #actions="{ item: log }">
                     <ActionMenu :item-id="log.id" @select="handleMenuAction">
                         <template #menu-items="{ handleAction }">

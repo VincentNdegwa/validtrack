@@ -113,7 +113,7 @@ const mainNavItems = computed(() => {
             href: '/activity-logs',
             icon: FileBadge2Icon,
             show: hasPermission('users-view'),
-        }
+        },
     ];
 
     return items.filter((item) => item.show === true);

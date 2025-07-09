@@ -44,8 +44,7 @@ const targetType = computed(() => {
 });
 
 const actionType = computed(() => {
-    return props.activityLog.action_type.charAt(0).toUpperCase() + 
-           props.activityLog.action_type.slice(1);
+    return props.activityLog.action_type.charAt(0).toUpperCase() + props.activityLog.action_type.slice(1);
 });
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -110,12 +109,12 @@ const goBack = () => {
                             </div>
                             <div>
                                 <span class="text-muted-foreground">Action:</span>
-                                <span 
+                                <span
                                     class="ml-2 rounded-full px-2 py-0.5 text-xs font-medium"
                                     :class="{
                                         'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': activityLog.action_type === 'created',
                                         'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400': activityLog.action_type === 'updated',
-                                        'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': activityLog.action_type === 'deleted'
+                                        'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': activityLog.action_type === 'deleted',
                                     }"
                                 >
                                     {{ actionType }}
@@ -132,7 +131,7 @@ const goBack = () => {
                 <!-- Log Payload -->
                 <div class="rounded-lg border border-border bg-card p-6">
                     <h2 class="mb-4 text-xl font-semibold">Details</h2>
-                    
+
                     <!-- Created or Deleted -->
                     <div v-if="activityLog.action_type === 'created' || activityLog.action_type === 'deleted'">
                         <div v-if="activityLog.payload?.attributes" class="space-y-2">
@@ -143,13 +142,13 @@ const goBack = () => {
                         </div>
                         <div v-else class="text-muted-foreground">No additional details available.</div>
                     </div>
-                    
+
                     <!-- Updated -->
                     <div v-else-if="activityLog.action_type === 'updated' && activityLog.changes">
                         <div class="space-y-4">
                             <div v-for="(change, key) in activityLog.changes" :key="key" class="grid grid-cols-3 gap-4 border-b border-border pb-2">
                                 <div class="font-medium text-muted-foreground">{{ key }}</div>
-                                <div class="line-through text-red-500">
+                                <div class="text-red-500 line-through">
                                     {{ change.from }}
                                 </div>
                                 <div class="text-green-500">
@@ -158,7 +157,7 @@ const goBack = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Fallback -->
                     <div v-else class="text-muted-foreground">No change details available.</div>
                 </div>

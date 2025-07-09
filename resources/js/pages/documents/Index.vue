@@ -9,6 +9,7 @@ import { ref, computed } from 'vue';
 import { type Document } from '@/types/models';
 import { route } from 'ziggy-js';
 import { Eye, Edit, Download, Trash } from 'lucide-vue-next';
+import Can from '@/components/auth/Can.vue';
 
 // Define props for parent-driven data loading mode
 interface Props {
@@ -205,6 +206,7 @@ const handleMenuAction = (action: string, documentId: string | number) => {
 </script>
 
 <template>
+
   <Head title="Documents" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
@@ -219,40 +221,37 @@ const handleMenuAction = (action: string, documentId: string | number) => {
                 @keyup.enter="handleSearch" />
             </div>
           </div>
-          <Link :href="route('document-types.index')">
+          <Can permission="document-types-view">
+            <Link :href="route('document-types.index')">
             <Button variant="outline" class="mr-2">
               Document Types
             </Button>
-          </Link>
-          <Link :href="route('documents.create')">
+            </Link>
+          </Can>
+          <Can permission="documents-create">
+            <Link :href="route('documents.create')">
             <Button class="bg-primary text-primary-foreground hover:bg-primary/90">
               Upload Document
             </Button>
-          </Link>
+            </Link>
+          </Can>
         </div>
       </div>
 
-      <DataTable 
-        :data="props.documents?.data || []" 
-        :columns="columns" 
-        :pagination="pagination || undefined"
-        :show-pagination="!!pagination" 
-        empty-message="No documents found" 
-        @page-change="handlePageChange"
-        @sort="handleSort" 
-        @per-page-change="handlePerPageChange"
-      >
+      <DataTable :data="props.documents?.data || []" :columns="columns" :pagination="pagination || undefined"
+        :show-pagination="!!pagination" empty-message="No documents found" @page-change="handlePageChange"
+        @sort="handleSort" @per-page-change="handlePerPageChange">
         <template #name="{ item: document }">
           <div>
             <div>{{ document.name }}</div>
             <div class="text-xs text-muted-foreground" v-if="document.notes">{{ document.notes }}</div>
           </div>
         </template>
-        
+
         <template #subject="{ item: document }">
           <div>{{ document.subject?.name || 'N/A' }}</div>
         </template>
-        
+
         <template #document_type="{ item: document }">
           <div>{{ document.document_type?.name || 'N/A' }}</div>
         </template>
@@ -262,25 +261,34 @@ const handleMenuAction = (action: string, documentId: string | number) => {
             {{ document.expiry_date ? formatDate(document.expiry_date) : 'N/A' }}
           </div>
         </template>
-        
+
         <template #created_at="{ item: document }">
           <div>{{ formatDate(document.created_at) }}</div>
         </template>
-        
+
         <template #status="{ item: document }">
           <span class="inline-flex items-center">
             <span :class="[getStatusColor(document.status), 'w-2 h-2 mr-2 rounded-full']"></span>
             {{ getStatusText(document.status) }}
           </span>
         </template>
-        
+
         <template #actions="{ item: document }">
           <ActionMenu :item-id="document.id" @select="handleMenuAction">
             <template #menu-items="{ handleAction }">
-              <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
-              <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
-              <ActionMenuButton :icon="Download" text="Download" @click="(e) => handleAction('download', e)" />
-              <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
+              <Can permission="documents-view">
+                <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
+              </Can>
+              <Can permission="documents-edit">
+                <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
+              </Can>
+              <Can permission="documents-view">
+                <ActionMenuButton :icon="Download" text="Download" @click="(e) => handleAction('download', e)" />
+              </Can>
+              <Can permission="documents-delete">
+                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive"
+                  @click="(e) => handleAction('delete', e)" />
+              </Can>
             </template>
           </ActionMenu>
         </template>

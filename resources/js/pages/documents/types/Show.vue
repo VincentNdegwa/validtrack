@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 import { type DocumentType, type Document } from '@/types/models';
+import Can from '@/components/auth/Can.vue';
 
 interface Props {
   documentType: DocumentType;
@@ -59,6 +60,7 @@ const getStatusClass = (status: number) => {
 </script>
 
 <template>
+
   <Head :title="documentType.name" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
@@ -66,16 +68,18 @@ const getStatusClass = (status: number) => {
       <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold text-foreground">{{ documentType.name }}</h1>
         <div class="flex gap-2">
-          <Link :href="`/document-types/${documentType.slug}/edit`">
+          <Can permission="document-types-edit">
+            <Link :href="`/document-types/${documentType.slug}/edit`">
             <Button variant="outline">Edit</Button>
-          </Link>
-          <Button
-            variant="destructive"
-            v-if="(documents?.length || 0) === 0"
-            @click="$inertia.delete(`/document-types/${documentType.id}`)"
-          >
-            Delete
-          </Button>
+            </Link>
+          </Can>
+          <Can permission="document-types-delete">
+            <Button variant="destructive" v-if="(documents?.length || 0) === 0"
+              @click="$inertia.delete(`/document-types/${documentType.id}`)">
+              Delete
+            </Button>
+          </Can>
+
         </div>
       </div>
 
@@ -94,13 +98,10 @@ const getStatusClass = (status: number) => {
               </div>
               <div>
                 <span class="text-muted-foreground">Status:</span>
-                <span
-                  class="ml-2 px-2 py-1 rounded-full text-xs"
-                  :class="{
-                    'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': documentType.is_active,
-                    'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': !documentType.is_active,
-                  }"
-                >
+                <span class="ml-2 px-2 py-1 rounded-full text-xs" :class="{
+                  'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': documentType.is_active,
+                  'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': !documentType.is_active,
+                }">
                   {{ documentType.is_active ? 'Active' : 'Inactive' }}
                 </span>
               </div>
@@ -141,7 +142,7 @@ const getStatusClass = (status: number) => {
               <tr v-for="document in documents" :key="document.id" class="border-t border-border hover:bg-muted/30">
                 <td class="px-6 py-4 font-medium">
                   <Link :href="`/subjects/${document.slug}`" class="text-blue-600 hover:underline">
-                    {{ document.subject?.name || 'Unknown Subject' }}
+                  {{ document.subject?.name || 'Unknown Subject' }}
                   </Link>
                 </td>
                 <td class="px-6 py-4">
@@ -160,8 +161,13 @@ const getStatusClass = (status: number) => {
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex space-x-2">
-                    <Link :href="`/documents/${document.slug}`" class="text-blue-600 hover:underline">View</Link>
-                    <Link :href="`/documents/${document.slug}/edit`" class="text-amber-600 hover:underline">Edit</Link>
+                    <Can permission="document-view">
+                      <Link :href="`/documents/${document.slug}`" class="text-blue-600 hover:underline">View</Link>
+                    </Can>
+                    <Can permission="document-edit">
+                      <Link :href="`/documents/${document.slug}/edit`" class="text-amber-600 hover:underline">Edit
+                      </Link>
+                    </Can>
                   </div>
                 </td>
               </tr>

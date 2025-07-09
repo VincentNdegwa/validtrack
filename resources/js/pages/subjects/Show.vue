@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 import { type Subject, type Document } from '@/types/models';
+import Can from '@/components/auth/Can.vue';
 
 interface Props {
   subject: Subject;
@@ -47,6 +48,7 @@ const getStatusText = (status: number) => {
 </script>
 
 <template>
+
   <Head :title="'Subject: ' + subject.name" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
@@ -54,12 +56,16 @@ const getStatusText = (status: number) => {
       <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold text-foreground">{{ subject.name }}</h1>
         <div class="flex space-x-3">
-          <Link :href="`/subjects/${subject.id}/edit`">
+          <Can permission="subjects-edit">
+            <Link :href="`/subjects/${subject.id}/edit`">
             <Button variant="outline">Edit</Button>
-          </Link>
-          <Link href="/subjects">
+            </Link>
+          </Can>
+          <Can permission="subjects-view">
+            <Link href="/subjects">
             <Button variant="ghost">Back to Subjects</Button>
-          </Link>
+            </Link>
+          </Can>
         </div>
       </div>
 
@@ -67,38 +73,38 @@ const getStatusText = (status: number) => {
         <!-- Subject Info Card -->
         <div class="rounded-xl border border-border bg-card p-6 col-span-2">
           <h2 class="text-xl font-semibold mb-4">Subject Information</h2>
-          
+
           <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4">
             <div>
               <p class="text-sm text-muted-foreground">Name</p>
               <p class="font-medium">{{ subject.name }}</p>
             </div>
-            
+
             <div>
               <p class="text-sm text-muted-foreground">Type</p>
               <p class="font-medium">{{ subject.subject_type?.name || 'N/A' }}</p>
             </div>
-            
+
             <div>
               <p class="text-sm text-muted-foreground">Email</p>
               <p class="font-medium">{{ subject.email || 'N/A' }}</p>
             </div>
-            
+
             <div>
               <p class="text-sm text-muted-foreground">Phone</p>
               <p class="font-medium">{{ subject.phone || 'N/A' }}</p>
             </div>
-            
+
             <div>
               <p class="text-sm text-muted-foreground">Address</p>
               <p class="font-medium">{{ subject.address || 'N/A' }}</p>
             </div>
-            
+
             <div>
               <p class="text-sm text-muted-foreground">Category</p>
               <p class="font-medium">{{ subject.category || 'N/A' }}</p>
             </div>
-            
+
             <div>
               <p class="text-sm text-muted-foreground">Status</p>
               <p class="font-medium flex items-center">
@@ -106,7 +112,7 @@ const getStatusText = (status: number) => {
                 {{ getStatusText(subject.status) }}
               </p>
             </div>
-            
+
             <div>
               <p class="text-sm text-muted-foreground">Created</p>
               <p class="font-medium">{{ new Date(subject.created_at).toLocaleDateString() }}</p>
@@ -123,26 +129,32 @@ const getStatusText = (status: number) => {
         <div class="rounded-xl border border-border bg-card p-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">Documents</h2>
-            <Link :href="`/documents/create?subject_id=${subject.id}`">
+            <Can permission="documents-create">
+              <Link :href="`/documents/create?subject_id=${subject.id}`">
               <Button size="sm" class="bg-primary text-primary-foreground hover:bg-primary/90">
                 Add Document
               </Button>
-            </Link>
+              </Link>
+            </Can>
           </div>
-          
+
           <div v-if="documents && documents.length > 0" class="space-y-3">
-            <div v-for="document in documents" :key="document.id" class="p-3 border border-border rounded-lg hover:bg-muted/30">
+            <div v-for="document in documents" :key="document.id"
+              class="p-2 border border-border rounded-lg hover:bg-muted/30">
               <div class="flex justify-between items-start">
                 <div>
                   <p class="font-medium">{{ document.document_type?.name || 'Document' }}</p>
                   <p class="text-sm text-muted-foreground">
                     Issued: {{ new Date(document.issue_date).toLocaleDateString() }}
                   </p>
-                  <p v-if="document.expiry_date" class="text-sm" :class="new Date(document.expiry_date) < new Date() ? 'text-red-500' : 'text-muted-foreground'">
+                  <p v-if="document.expiry_date" class="text-sm"
+                    :class="new Date(document.expiry_date) < new Date() ? 'text-red-500' : 'text-muted-foreground'">
                     Expires: {{ new Date(document.expiry_date).toLocaleDateString() }}
                   </p>
                 </div>
-                <Link :href="`/documents/${document.slug}`" class="text-primary hover:underline text-sm">View</Link>
+                <Can permission="documents-view" >
+                  <Link :href="`/documents/${document.slug}`" class="text-primary hover:underline text-sm">View</Link>
+                </Can>
               </div>
             </div>
           </div>

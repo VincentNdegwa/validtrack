@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -54,9 +55,11 @@ const getRoleNames = (user: User) => {
                     <p class="text-muted-foreground">User profile and role information</p>
                 </div>
                 <div class="flex gap-2">
-                    <Link :href="`/users/${user.slug}/edit`">
-                        <Button variant="outline">Edit User</Button>
-                    </Link>
+                    <Can permission="users-edit" >
+                        <Link :href="`/users/${user.slug}/edit`">
+                            <Button variant="outline">Edit User</Button>
+                        </Link>
+                    </Can>
                 </div>
             </div>
 
@@ -123,9 +126,11 @@ const getRoleNames = (user: User) => {
                                     <div v-for="role in user.roles" :key="role.id" class="rounded-lg border border-border p-4">
                                         <div class="flex items-center justify-between mb-2">
                                             <h3 class="font-semibold">{{ role.display_name || role.name }}</h3>
-                                            <Link :href="`/roles/${role.slug}`" class="text-blue-600 hover:underline text-sm">
-                                                View Role
-                                            </Link>
+                                            <Can permission="roles-view" >
+                                                <Link :href="`/roles/${role.slug}`" class="text-blue-600 hover:underline text-sm">
+                                                    View Role
+                                                </Link>
+                                            </Can>
                                         </div>
                                         <p v-if="role.description" class="text-muted-foreground text-sm mb-2">{{ role.description }}</p>
                                         

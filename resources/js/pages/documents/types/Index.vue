@@ -8,6 +8,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { Eye, Edit, Trash } from 'lucide-vue-next';
 import { type DocumentType } from '@/types/models';
+import Can from '@/components/auth/Can.vue';
 
 // Define props for parent-driven data loading mode
 interface Props {
@@ -183,11 +184,13 @@ const handleMenuAction = (action: string, typeId: string | number) => {
                 @keyup.enter="handleSearch" />
             </div>
           </div>
-          <Link href="/document-types/create">
-            <Button class="bg-primary text-primary-foreground hover:bg-primary/90">
-              Add Document Type
-            </Button>
-          </Link>
+          <Can permission="document-types-create" >
+            <Link href="/document-types/create">
+              <Button class="bg-primary text-primary-foreground hover:bg-primary/90">
+                Add Document Type
+              </Button>
+            </Link>
+          </Can>
         </div>
       </div>
 
@@ -220,16 +223,23 @@ const handleMenuAction = (action: string, typeId: string | number) => {
         <template #actions="{ item: type }">
           <ActionMenu :item-id="type.id" @select="handleMenuAction">
             <template #menu-items="{ handleAction }">
-              <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
-              <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
-              <ActionMenuButton 
+              <Can permission="document-types-view"> 
+                <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
+              </Can>
+              <Can permission="document-types-edit"> 
+                <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
+              </Can>
+              <Can permission="document-types-delete"> 
+                <ActionMenuButton 
                 v-if="(type.documents_count || 0) === 0"
                 :icon="Trash" 
                 text="Delete" 
                 variant="destructive" 
                 @click="(e) => handleAction('delete', e)" 
-              />
-              <span v-else class="px-2 py-1.5 text-xs text-muted-foreground">In use</span>
+                />
+                <span v-else class="px-2 py-1.5 text-xs text-muted-foreground">In use</span>
+
+              </Can>
             </template>
           </ActionMenu>
         </template>

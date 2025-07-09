@@ -237,9 +237,15 @@ const deleteRole = () => {
                 <template #actions="{ item: role }">
                     <ActionMenu :item-id="role.id" @select="handleMenuAction">
                         <template #menu-items="{ handleAction }">
-                            <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
-                            <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
-                            <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
+                            <Can permission="roles-view" >
+                                <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
+                            </Can>
+                            <Can permission="roles-edit">
+                                <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
+                            </Can>
+                            <Can permission="roles-delete" >
+                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
+                            </Can>
                         </template>
                     </ActionMenu>
                 </template>

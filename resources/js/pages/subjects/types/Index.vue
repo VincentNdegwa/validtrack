@@ -8,6 +8,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { Eye, Edit, Trash } from 'lucide-vue-next';
 import { type SubjectType } from '@/types/models';
+import Can from '@/components/auth/Can.vue';
 
 interface Props {
   subjectTypes?: {
@@ -44,20 +45,20 @@ const pagination = computed(() => {
 
 // Define columns for the DataTable
 const columns = computed(() => [
-  { 
-    key: 'name', 
+  {
+    key: 'name',
     label: 'Name',
     class: 'font-medium',
     sortable: true,
     sortDirection: sortField.value === 'name' ? sortDirection.value : null
   },
-  { 
-    key: 'subjects_count', 
+  {
+    key: 'subjects_count',
     label: 'Subjects Count',
     sortable: false
   },
-  { 
-    key: 'created_at', 
+  {
+    key: 'created_at',
     label: 'Created At',
     sortable: true,
     sortDirection: sortField.value === 'created_at' ? sortDirection.value : null
@@ -98,7 +99,7 @@ const handleSort = (field: string) => {
     sortField.value = field;
     sortDirection.value = 'asc';
   }
-  
+
   router.get('/subject-types', {
     sort: sortField.value,
     direction: sortDirection.value,
@@ -143,9 +144,9 @@ const handlePerPageChange = (value: number) => {
 // Handle menu action selection
 const handleMenuAction = (action: string, typeId: string | number) => {
   const type = props.subjectTypes?.data.find(t => t.id === typeId);
-  
+
   if (!type) return;
-  
+
   switch (action) {
     case 'view':
       router.visit(`/subject-types/${type.id}`);
@@ -163,6 +164,7 @@ const handleMenuAction = (action: string, typeId: string | number) => {
 </script>
 
 <template>
+
   <Head title="Subject Types" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
@@ -177,41 +179,38 @@ const handleMenuAction = (action: string, typeId: string | number) => {
                 @keyup.enter="handleSearch" />
             </div>
           </div>
-          <Link href="/subject-types/create">
+          <Can permission="subject-types-create">
+            <Link href="/subject-types/create">
             <Button class="bg-primary text-primary-foreground hover:bg-primary/90">
               Add Subject Type
             </Button>
-          </Link>
+            </Link>
+          </Can>
+
         </div>
       </div>
 
-      <DataTable 
-        :data="props.subjectTypes?.data || []" 
-        :columns="columns" 
-        :pagination="pagination || undefined"
-        :show-pagination="!!pagination" 
-        empty-message="No subject types found" 
-        @page-change="handlePageChange"
-        @sort="handleSort" 
-        @per-page-change="handlePerPageChange"
-      >
+      <DataTable :data="props.subjectTypes?.data || []" :columns="columns" :pagination="pagination || undefined"
+        :show-pagination="!!pagination" empty-message="No subject types found" @page-change="handlePageChange"
+        @sort="handleSort" @per-page-change="handlePerPageChange">
         <template #created_at="{ item: type }">
           {{ new Date(type.created_at).toLocaleDateString() }}
         </template>
-        
+
         <template #actions="{ item: type }">
           <ActionMenu :item-id="type.id" @select="handleMenuAction">
             <template #menu-items="{ handleAction }">
-              <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
-              <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
-              <ActionMenuButton 
-                v-if="(type.subjects_count || 0) === 0"
-                :icon="Trash" 
-                text="Delete" 
-                variant="destructive" 
-                @click="(e) => handleAction('delete', e)" 
-              />
-              <span v-else class="px-2 py-1.5 text-xs text-muted-foreground">In use</span>
+              <Can permission="subject-types-view">
+                <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
+              </Can>
+              <Can permission="subject-types-edit">
+                <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
+              </Can>
+              <Can permission="subject-types-delete">
+                <ActionMenuButton v-if="(type.subjects_count || 0) === 0" :icon="Trash" text="Delete"
+                  variant="destructive" @click="(e) => handleAction('delete', e)" />
+                <span v-else class="px-2 py-1.5 text-xs text-muted-foreground">In use</span>
+              </Can>
             </template>
           </ActionMenu>
         </template>

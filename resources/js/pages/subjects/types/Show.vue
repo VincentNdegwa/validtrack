@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 import { type SubjectType, type Subject } from '@/types/models';
+import Can from '@/components/auth/Can.vue';
 
 interface Props {
   subjectType: SubjectType;
@@ -47,6 +48,7 @@ const getStatusText = (status: number) => {
 </script>
 
 <template>
+
   <Head :title="`Subject Type: ${subjectType.name}`" />
 
   <AppLayout :breadcrumbs="breadcrumbs">
@@ -57,27 +59,33 @@ const getStatusText = (status: number) => {
           <p class="text-muted-foreground">{{ subjects.length }} subjects in this category</p>
         </div>
         <div class="flex space-x-3">
-          <Link :href="`/subject-types/${subjectType.slug}/edit`">
+          <Can permission="subject-types-edit">
+            <Link :href="`/subject-types/${subjectType.slug}/edit`">
             <Button variant="outline">Edit</Button>
-          </Link>
-          <Link href="/subject-types">
+            </Link>
+          </Can>
+          <Can permission="subject-types-view">
+            <Link href="/subject-types">
             <Button variant="ghost">Back to Subject Types</Button>
-          </Link>
+            </Link>
+          </Can>
         </div>
       </div>
 
       <div class="rounded-xl border border-border bg-card p-6">
         <h2 class="text-xl font-semibold mb-4">Subjects with this Type</h2>
-        
+
         <div v-if="subjects.length === 0" class="p-4 text-center text-muted-foreground">
           No subjects with this type yet.
           <div class="mt-4">
-            <Link href="/subjects/create">
+            <Can permission="subjects-create">
+              <Link href="/subjects/create">
               <Button size="sm">Create Subject</Button>
-            </Link>
+              </Link>
+            </Can>
           </div>
         </div>
-        
+
         <div v-else class="overflow-x-auto">
           <table class="w-full text-sm text-left">
             <thead class="text-xs uppercase bg-muted/50">
@@ -102,7 +110,9 @@ const getStatusText = (status: number) => {
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex space-x-2">
-                    <Link :href="`/subjects/${subject.id}`" class="text-blue-600 hover:underline">View</Link>
+                    <Can permission="subjects-view">
+                      <Link :href="`/subjects/${subject.slug}`" class="text-blue-600 hover:underline">View</Link>
+                    </Can>
                   </div>
                 </td>
               </tr>

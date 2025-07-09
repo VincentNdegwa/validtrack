@@ -8,6 +8,7 @@ import { type Subject, type SubjectType } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { Eye, Edit, Trash } from 'lucide-vue-next';
+import Can from '@/components/auth/Can.vue';
 
 // Define props for parent-driven data loading mode
 interface Props {
@@ -212,12 +213,16 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                                 @keyup.enter="handleSearch" />
                         </div>
                     </div>
-                    <Link href="/subject-types">
-                    <Button variant="outline" class="mr-2"> Subject Types </Button>
-                    </Link>
-                    <Link href="/subjects/create">
-                    <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
-                    </Link>
+                    <Can permission="subject-types-view">
+                        <Link href="/subject-types">
+                        <Button variant="outline" class="mr-2"> Subject Types </Button>
+                        </Link>
+                    </Can>
+                    <Can permission="subjects-create">
+                        <Link href="/subjects/create">
+                        <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
+                        </Link>
+                    </Can>
                 </div>
             </div>
 
@@ -238,10 +243,16 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                 <template #actions="{ item: subject }">
                     <ActionMenu :item-id="subject.id" @select="handleMenuAction">
                         <template #menu-items="{ handleAction }">
-                            <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
-                            <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
-                            <ActionMenuButton :icon="Trash" text="Delete" variant="destructive"
-                                @click="(e) => handleAction('delete', e)" />
+                            <Can permission="subjects-view">
+                                <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
+                            </Can>
+                            <Can permission="subjects-edit">
+                                <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
+                            </Can>
+                            <Can permission="subjects-delete">
+                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive"
+                                    @click="(e) => handleAction('delete', e)" />
+                            </Can>
                         </template>
                     </ActionMenu>
                 </template>

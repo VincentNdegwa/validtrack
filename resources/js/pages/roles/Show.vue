@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -47,9 +48,11 @@ const formatDate = (date: string) => {
                     <p class="text-muted-foreground">Role permissions and assigned users</p>
                 </div>
                 <div class="flex gap-2">
-                    <Link :href="`/roles/${role.slug}/edit`">
-                        <Button variant="outline">Edit Role</Button>
-                    </Link>
+                    <Can permission="roles-edit" >
+                        <Link :href="`/roles/${role.slug}/edit`">
+                            <Button variant="outline">Edit Role</Button>
+                        </Link>
+                    </Can>
                 </div>
             </div>
 

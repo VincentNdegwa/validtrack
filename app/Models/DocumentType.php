@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasSlug;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DocumentType extends Model
 {
-    use HasFactory, HasSlug;
+    use HasFactory, HasSlug, LogsActivity;
 
     protected $appends = ['slug'];
 

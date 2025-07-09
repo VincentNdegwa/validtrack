@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\HasSlug;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -11,8 +12,7 @@ use Laratrust\Traits\HasRolesAndPermissions;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasSlug, HasRolesAndPermissions;
+    use HasFactory, Notifiable, HasSlug, HasRolesAndPermissions, LogsActivity;
 
     /**
      * The attributes that are mass assignable.

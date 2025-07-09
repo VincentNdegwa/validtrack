@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasSlug;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Document extends Model
 {
-    use HasFactory, HasSlug;
+    use HasFactory, HasSlug, LogsActivity;
 
     /**
      * The accessors to append to the model's array form.

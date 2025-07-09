@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
@@ -26,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('subject-types', SubjectTypeController::class);
     Route::resource('documents', DocumentController::class);
     Route::resource('document-types', DocumentTypeController::class);
+    Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show']);
     
     // User management routes
     Route::resource('users', UserController::class);

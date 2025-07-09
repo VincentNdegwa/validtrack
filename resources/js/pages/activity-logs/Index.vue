@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 import { Eye } from 'lucide-vue-next';
 
@@ -20,6 +19,9 @@ interface ActivityLog {
     created_at: string;
     updated_at: string;
     slug: string;
+    message: string;
+    friendly_target_name: string;
+    friendly_date: string;
     user?: {
         id: number;
         name: string;
@@ -67,6 +69,11 @@ const columns = computed(() => [
         label: 'Date/Time',
         sortable: true,
         sortDirection: sortField.value === 'created_at' ? sortDirection.value : null
+    },
+    {
+        key: 'message',
+        label: 'Activity',
+        sortable: false
     },
     {
         key: 'user',
@@ -185,7 +192,7 @@ const handleMenuAction = (action: string, logId: string | number) => {
     if (!activityLog) return;
     
     if (action === 'view') {
-        router.visit(`/activity-logs/${activityLog.id}`);
+        router.visit(`/activity-logs/${activityLog.slug}`);
     }
 };
 </script>
@@ -222,7 +229,14 @@ const handleMenuAction = (action: string, logId: string | number) => {
                 @per-page-change="handlePerPageChange"
             >
                 <template #created_at="{ item: log }">
-                    <div>{{ formatDate(log.created_at) }}</div>
+                    <div>
+                        {{ formatDate(log.created_at) }}
+                        <div class="text-xs text-muted-foreground">{{ log.friendly_date }}</div>
+                    </div>
+                </template>
+
+                <template #message="{ item: log }">
+                    <div>{{ log.message }}</div>
                 </template>
                 
                 <template #user="{ item: log }">

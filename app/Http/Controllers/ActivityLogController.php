@@ -22,7 +22,11 @@ class ActivityLogController extends Controller
             $searchTerm = $request->get('search');
             $query->where(function($q) use ($searchTerm) {
                 $q->where('action_type', 'like', "%{$searchTerm}%")
-                  ->orWhere('target_type', 'like', "%{$searchTerm}%");
+                  ->orWhere('target_type', 'like', "%{$searchTerm}%")
+                  ->orWhereHas('user', function($userQuery) use ($searchTerm) {
+                      $userQuery->where('name', 'like', "%{$searchTerm}%")
+                                ->orWhere('email', 'like', "%{$searchTerm}%");
+                  });
             });
         }
         
@@ -40,7 +44,28 @@ class ActivityLogController extends Controller
         
         // Paginate the results
         $perPage = $request->get('per_page', 10);
-        $activityLogs = $query->paginate($perPage);
+        $activityLogs = $query->paginate($perPage)->through(function ($log) {
+            // Add computed attributes
+            return [
+                'id' => $log->id,
+                'slug' => $log->slug,
+                'user' => $log->user ? [
+                    'name' => $log->user->name,
+                    'email' => $log->user->email,
+                ] : null,
+                'company' => $log->company ? [
+                    'name' => $log->company->name,
+                ] : null,
+                'action_type' => $log->action_type,
+                'target_type' => $log->target_type,
+                'target_id' => $log->target_id,
+                'message' => $log->message,
+                'friendly_target_name' => $log->friendly_target_name,
+                'friendly_date' => $log->friendly_date,
+                'created_at' => $log->created_at->format('Y-m-d H:i:s'),
+                'updated_at' => $log->updated_at->format('Y-m-d H:i:s'),
+            ];
+        });
 
         return Inertia::render('activity-logs/Index', [
             'activityLogs' => $activityLogs,
@@ -56,24 +81,43 @@ class ActivityLogController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ActivityLog $activityLog)
+    public function show($id)
     {
-        // Ensure user can only view logs from their company
+        $activityLog = is_numeric($id) ? ActivityLog::findOrFail($id) : ActivityLog::findBySlugOrFail($id);
+
         if ($activityLog->company_id !== Auth::user()->company_id) {
             abort(403);
         }
 
-        // Load relationships
         $activityLog->load(['user', 'company']);
+        
+        $log = [
+            'id' => $activityLog->id,
+            'slug' => $activityLog->slug,
+            'user' => $activityLog->user ? [
+                'name' => $activityLog->user->name,
+                'email' => $activityLog->user->email,
+            ] : null,
+            'company' => $activityLog->company ? [
+                'name' => $activityLog->company->name,
+            ] : null,
+            'action_type' => $activityLog->action_type,
+            'target_type' => $activityLog->target_type,
+            'target_id' => $activityLog->target_id,
+            'message' => $activityLog->message,
+            'friendly_target_name' => $activityLog->friendly_target_name,
+            'friendly_date' => $activityLog->friendly_date,
+            'created_at' => $activityLog->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $activityLog->updated_at->format('Y-m-d H:i:s'),
+            'payload' => $activityLog->payload,
+            'changes' => $activityLog->getChanges(),
+        ];
 
         return Inertia::render('activity-logs/Show', [
-            'activityLog' => $activityLog,
+            'activityLog' => $log,
         ]);
     }
 
-    /**
-     * These methods aren't needed for activity logs since they're created automatically
-     */
     public function create()
     {
         abort(404);

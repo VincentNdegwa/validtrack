@@ -108,6 +108,12 @@ const mainNavItems = computed(() => {
             icon: FileBadge2Icon,
             show: hasPermission('documents-view'),
         },
+        {
+            title: 'Activity Logs',
+            href: '/activity-logs',
+            icon: FileBadge2Icon,
+            show: hasPermission('users-view'),
+        }
     ];
 
     return items.filter((item) => item.show === true);

@@ -2,7 +2,7 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface ActivityLog {
@@ -13,9 +13,13 @@ interface ActivityLog {
     target_type: string;
     target_id: number;
     payload: any;
+    changes?: any;
     created_at: string;
     updated_at: string;
     slug: string;
+    message: string;
+    friendly_target_name: string;
+    friendly_date: string;
     user?: {
         id: number;
         name: string;
@@ -29,33 +33,20 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Format date and time
 const formattedDateTime = computed(() => {
     const date = new Date(props.activityLog.created_at);
     return date.toLocaleString();
 });
 
-// Format the target type
 const targetType = computed(() => {
     const parts = props.activityLog.target_type.split('\\');
     return parts[parts.length - 1];
 });
 
-// Format action type with proper capitalization
 const actionType = computed(() => {
     return props.activityLog.action_type.charAt(0).toUpperCase() + 
            props.activityLog.action_type.slice(1);
 });
-
-// Determine if we should show the diff view (only for 'updated' actions)
-const showDiff = computed(() => {
-    return props.activityLog.action_type === 'updated' && 
-           props.activityLog.payload && 
-           props.activityLog.payload.old && 
-           props.activityLog.payload.new;
-});
-
-// Breadcrumbs for navigation
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -95,6 +86,12 @@ const goBack = () => {
             <div class="grid grid-cols-1 gap-6">
                 <!-- Log Header Info -->
                 <div class="rounded-lg border border-border bg-card p-6">
+                    <!-- User-friendly message -->
+                    <div class="mb-6 text-lg font-medium">
+                        {{ activityLog.message }}
+                        <div class="mt-1 text-sm text-muted-foreground">{{ activityLog.friendly_date }}</div>
+                    </div>
+
                     <div class="mb-4 flex flex-col gap-1">
                         <div class="flex justify-between">
                             <div>
@@ -148,15 +145,15 @@ const goBack = () => {
                     </div>
                     
                     <!-- Updated -->
-                    <div v-else-if="showDiff">
+                    <div v-else-if="activityLog.action_type === 'updated' && activityLog.changes">
                         <div class="space-y-4">
-                            <div v-for="(newValue, key) in activityLog.payload.new" :key="key" class="grid grid-cols-3 gap-4 border-b border-border pb-2">
+                            <div v-for="(change, key) in activityLog.changes" :key="key" class="grid grid-cols-3 gap-4 border-b border-border pb-2">
                                 <div class="font-medium text-muted-foreground">{{ key }}</div>
                                 <div class="line-through text-red-500">
-                                    {{ activityLog.payload.old[key] }}
+                                    {{ change.from }}
                                 </div>
                                 <div class="text-green-500">
-                                    {{ newValue }}
+                                    {{ change.to }}
                                 </div>
                             </div>
                         </div>

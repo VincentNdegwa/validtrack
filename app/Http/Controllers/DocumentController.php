@@ -128,10 +128,7 @@ class DocumentController extends Controller
      */
     public function show($id)
     {
-        // Try to find the document by ID or slug
-        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
-        
-        // Make sure the document belongs to the user's company
+        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);        
         if ($document->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
         }
@@ -149,7 +146,7 @@ class DocumentController extends Controller
      */
     public function edit($id)
     {
-        // Try to find the document by ID or slug
+        
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
         
         // Make sure the document belongs to the user's company
@@ -178,7 +175,7 @@ class DocumentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Try to find the document by ID or slug
+        
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
         
         // Make sure the document belongs to the user's company
@@ -231,7 +228,7 @@ class DocumentController extends Controller
      */
     public function destroy($id)
     {
-        // Try to find the document by ID or slug
+        
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
         
         // Make sure the document belongs to the user's company

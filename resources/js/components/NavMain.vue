@@ -5,7 +5,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { ChevronDown, ChevronRight } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
-const props = defineProps<{
+defineProps<{
     items: NavItem[];
 }>();
 

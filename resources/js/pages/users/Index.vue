@@ -31,7 +31,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const roles = ref(props.roles || []);
+ref(props.roles || []);
 
 const search = ref(props.filters?.search || '');
 const sortField = ref(props.filters?.sort || 'name');

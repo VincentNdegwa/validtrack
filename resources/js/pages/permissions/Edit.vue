@@ -64,52 +64,33 @@ import { computed } from 'vue';
 
             <form @submit.prevent="submit" class="space-y-6">
                 <Card>
-                    <div class="p-6 space-y-4">
+                    <div class="space-y-4 p-6">
                         <div class="space-y-2">
                             <Label for="name">Permission Name</Label>
-                            <Input 
-                                id="name" 
-                                v-model="form.name" 
-                                required 
-                            />
-                            <p class="text-xs text-muted-foreground">
-                                Use lowercase with dashes. Typically follows a 'resource-action' pattern.
-                            </p>
-                            <p v-if="form.errors.name" class="text-xs text-red-500 mt-1">{{ form.errors.name }}</p>
+                            <Input id="name" v-model="form.name" required />
+                            <p class="text-xs text-muted-foreground">Use lowercase with dashes. Typically follows a 'resource-action' pattern.</p>
+                            <p v-if="form.errors.name" class="mt-1 text-xs text-red-500">{{ form.errors.name }}</p>
                         </div>
 
                         <div class="space-y-2">
                             <Label for="display_name">Display Name</Label>
-                            <Input 
-                                id="display_name" 
-                                v-model="form.display_name"
-                            />
-                            <p class="text-xs text-muted-foreground">
-                                User-friendly name displayed in the interface.
-                            </p>
-                            <p v-if="form.errors.display_name" class="text-xs text-red-500 mt-1">{{ form.errors.display_name }}</p>
+                            <Input id="display_name" v-model="form.display_name" />
+                            <p class="text-xs text-muted-foreground">User-friendly name displayed in the interface.</p>
+                            <p v-if="form.errors.display_name" class="mt-1 text-xs text-red-500">{{ form.errors.display_name }}</p>
                         </div>
 
                         <div class="space-y-2">
                             <Label for="description">Description</Label>
-                            <Textarea 
-                                id="description" 
-                                v-model="form.description"
-                                rows="3"
-                            />
-                            <p v-if="form.errors.description" class="text-xs text-red-500 mt-1">{{ form.errors.description }}</p>
+                            <Textarea id="description" v-model="form.description" rows="3" />
+                            <p v-if="form.errors.description" class="mt-1 text-xs text-red-500">{{ form.errors.description }}</p>
                         </div>
 
                         <div class="flex items-center space-x-2 pt-2">
-                            <Checkbox 
-                                id="is_global" 
-                                v-model:checked="form.is_global" 
-                                :disabled="!canChangeGlobalStatus"
-                            />
+                            <Checkbox id="is_global" v-model:checked="form.is_global" :disabled="!canChangeGlobalStatus" />
                             <Label for="is_global" class="cursor-pointer" :class="{ 'opacity-50': !canChangeGlobalStatus }">
                                 Global Permission
                             </Label>
-                            <p v-if="form.errors.is_global" class="text-xs text-red-500 mt-1">{{ form.errors.is_global }}</p>
+                            <p v-if="form.errors.is_global" class="mt-1 text-xs text-red-500">{{ form.errors.is_global }}</p>
                         </div>
                         <p class="text-xs text-muted-foreground">
                             Global permissions apply across all companies. Company-specific permissions are only valid within your company.

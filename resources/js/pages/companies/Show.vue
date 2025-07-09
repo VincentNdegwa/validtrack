@@ -12,9 +12,7 @@
                     <Link :href="`/companies/${company.slug}/edit`">
                         <Button variant="outline">Edit Company</Button>
                     </Link>
-                    <Button @click="confirmSwitch(company)" class="bg-primary text-primary-foreground">
-                        Impersonate User
-                    </Button>
+                    <Button @click="confirmSwitch(company)" class="bg-primary text-primary-foreground"> Impersonate User </Button>
                 </div>
             </div>
 
@@ -31,23 +29,27 @@
                                 <dd>
                                     <span
                                         class="inline-flex items-center rounded-full px-2 py-1 text-xs"
-                                        :class="company.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'"
+                                        :class="
+                                            company.is_active
+                                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                                : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                        "
                                     >
                                         {{ company.is_active ? 'Active' : 'Inactive' }}
                                     </span>
                                 </dd>
                             </div>
-                            
+
                             <div>
                                 <dt class="text-sm font-medium text-muted-foreground">Email</dt>
                                 <dd>{{ company.email || 'N/A' }}</dd>
                             </div>
-                            
+
                             <div>
                                 <dt class="text-sm font-medium text-muted-foreground">Phone</dt>
                                 <dd>{{ company.phone || 'N/A' }}</dd>
                             </div>
-                            
+
                             <div>
                                 <dt class="text-sm font-medium text-muted-foreground">Website</dt>
                                 <dd>
@@ -63,12 +65,12 @@
                                     <span v-else>N/A</span>
                                 </dd>
                             </div>
-                            
+
                             <div>
                                 <dt class="text-sm font-medium text-muted-foreground">Address</dt>
                                 <dd>{{ company.address || 'N/A' }}</dd>
                             </div>
-                            
+
                             <div v-if="company.description">
                                 <dt class="text-sm font-medium text-muted-foreground">Description</dt>
                                 <dd class="whitespace-pre-line">{{ company.description }}</dd>
@@ -86,22 +88,18 @@
                         </Link>
                     </CardHeader>
                     <CardContent>
-                        <DataTable
-                            :data="company.users"
-                            :columns="userColumns"
-                            empty-message="No users found"
-                        >
+                        <DataTable :data="company.users" :columns="userColumns" empty-message="No users found">
                             <template #role="{ item: user }">
                                 <span v-if="user.roles && user.roles.length > 0">
                                     {{ user.roles[0].display_name }}
                                 </span>
                                 <span v-else>-</span>
                             </template>
-                            
+
                             <template #status="{ item: user }">
                                 <StatusBadge :active="user.is_active" />
                             </template>
-                            
+
                             <template #actions="{ item: user }">
                                 <div class="flex items-center space-x-2">
                                     <Link :href="`/users/${user.slug}`" class="text-blue-600 hover:underline">View</Link>
@@ -123,9 +121,10 @@
                 </DialogHeader>
                 <div class="py-4">
                     <p>
-                        Switch to view the system as a user from <span class="font-semibold">{{ companyToSwitch?.name }}</span>?
+                        Switch to view the system as a user from <span class="font-semibold">{{ companyToSwitch?.name }}</span
+                        >?
                     </p>
-                    <p class="text-sm text-muted-foreground mt-2">
+                    <p class="mt-2 text-sm text-muted-foreground">
                         This will take you to a page where you can select a specific user to impersonate.
                     </p>
                 </div>
@@ -141,8 +140,8 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DataTable } from '@/components/ui/data-table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -151,8 +150,8 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 interface Props {
-    company: Company & { 
-        users: Array<User & { roles?: Array<{ name: string, display_name: string }> }> 
+    company: Company & {
+        users: Array<User & { roles?: Array<{ name: string; display_name: string }> }>;
     };
 }
 
@@ -166,7 +165,7 @@ const userColumns = [
     { key: 'email', label: 'Email' },
     { key: 'role', label: 'Role' },
     { key: 'status', label: 'Status' },
-    { key: '_actions', label: 'Actions', class: 'w-[100px]' }
+    { key: '_actions', label: 'Actions', class: 'w-[100px]' },
 ];
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -197,14 +196,14 @@ const cancelSwitch = () => {
 const switchToCompany = () => {
     if (companyToSwitch.value) {
         router.post('/companies/switch', {
-            company_id: companyToSwitch.value.id
+            company_id: companyToSwitch.value.id,
         });
     }
 };
 
 const impersonateSpecificUser = (userId: number) => {
     router.post('/impersonate', {
-        user_id: userId
+        user_id: userId,
     });
 };
 </script>

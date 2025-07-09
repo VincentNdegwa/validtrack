@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DataTable } from '@/components/ui/data-table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Company } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
-import { Eye, Edit, UserRound, Trash, } from 'lucide-vue-next';
+import { Edit, Eye, Trash, UserRound } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 // Define props for parent-driven data loading mode
 interface Props {
@@ -32,7 +32,7 @@ const props = defineProps<Props>();
 
 const search = ref(props.filters?.search || '');
 const sortField = ref(props.filters?.sort || 'name');
-const sortDirection = ref<'asc' | 'desc'>(props.filters?.direction as 'asc' | 'desc' || 'asc');
+const sortDirection = ref<'asc' | 'desc'>((props.filters?.direction as 'asc' | 'desc') || 'asc');
 const perPage = ref(props.filters?.per_page || 10);
 
 // Computed pagination object for parent-driven mode
@@ -42,38 +42,38 @@ const pagination = computed(() => {
         currentPage: props.companies.current_page,
         lastPage: props.companies.last_page,
         perPage: props.companies.per_page,
-        total: props.companies.total
+        total: props.companies.total,
     };
 });
 
 // Define columns for the DataTable
 const columns = computed(() => [
-    { 
-        key: 'name', 
-        label: 'Name', 
+    {
+        key: 'name',
+        label: 'Name',
         class: 'font-medium',
         sortable: true,
-        sortDirection: sortField.value === 'name' ? sortDirection.value : null
+        sortDirection: sortField.value === 'name' ? sortDirection.value : null,
     },
-    { 
-        key: 'email', 
+    {
+        key: 'email',
         label: 'Email',
         sortable: true,
-        sortDirection: sortField.value === 'email' ? sortDirection.value : null
+        sortDirection: sortField.value === 'email' ? sortDirection.value : null,
     },
-    { 
-        key: 'users_count', 
+    {
+        key: 'users_count',
         label: 'Users',
         sortable: true,
-        sortDirection: sortField.value === 'users_count' ? sortDirection.value : null
+        sortDirection: sortField.value === 'users_count' ? sortDirection.value : null,
     },
-    { 
-        key: 'status', 
+    {
+        key: 'status',
         label: 'Status',
         sortable: true,
-        sortDirection: sortField.value === 'is_active' ? sortDirection.value : null
+        sortDirection: sortField.value === 'is_active' ? sortDirection.value : null,
     },
-    { key: '_actions', label: 'Actions' }
+    { key: '_actions', label: 'Actions' },
 ]);
 const showDeleteDialog = ref(false);
 const companyToDelete = ref<Company | null>(null);
@@ -108,7 +108,7 @@ const deleteCompany = () => {
             onSuccess: () => {
                 showDeleteDialog.value = false;
                 companyToDelete.value = null;
-            }
+            },
         });
     }
 };
@@ -127,23 +127,27 @@ const cancelSwitch = () => {
 const switchToCompany = () => {
     if (companyToSwitch.value) {
         router.post('/companies/switch', {
-            company_id: companyToSwitch.value.id
+            company_id: companyToSwitch.value.id,
         });
     }
 };
 
 const handlePageChange = (page: number) => {
-    router.get('/companies', {
-        page: page,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['companies']
-    });
+    router.get(
+        '/companies',
+        {
+            page: page,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['companies'],
+        },
+    );
 };
 
 // Handle sort change
@@ -154,53 +158,65 @@ const handleSort = (field: string) => {
         sortField.value = field;
         sortDirection.value = 'asc';
     }
-    
-    router.get('/companies', {
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['companies']
-    });
+
+    router.get(
+        '/companies',
+        {
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['companies'],
+        },
+    );
 };
 
 // Handle search
 const handleSearch = () => {
-    router.get('/companies', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['companies']
-    });
+    router.get(
+        '/companies',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['companies'],
+        },
+    );
 };
 
 // Handle per page change
 const handlePerPageChange = (value: number) => {
     perPage.value = value;
-    router.get('/companies', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['companies']
-    });
+    router.get(
+        '/companies',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['companies'],
+        },
+    );
 };
 
 const handleMenuAction = (action: string, companyId: string | number) => {
-    const company = props.companies?.data.find(c => c.id === companyId);
-    
+    const company = props.companies?.data.find((c) => c.id === companyId);
+
     if (!company) return;
-    
+
     switch (action) {
         case 'view':
             router.visit(`/companies/${company.slug}`);
@@ -230,16 +246,15 @@ const handleMenuAction = (action: string, companyId: string | number) => {
                 </div>
                 <div class="flex gap-2">
                     <div class="relative mr-2">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             v-model="search"
-                            placeholder="Search companies..." 
-                            class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            placeholder="Search companies..."
+                            class="rounded-md border px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                             @keyup.enter="handleSearch"
                         />
                     </div>
 
-               
                     <Link href="/companies/create">
                         <Button class="bg-primary text-primary-foreground hover:bg-primary/90">Add Company</Button>
                     </Link>
@@ -259,31 +274,14 @@ const handleMenuAction = (action: string, companyId: string | number) => {
                 <template #status="{ item: company }">
                     <StatusBadge :active="company.is_active" />
                 </template>
-                
+
                 <template #actions="{ item: company }">
                     <ActionMenu :item-id="company.id" @select="handleMenuAction">
                         <template #menu-items="{ handleAction }">
-                            <ActionMenuButton 
-                                :icon="Eye" 
-                                text="View" 
-                                @click="(e) => handleAction('view', e)" 
-                            />
-                            <ActionMenuButton 
-                                :icon="Edit" 
-                                text="Edit" 
-                                @click="(e) => handleAction('edit', e)" 
-                            />
-                            <ActionMenuButton 
-                                :icon="UserRound" 
-                                text="Impersonate" 
-                                @click="(e) => handleAction('impersonate', e)" 
-                            />
-                            <ActionMenuButton 
-                                :icon="Trash" 
-                                text="Delete" 
-                                variant="destructive"
-                                @click="(e) => handleAction('delete', e)" 
-                            />
+                            <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
+                            <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
+                            <ActionMenuButton :icon="UserRound" text="Impersonate" @click="(e) => handleAction('impersonate', e)" />
+                            <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
                         </template>
                     </ActionMenu>
                 </template>
@@ -298,8 +296,8 @@ const handleMenuAction = (action: string, companyId: string | number) => {
                 </DialogHeader>
                 <div class="py-4">
                     <p>
-                        Are you sure you want to delete company <span class="font-semibold">{{ companyToDelete?.name }}</span>? This
-                        action cannot be undone.
+                        Are you sure you want to delete company <span class="font-semibold">{{ companyToDelete?.name }}</span
+                        >? This action cannot be undone.
                     </p>
                 </div>
                 <div class="flex justify-end space-x-2">
@@ -317,11 +315,10 @@ const handleMenuAction = (action: string, companyId: string | number) => {
                 </DialogHeader>
                 <div class="py-4">
                     <p>
-                        Switch to <span class="font-semibold">{{ companyToSwitch?.name }}</span>?
+                        Switch to <span class="font-semibold">{{ companyToSwitch?.name }}</span
+                        >?
                     </p>
-                    <p class="text-sm text-muted-foreground mt-2">
-                        This will show you a list of users in this company that you can impersonate.
-                    </p>
+                    <p class="mt-2 text-sm text-muted-foreground">This will show you a list of users in this company that you can impersonate.</p>
                 </div>
                 <div class="flex justify-end space-x-2">
                     <Button variant="outline" @click="cancelSwitch">Cancel</Button>

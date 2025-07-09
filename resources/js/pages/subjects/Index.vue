@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
@@ -6,9 +7,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Subject, type SubjectType } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
-import { Eye, Edit, Trash } from 'lucide-vue-next';
-import Can from '@/components/auth/Can.vue';
+import { Edit, Eye, Trash } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 // Define props for parent-driven data loading mode
 interface Props {
@@ -31,7 +31,7 @@ interface Props {
 const props = defineProps<Props>();
 const search = ref(props.filters?.search || '');
 const sortField = ref(props.filters?.sort || 'name');
-const sortDirection = ref<'asc' | 'desc'>(props.filters?.direction as 'asc' | 'desc' || 'asc');
+const sortDirection = ref<'asc' | 'desc'>((props.filters?.direction as 'asc' | 'desc') || 'asc');
 const perPage = ref(props.filters?.per_page || 10);
 
 // Computed pagination object for parent-driven mode
@@ -41,7 +41,7 @@ const pagination = computed(() => {
         currentPage: props.subjects.current_page,
         lastPage: props.subjects.last_page,
         perPage: props.subjects.per_page,
-        total: props.subjects.total
+        total: props.subjects.total,
     };
 });
 
@@ -52,26 +52,26 @@ const columns = computed(() => [
         label: 'Name',
         class: 'font-medium',
         sortable: true,
-        sortDirection: sortField.value === 'name' ? sortDirection.value : null
+        sortDirection: sortField.value === 'name' ? sortDirection.value : null,
     },
     {
         key: 'subject_type',
         label: 'Type',
-        sortable: false
+        sortable: false,
     },
     {
         key: 'email',
         label: 'Email',
         sortable: true,
-        sortDirection: sortField.value === 'email' ? sortDirection.value : null
+        sortDirection: sortField.value === 'email' ? sortDirection.value : null,
     },
     {
         key: 'phone',
         label: 'Phone',
         sortable: true,
-        sortDirection: sortField.value === 'phone' ? sortDirection.value : null
+        sortDirection: sortField.value === 'phone' ? sortDirection.value : null,
     },
-    { key: '_actions', label: 'Actions' }
+    { key: '_actions', label: 'Actions' },
 ]);
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -112,17 +112,21 @@ const getStatusText = (status: number) => {
 };
 
 const handlePageChange = (page: number) => {
-    router.get('/subjects', {
-        page: page,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['subjects']
-    });
+    router.get(
+        '/subjects',
+        {
+            page: page,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['subjects'],
+        },
+    );
 };
 
 // Handle sort change
@@ -134,50 +138,62 @@ const handleSort = (field: string) => {
         sortDirection.value = 'asc';
     }
 
-    router.get('/subjects', {
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['subjects']
-    });
+    router.get(
+        '/subjects',
+        {
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['subjects'],
+        },
+    );
 };
 
 // Handle search
 const handleSearch = () => {
-    router.get('/subjects', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['subjects']
-    });
+    router.get(
+        '/subjects',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['subjects'],
+        },
+    );
 };
 
 // Handle per page change
 const handlePerPageChange = (value: number) => {
     perPage.value = value;
-    router.get('/subjects', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['subjects']
-    });
+    router.get(
+        '/subjects',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['subjects'],
+        },
+    );
 };
 
 // Handle menu action selection
 const handleMenuAction = (action: string, subjectId: string | number) => {
-    const subject = props.subjects?.data.find(s => s.id === subjectId);
+    const subject = props.subjects?.data.find((s) => s.id === subjectId);
 
     if (!subject) return;
 
@@ -196,7 +212,6 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
 </script>
 
 <template>
-
     <Head title="Subjects" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -206,29 +221,40 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                     <h1 class="text-2xl font-bold text-foreground">Subjects</h1>
                 </div>
                 <div class="flex gap-2">
-                    <div class="flex items-center mb-0">
+                    <div class="mb-0 flex items-center">
                         <div class="relative mr-2">
-                            <input type="text" v-model="search" placeholder="Search subjects..."
-                                class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                                @keyup.enter="handleSearch" />
+                            <input
+                                type="text"
+                                v-model="search"
+                                placeholder="Search subjects..."
+                                class="rounded-md border px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
+                                @keyup.enter="handleSearch"
+                            />
                         </div>
                     </div>
                     <Can permission="subject-types-view">
                         <Link href="/subject-types">
-                        <Button variant="outline" class="mr-2"> Subject Types </Button>
+                            <Button variant="outline" class="mr-2"> Subject Types </Button>
                         </Link>
                     </Can>
                     <Can permission="subjects-create">
                         <Link href="/subjects/create">
-                        <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
+                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
                         </Link>
                     </Can>
                 </div>
             </div>
 
-            <DataTable :data="props.subjects?.data || []" :columns="columns" :pagination="pagination || undefined"
-                :show-pagination="!!pagination" empty-message="No subjects found" @page-change="handlePageChange"
-                @sort="handleSort" @per-page-change="handlePerPageChange">
+            <DataTable
+                :data="props.subjects?.data || []"
+                :columns="columns"
+                :pagination="pagination || undefined"
+                :show-pagination="!!pagination"
+                empty-message="No subjects found"
+                @page-change="handlePageChange"
+                @sort="handleSort"
+                @per-page-change="handlePerPageChange"
+            >
                 <template #subject_type="{ item: subject }">
                     <div>{{ subject.subject_type?.name || 'N/A' }}</div>
                 </template>
@@ -250,8 +276,7 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                                 <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
                             </Can>
                             <Can permission="subjects-delete">
-                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive"
-                                    @click="(e) => handleAction('delete', e)" />
+                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
                             </Can>
                         </template>
                     </ActionMenu>

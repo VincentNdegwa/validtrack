@@ -4,9 +4,8 @@ import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { usePage } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';
-import { LayoutGrid, Dock, FileBadge2Icon, Users, ShieldCheck, Key, Settings, FileText, Building } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { Building, Dock, FileBadge2Icon, Key, LayoutGrid, ShieldCheck, Users } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -19,24 +18,23 @@ const hasPermission = (permission: string): boolean => {
 
 const isSuperAdmin = computed((): boolean => {
     if (!user.value?.roles) return false;
-    return user.value.roles.some(role => role.name === 'super-admin');
+    return user.value.roles.some((role) => role.name === 'super-admin');
 });
 
 const mainNavItems = computed(() => {
-
     if (isSuperAdmin.value) {
         return [
             {
                 title: 'Dashboard',
                 href: '/dashboard',
                 icon: LayoutGrid,
-                show: true
+                show: true,
             },
             {
                 title: 'Companies',
                 href: '/companies',
                 icon: Building,
-                show: true
+                show: true,
             },
             {
                 title: 'Users Management',
@@ -47,25 +45,25 @@ const mainNavItems = computed(() => {
                         title: 'Users',
                         href: '/users',
                         icon: Users,
-                        show: true
+                        show: true,
                     },
                     {
                         title: 'Roles',
                         href: '/roles',
                         icon: ShieldCheck,
-                        show: true
+                        show: true,
                     },
                     {
                         title: 'Permissions',
                         href: '/permissions',
                         icon: Key,
-                        show: true
-                    }
-                ]
-            }
+                        show: true,
+                    },
+                ],
+            },
         ];
     }
-    
+
     const items: NavItem[] = [
         {
             title: 'Dashboard',
@@ -95,8 +93,8 @@ const mainNavItems = computed(() => {
                     href: '/permissions',
                     icon: Key,
                     show: hasPermission('roles-view'),
-                }
-            ]
+                },
+            ],
         },
         {
             title: 'Subjects',
@@ -111,8 +109,8 @@ const mainNavItems = computed(() => {
             show: hasPermission('documents-view'),
         },
     ];
-    
-    return items.filter(item => item.show === true);
+
+    return items.filter((item) => item.show === true);
 });
 
 const footerNavItems: NavItem[] = [];

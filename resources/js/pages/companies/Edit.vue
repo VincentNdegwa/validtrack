@@ -38,23 +38,13 @@
 
                             <div class="space-y-2">
                                 <Label for="website">Website</Label>
-                                <Input
-                                    id="website"
-                                    v-model="form.website"
-                                    :error="form.errors.website"
-                                    placeholder="https://example.com"
-                                />
+                                <Input id="website" v-model="form.website" :error="form.errors.website" placeholder="https://example.com" />
                                 <p v-if="form.errors.website" class="text-sm text-red-500">{{ form.errors.website }}</p>
                             </div>
 
                             <div class="space-y-2 md:col-span-2">
                                 <Label for="address">Address</Label>
-                                <Input
-                                    id="address"
-                                    v-model="form.address"
-                                    :error="form.errors.address"
-                                    placeholder="Enter company address"
-                                />
+                                <Input id="address" v-model="form.address" :error="form.errors.address" placeholder="Enter company address" />
                                 <p v-if="form.errors.address" class="text-sm text-red-500">{{ form.errors.address }}</p>
                             </div>
 
@@ -69,9 +59,7 @@
                             <Link :href="`/companies/${company.slug}`">
                                 <Button type="button" variant="outline">Cancel</Button>
                             </Link>
-                            <Button :disabled="form.processing" type="submit" class="bg-primary text-primary-foreground">
-                                Update Company
-                            </Button>
+                            <Button :disabled="form.processing" type="submit" class="bg-primary text-primary-foreground"> Update Company </Button>
                         </div>
                     </form>
                 </CardContent>
@@ -88,9 +76,7 @@
                         <div class="flex items-center justify-between rounded-lg border border-red-200 p-4 dark:border-red-900">
                             <div>
                                 <h3 class="text-base font-medium">Delete this company</h3>
-                                <p class="text-sm text-muted-foreground">
-                                    Once deleted, all of the company's data will be permanently removed.
-                                </p>
+                                <p class="text-sm text-muted-foreground">Once deleted, all of the company's data will be permanently removed.</p>
                             </div>
                             <Button variant="destructive" @click="confirmDelete">Delete Company</Button>
                         </div>
@@ -107,8 +93,8 @@
                 </DialogHeader>
                 <div class="py-4">
                     <p>
-                        Are you sure you want to delete company <span class="font-semibold">{{ company.name }}</span>? This action
-                        cannot be undone.
+                        Are you sure you want to delete company <span class="font-semibold">{{ company.name }}</span
+                        >? This action cannot be undone.
                     </p>
                 </div>
                 <div class="flex justify-end space-x-2">
@@ -130,7 +116,7 @@ import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Company } from '@/types/models';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 interface Props {

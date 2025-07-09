@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DataTable } from '@/components/ui/data-table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Role } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
-import { Eye, Edit, Trash, Shield } from 'lucide-vue-next';
-import Can from '@/components/auth/Can.vue';
+import { Edit, Eye, Trash } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 // Define props for parent-driven data loading mode
 interface Props {
@@ -31,7 +31,7 @@ interface Props {
 const props = defineProps<Props>();
 const search = ref(props.filters?.search || '');
 const sortField = ref(props.filters?.sort || 'name');
-const sortDirection = ref<'asc' | 'desc'>(props.filters?.direction as 'asc' | 'desc' || 'asc');
+const sortDirection = ref<'asc' | 'desc'>((props.filters?.direction as 'asc' | 'desc') || 'asc');
 const perPage = ref(props.filters?.per_page || 10);
 const showDeleteDialog = ref(false);
 const roleToDelete = ref<Role | null>(null);
@@ -43,38 +43,38 @@ const pagination = computed(() => {
         currentPage: props.roles.current_page,
         lastPage: props.roles.last_page,
         perPage: props.roles.per_page,
-        total: props.roles.total
+        total: props.roles.total,
     };
 });
 
 // Define columns for the DataTable
 const columns = computed(() => [
-    { 
-        key: 'name', 
-        label: 'Name', 
+    {
+        key: 'name',
+        label: 'Name',
         class: 'font-medium',
         sortable: true,
-        sortDirection: sortField.value === 'name' ? sortDirection.value : null
+        sortDirection: sortField.value === 'name' ? sortDirection.value : null,
     },
-    { 
-        key: 'display_name', 
+    {
+        key: 'display_name',
         label: 'Display Name',
         sortable: true,
-        sortDirection: sortField.value === 'display_name' ? sortDirection.value : null
+        sortDirection: sortField.value === 'display_name' ? sortDirection.value : null,
     },
-    { 
-        key: 'users_count', 
+    {
+        key: 'users_count',
         label: 'Users',
         sortable: true,
-        sortDirection: sortField.value === 'users_count' ? sortDirection.value : null
+        sortDirection: sortField.value === 'users_count' ? sortDirection.value : null,
     },
-    { 
-        key: 'permissions_count', 
+    {
+        key: 'permissions_count',
         label: 'Permissions',
         sortable: true,
-        sortDirection: sortField.value === 'permissions_count' ? sortDirection.value : null
+        sortDirection: sortField.value === 'permissions_count' ? sortDirection.value : null,
     },
-    { key: '_actions', label: 'Actions' }
+    { key: '_actions', label: 'Actions' },
 ]);
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -94,17 +94,21 @@ const confirmDelete = (role: Role) => {
 };
 
 const handlePageChange = (page: number) => {
-    router.get('/roles', {
-        page: page,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['roles']
-    });
+    router.get(
+        '/roles',
+        {
+            page: page,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['roles'],
+        },
+    );
 };
 
 // Handle sort change
@@ -115,54 +119,66 @@ const handleSort = (field: string) => {
         sortField.value = field;
         sortDirection.value = 'asc';
     }
-    
-    router.get('/roles', {
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['roles']
-    });
+
+    router.get(
+        '/roles',
+        {
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['roles'],
+        },
+    );
 };
 
 // Handle search
 const handleSearch = () => {
-    router.get('/roles', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['roles']
-    });
+    router.get(
+        '/roles',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['roles'],
+        },
+    );
 };
 
 // Handle per page change
 const handlePerPageChange = (value: number) => {
     perPage.value = value;
-    router.get('/roles', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['roles']
-    });
+    router.get(
+        '/roles',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['roles'],
+        },
+    );
 };
 
 // Handle menu action selection
 const handleMenuAction = (action: string, roleId: string | number) => {
-    const role = props.roles?.data.find(r => r.id === roleId);
-    
+    const role = props.roles?.data.find((r) => r.id === roleId);
+
     if (!role) return;
-    
+
     switch (action) {
         case 'view':
             router.visit(`/roles/${role.slug}`);
@@ -187,7 +203,7 @@ const deleteRole = () => {
             onSuccess: () => {
                 showDeleteDialog.value = false;
                 roleToDelete.value = null;
-            }
+            },
         });
     }
 };
@@ -204,11 +220,15 @@ const deleteRole = () => {
                     <p class="text-muted-foreground">Manage user roles and permissions</p>
                 </div>
                 <div class="flex gap-2">
-                    <div class="flex items-center mb-0">
+                    <div class="mb-0 flex items-center">
                         <div class="relative mr-2">
-                            <input type="text" v-model="search" placeholder="Search roles..."
-                                class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                                @keyup.enter="handleSearch" />
+                            <input
+                                type="text"
+                                v-model="search"
+                                placeholder="Search roles..."
+                                class="rounded-md border px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
+                                @keyup.enter="handleSearch"
+                            />
                         </div>
                     </div>
                     <Can permission="roles-view">
@@ -224,26 +244,26 @@ const deleteRole = () => {
                 </div>
             </div>
 
-            <DataTable 
-                :data="props.roles?.data || []" 
-                :columns="columns" 
+            <DataTable
+                :data="props.roles?.data || []"
+                :columns="columns"
                 :pagination="pagination || undefined"
-                :show-pagination="!!pagination" 
-                empty-message="No roles found" 
+                :show-pagination="!!pagination"
+                empty-message="No roles found"
                 @page-change="handlePageChange"
-                @sort="handleSort" 
+                @sort="handleSort"
                 @per-page-change="handlePerPageChange"
             >
                 <template #actions="{ item: role }">
                     <ActionMenu :item-id="role.id" @select="handleMenuAction">
                         <template #menu-items="{ handleAction }">
-                            <Can permission="roles-view" >
+                            <Can permission="roles-view">
                                 <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
                             </Can>
                             <Can permission="roles-edit">
                                 <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
                             </Can>
-                            <Can permission="roles-delete" >
+                            <Can permission="roles-delete">
                                 <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
                             </Can>
                         </template>
@@ -259,8 +279,8 @@ const deleteRole = () => {
                 </DialogHeader>
                 <div class="py-4">
                     <p>
-                        Are you sure you want to delete role <span class="font-semibold">{{ roleToDelete?.name }}</span>? This
-                        action cannot be undone.
+                        Are you sure you want to delete role <span class="font-semibold">{{ roleToDelete?.name }}</span
+                        >? This action cannot be undone.
                     </p>
                 </div>
                 <div class="flex justify-end space-x-2">

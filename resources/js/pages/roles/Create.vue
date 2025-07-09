@@ -60,20 +60,20 @@ const updatePermission = (permissionId: number, checked: boolean) => {
 // Group permissions by category based on their names
 const groupedPermissions = computed(() => {
     if (!props.permissions) return {};
-    
+
     const groups: Record<string, Permission[]> = {};
-    
-    props.permissions.forEach(permission => {
+
+    props.permissions.forEach((permission) => {
         // Extract category from permission name (e.g., "users-create" => "users")
         const category = permission.name.split('-')[0] || 'other';
-        
+
         if (!groups[category]) {
             groups[category] = [];
         }
-        
+
         groups[category].push(permission);
     });
-    
+
     return groups;
 });
 
@@ -92,78 +92,64 @@ import { computed } from 'vue';
 
             <form @submit.prevent="submit" class="space-y-6">
                 <Card>
-                    <div class="p-6 space-y-4">
+                    <div class="space-y-4 p-6">
                         <div class="space-y-2">
                             <Label for="name">Role Name</Label>
-                            <Input 
-                                id="name" 
-                                v-model="form.name" 
-                                required 
-                                placeholder="e.g., admin, editor, viewer"
-                            />
-                            <p class="text-xs text-muted-foreground">
-                                Use lowercase with no spaces. This is the technical name used internally.
-                            </p>
-                            <p v-if="form.errors.name" class="text-xs text-red-500 mt-1">{{ form.errors.name }}</p>
+                            <Input id="name" v-model="form.name" required placeholder="e.g., admin, editor, viewer" />
+                            <p class="text-xs text-muted-foreground">Use lowercase with no spaces. This is the technical name used internally.</p>
+                            <p v-if="form.errors.name" class="mt-1 text-xs text-red-500">{{ form.errors.name }}</p>
                         </div>
 
                         <div class="space-y-2">
                             <Label for="display_name">Display Name</Label>
-                            <Input 
-                                id="display_name" 
-                                v-model="form.display_name"
-                                placeholder="e.g., Administrator, Content Editor, Viewer"
-                            />
-                            <p class="text-xs text-muted-foreground">
-                                User-friendly name displayed in the interface.
-                            </p>
-                            <p v-if="form.errors.display_name" class="text-xs text-red-500 mt-1">{{ form.errors.display_name }}</p>
+                            <Input id="display_name" v-model="form.display_name" placeholder="e.g., Administrator, Content Editor, Viewer" />
+                            <p class="text-xs text-muted-foreground">User-friendly name displayed in the interface.</p>
+                            <p v-if="form.errors.display_name" class="mt-1 text-xs text-red-500">{{ form.errors.display_name }}</p>
                         </div>
 
                         <div class="space-y-2">
                             <Label for="description">Description</Label>
-                            <Textarea 
-                                id="description" 
+                            <Textarea
+                                id="description"
                                 v-model="form.description"
                                 placeholder="Describe the purpose and capabilities of this role..."
                                 rows="3"
                             />
-                            <p v-if="form.errors.description" class="text-xs text-red-500 mt-1">{{ form.errors.description }}</p>
+                            <p v-if="form.errors.description" class="mt-1 text-xs text-red-500">{{ form.errors.description }}</p>
                         </div>
 
                         <div class="space-y-4 pt-4">
-                            <h3 class="text-lg font-semibold border-b border-border pb-2">Assign Permissions</h3>
+                            <h3 class="border-b border-border pb-2 text-lg font-semibold">Assign Permissions</h3>
 
                             <div v-if="!props.permissions || props.permissions.length === 0" class="py-4 text-center text-muted-foreground">
                                 No permissions available to assign.
                             </div>
-                            
+
                             <div v-else class="space-y-6">
                                 <div v-for="(permissions, category) in groupedPermissions" :key="category" class="space-y-2">
                                     <h4 class="font-medium capitalize">{{ category }}</h4>
-                                    
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+
+                                    <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
                                         <div v-for="permission in permissions" :key="permission.id" class="flex items-center space-x-2">
-                                            <div class="flex items-center h-4">
-                                                <input 
+                                            <div class="flex h-4 items-center">
+                                                <input
                                                     type="checkbox"
-                                                    :id="`permission-${permission.id}`" 
+                                                    :id="`permission-${permission.id}`"
                                                     :checked="form.permissions.includes(permission.id)"
                                                     @change="(e) => updatePermission(permission.id, (e.target as HTMLInputElement).checked)"
                                                     :value="permission.id"
-                                                    class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/80" 
+                                                    class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/80"
                                                 />
                                             </div>
-                                            <Label :for="`permission-${permission.id}`" class="cursor-pointer ml-2">
+                                            <Label :for="`permission-${permission.id}`" class="ml-2 cursor-pointer">
                                                 {{ permission.display_name || permission.name }}
-
                                             </Label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <p v-if="form.errors.permissions" class="text-xs text-red-500 mt-1">{{ form.errors.permissions }}</p>
+
+                            <p v-if="form.errors.permissions" class="mt-1 text-xs text-red-500">{{ form.errors.permissions }}</p>
                         </div>
                     </div>
                 </Card>

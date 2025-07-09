@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DataTable } from '@/components/ui/data-table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import { StatusBadge } from '@/components/ui/status-badge';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { type User, type Role } from '@/types/models';
+import { type Role, type User } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
-import { Eye, Edit, Trash } from 'lucide-vue-next';
-import Can from '@/components/auth/Can.vue';
+import { Edit, Eye, Trash } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 // Define props for parent-driven data loading mode
 interface Props {
@@ -35,7 +35,7 @@ const roles = ref(props.roles || []);
 
 const search = ref(props.filters?.search || '');
 const sortField = ref(props.filters?.sort || 'name');
-const sortDirection = ref<'asc' | 'desc'>(props.filters?.direction as 'asc' | 'desc' || 'asc');
+const sortDirection = ref<'asc' | 'desc'>((props.filters?.direction as 'asc' | 'desc') || 'asc');
 const perPage = ref(props.filters?.per_page || 10);
 
 // Computed pagination object for parent-driven mode
@@ -45,37 +45,37 @@ const pagination = computed(() => {
         currentPage: props.users.current_page,
         lastPage: props.users.last_page,
         perPage: props.users.per_page,
-        total: props.users.total
+        total: props.users.total,
     };
 });
 
 // Define columns for the DataTable
 const columns = computed(() => [
-    { 
-        key: 'name', 
-        label: 'Name', 
+    {
+        key: 'name',
+        label: 'Name',
         class: 'font-medium',
         sortable: true,
-        sortDirection: sortField.value === 'name' ? sortDirection.value : null
+        sortDirection: sortField.value === 'name' ? sortDirection.value : null,
     },
-    { 
-        key: 'email', 
+    {
+        key: 'email',
         label: 'Email',
         sortable: true,
-        sortDirection: sortField.value === 'email' ? sortDirection.value : null
+        sortDirection: sortField.value === 'email' ? sortDirection.value : null,
     },
-    { 
-        key: 'roles', 
+    {
+        key: 'roles',
         label: 'Roles',
-        sortable: false
+        sortable: false,
     },
-    { 
-        key: 'status', 
+    {
+        key: 'status',
         label: 'Status',
         sortable: true,
-        sortDirection: sortField.value === 'is_active' ? sortDirection.value : null
+        sortDirection: sortField.value === 'is_active' ? sortDirection.value : null,
     },
-    { key: '_actions', label: 'Actions' }
+    { key: '_actions', label: 'Actions' },
 ]);
 
 const showDeleteDialog = ref(false);
@@ -96,7 +96,7 @@ const getRoleNames = (user: User) => {
     if (!user.roles || user.roles.length === 0) {
         return 'No roles assigned';
     }
-    return user.roles.map(role => role.name).join(', ');
+    return user.roles.map((role) => role.name).join(', ');
 };
 
 const confirmDelete = (user: User) => {
@@ -115,23 +115,27 @@ const deleteUser = () => {
             onSuccess: () => {
                 showDeleteDialog.value = false;
                 userToDelete.value = null;
-            }
+            },
         });
     }
 };
 
 const handlePageChange = (page: number) => {
-    router.get('/users', {
-        page: page,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['users']
-    });
+    router.get(
+        '/users',
+        {
+            page: page,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['users'],
+        },
+    );
 };
 
 // Handle sort change
@@ -142,54 +146,66 @@ const handleSort = (field: string) => {
         sortField.value = field;
         sortDirection.value = 'asc';
     }
-    
-    router.get('/users', {
-        sort: sortField.value,
-        direction: sortDirection.value,
-        search: search.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['users']
-    });
+
+    router.get(
+        '/users',
+        {
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['users'],
+        },
+    );
 };
 
 // Handle search
 const handleSearch = () => {
-    router.get('/users', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['users']
-    });
+    router.get(
+        '/users',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['users'],
+        },
+    );
 };
 
 // Handle per page change
 const handlePerPageChange = (value: number) => {
     perPage.value = value;
-    router.get('/users', {
-        search: search.value,
-        sort: sortField.value,
-        direction: sortDirection.value,
-        per_page: perPage.value
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        only: ['users']
-    });
+    router.get(
+        '/users',
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['users'],
+        },
+    );
 };
 
 // Handle menu action selection
 const handleMenuAction = (action: string, userId: string | number) => {
-    const user = props.users?.data.find(u => u.id === userId);
-    
+    const user = props.users?.data.find((u) => u.id === userId);
+
     if (!user) return;
-    
+
     switch (action) {
         case 'view':
             router.visit(`/users/${user.slug}`);
@@ -216,15 +232,15 @@ const handleMenuAction = (action: string, userId: string | number) => {
                 </div>
                 <div class="flex gap-2">
                     <div class="relative mr-2">
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             v-model="search"
-                            placeholder="Search users..." 
-                            class="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                            placeholder="Search users..."
+                            class="rounded-md border px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                             @keyup.enter="handleSearch"
                         />
                     </div>
-                    
+
                     <Can permission="roles-view">
                         <Link href="/roles">
                             <Button variant="outline" class="mr-2">Manage Roles</Button>
@@ -256,35 +272,22 @@ const handleMenuAction = (action: string, userId: string | number) => {
                 <template #roles="{ item: user }">
                     <div>{{ getRoleNames(user) }}</div>
                 </template>
-                
+
                 <template #status="{ item: user }">
                     <StatusBadge :active="user.is_active" />
                 </template>
-                
+
                 <template #actions="{ item: user }">
                     <ActionMenu :item-id="user.id" @select="handleMenuAction">
                         <template #menu-items="{ handleAction }">
                             <Can permission="users-view">
-                                <ActionMenuButton 
-                                    :icon="Eye" 
-                                    text="View" 
-                                    @click="(e) => handleAction('view', e)" 
-                                />
+                                <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
                             </Can>
                             <Can permission="users-edit">
-                                <ActionMenuButton 
-                                    :icon="Edit" 
-                                    text="Edit" 
-                                    @click="(e) => handleAction('edit', e)" 
-                                />
+                                <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
                             </Can>
                             <Can permission="users-delete">
-                                <ActionMenuButton 
-                                    :icon="Trash" 
-                                    text="Delete" 
-                                    variant="destructive"
-                                    @click="(e) => handleAction('delete', e)" 
-                                />
+                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
                             </Can>
                         </template>
                     </ActionMenu>
@@ -299,8 +302,8 @@ const handleMenuAction = (action: string, userId: string | number) => {
                 </DialogHeader>
                 <div class="py-4">
                     <p>
-                        Are you sure you want to delete user <span class="font-semibold">{{ userToDelete?.name }}</span>? This
-                        action cannot be undone.
+                        Are you sure you want to delete user <span class="font-semibold">{{ userToDelete?.name }}</span
+                        >? This action cannot be undone.
                     </p>
                 </div>
                 <div class="flex justify-end space-x-2">

@@ -6,9 +6,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-foreground">Select User to Impersonate</h1>
-                    <p class="text-muted-foreground">
-                        Select a user from {{ company.name }} to view the system as that user
-                    </p>
+                    <p class="text-muted-foreground">Select a user from {{ company.name }} to view the system as that user</p>
                 </div>
             </div>
 
@@ -22,13 +20,11 @@
                                     <select
                                         id="user_id"
                                         v-model="selectedUserId"
-                                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                         required
                                     >
                                         <option value="" disabled>Select a user</option>
-                                        <option v-for="user in users" :key="user.id" :value="user.id">
-                                            {{ user.name }} ({{ user.email }})
-                                        </option>
+                                        <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }} ({{ user.email }})</option>
                                     </select>
                                 </div>
                             </div>
@@ -75,12 +71,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Select User',
         href: '#',
-    }
+    },
 ];
 
 const impersonateUser = () => {
     router.post('/impersonate', {
-        user_id: selectedUserId.value
+        user_id: selectedUserId.value,
     });
 };
 </script>

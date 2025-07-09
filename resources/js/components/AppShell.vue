@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import ImpersonationBanner from '@/components/ImpersonationBanner.vue';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { usePage } from '@inertiajs/vue3';
-import ImpersonationBanner from '@/components/ImpersonationBanner.vue';
 
 interface Props {
     variant?: 'header' | 'sidebar';

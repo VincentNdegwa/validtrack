@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DocumentType;
 use App\Models\Subject;
 use App\Models\SubjectType;
 use Illuminate\Http\Request;
@@ -50,10 +51,14 @@ class SubjectController extends Controller
         $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
+        $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('subjects/Index', [
             'subjects' => $subjects,
             'subjectTypes' => $subjectTypes,
+            'documentTypes' => $documentTypes,
             'filters' => [
                 'search' => $request->get('search', ''),
                 'sort' => $sortField,
@@ -126,10 +131,14 @@ class SubjectController extends Controller
         $subject->load('subjectType');
         
         $documents = $subject->documents()->with('documentType')->get();
+        $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('subjects/Show', [
             'subject' => $subject,
-            'documents' => $documents
+            'documents' => $documents,
+            'documentTypes' => $documentTypes,
         ]);
     }
 

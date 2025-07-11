@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
+import RequestUploadModal from '@/components/documents/RequestUploadModal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { type Document, type Subject } from '@/types/models';
+import { type Document, type DocumentType, type Subject } from '@/types/models';
 import { Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 interface Props {
     subject: Subject;
     documents?: Document[];
+    documentTypes?: DocumentType[];
 }
 
 const props = defineProps<Props>();
+
+// Upload request modal state
+const showUploadRequestModal = ref(false);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -56,6 +62,7 @@ const getStatusText = (status: number) => {
 </script>
 
 <template>
+
     <Head :title="'Subject: ' + subject.name" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -63,14 +70,19 @@ const getStatusText = (status: number) => {
             <div class="flex items-center justify-between">
                 <h1 class="text-2xl font-bold text-foreground">{{ subject.name }}</h1>
                 <div class="flex space-x-3">
+                    <Can permission="documents-create">
+                            <Button variant="outline" size="md" @click="showUploadRequestModal = true">
+                                Request Upload
+                            </Button>
+                    </Can>
                     <Can permission="subjects-edit">
                         <Link :href="`/subjects/${subject.id}/edit`">
-                            <Button variant="outline">Edit</Button>
+                        <Button variant="outline">Edit</Button>
                         </Link>
                     </Can>
                     <Can permission="subjects-view">
                         <Link href="/subjects">
-                            <Button variant="ghost">Back to Subjects</Button>
+                        <Button variant="ghost">Back to Subjects</Button>
                         </Link>
                     </Can>
                 </div>
@@ -136,29 +148,32 @@ const getStatusText = (status: number) => {
                 <div class="rounded-xl border border-border bg-card p-6">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-xl font-semibold">Documents</h2>
-                        <Can permission="documents-create">
-                            <Link :href="`/documents/create?subject_id=${subject.id}`">
-                                <Button size="sm" class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Document </Button>
-                            </Link>
-                        </Can>
+                        <div class="flex gap-2">
+                            <Can permission="documents-create">
+                                <Link :href="`/documents/create?subject_id=${subject.id}`">
+                                <Button size="sm" class="bg-primary text-primary-foreground hover:bg-primary/90"> Add
+                                    Document </Button>
+                                </Link>
+                            </Can>
+                        </div>
                     </div>
 
                     <div v-if="documents && documents.length > 0" class="space-y-3">
-                        <div v-for="document in documents" :key="document.id" class="rounded-lg border border-border p-2 hover:bg-muted/30">
+                        <div v-for="document in documents" :key="document.id"
+                            class="rounded-lg border border-border p-2 hover:bg-muted/30">
                             <div class="flex items-start justify-between">
                                 <div>
                                     <p class="font-medium">{{ document.document_type?.name || 'Document' }}</p>
-                                    <p class="text-sm text-muted-foreground">Issued: {{ new Date(document.issue_date).toLocaleDateString() }}</p>
-                                    <p
-                                        v-if="document.expiry_date"
-                                        class="text-sm"
-                                        :class="new Date(document.expiry_date) < new Date() ? 'text-red-500' : 'text-muted-foreground'"
-                                    >
+                                    <p class="text-sm text-muted-foreground">Issued: {{ new
+                                        Date(document.issue_date).toLocaleDateString() }}</p>
+                                    <p v-if="document.expiry_date" class="text-sm"
+                                        :class="new Date(document.expiry_date) < new Date() ? 'text-red-500' : 'text-muted-foreground'">
                                         Expires: {{ new Date(document.expiry_date).toLocaleDateString() }}
                                     </p>
                                 </div>
                                 <Can permission="documents-view">
-                                    <Link :href="`/documents/${document.slug}`" class="text-sm text-primary hover:underline">View</Link>
+                                    <Link :href="`/documents/${document.slug}`"
+                                        class="text-sm text-primary hover:underline">View</Link>
                                 </Can>
                             </div>
                         </div>
@@ -167,5 +182,8 @@ const getStatusText = (status: number) => {
                 </div>
             </div>
         </div>
+
+        <RequestUploadModal :subject="subject" :document-types="props.documentTypes" :show="showUploadRequestModal"
+            @close="showUploadRequestModal = false" />
     </AppLayout>
 </template>

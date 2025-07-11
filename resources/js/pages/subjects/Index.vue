@@ -3,11 +3,12 @@ import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
+import RequestUploadModal from '@/components/documents/RequestUploadModal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Subject, type SubjectType } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Eye, Trash } from 'lucide-vue-next';
+import { Edit, Eye, Trash, Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 // Define props for parent-driven data loading mode
@@ -20,6 +21,7 @@ interface Props {
         total: number;
     };
     subjectTypes?: SubjectType[];
+    documentTypes?: DocumentType[];
     filters?: {
         sort: string;
         direction: string;
@@ -33,6 +35,16 @@ const search = ref(props.filters?.search || '');
 const sortField = ref(props.filters?.sort || 'name');
 const sortDirection = ref<'asc' | 'desc'>((props.filters?.direction as 'asc' | 'desc') || 'asc');
 const perPage = ref(props.filters?.per_page || 10);
+
+// Upload request modal state
+const showUploadRequestModal = ref(false);
+const selectedSubject = ref<Subject | null>(null);
+
+// Open upload request modal for a subject
+const openUploadRequestModal = (subject: Subject) => {
+    selectedSubject.value = subject;
+    showUploadRequestModal.value = true;
+};
 
 // Computed pagination object for parent-driven mode
 const pagination = computed(() => {
@@ -204,6 +216,9 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
         case 'edit':
             router.visit(`/subjects/${subject.slug}/edit`);
             break;
+        case 'upload':
+            openUploadRequestModal(subject);
+            break;
         case 'delete':
             router.delete(`/subjects/${subject.slug}`);
             break;
@@ -212,6 +227,7 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
 </script>
 
 <template>
+
     <Head title="Subjects" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -223,38 +239,27 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                 <div class="flex gap-2">
                     <div class="mb-0 flex items-center">
                         <div class="relative mr-2">
-                            <input
-                                type="text"
-                                v-model="search"
-                                placeholder="Search subjects..."
+                            <input type="text" v-model="search" placeholder="Search subjects..."
                                 class="rounded-md border px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
-                                @keyup.enter="handleSearch"
-                            />
+                                @keyup.enter="handleSearch" />
                         </div>
                     </div>
                     <Can permission="subject-types-view">
                         <Link href="/subject-types">
-                            <Button variant="outline" class="mr-2"> Subject Types </Button>
+                        <Button variant="outline" class="mr-2"> Subject Types </Button>
                         </Link>
                     </Can>
                     <Can permission="subjects-create">
                         <Link href="/subjects/create">
-                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
+                        <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
                         </Link>
                     </Can>
                 </div>
             </div>
 
-            <DataTable
-                :data="props.subjects?.data || []"
-                :columns="columns"
-                :pagination="pagination || undefined"
-                :show-pagination="!!pagination"
-                empty-message="No subjects found"
-                @page-change="handlePageChange"
-                @sort="handleSort"
-                @per-page-change="handlePerPageChange"
-            >
+            <DataTable :data="props.subjects?.data || []" :columns="columns" :pagination="pagination || undefined"
+                :show-pagination="!!pagination" empty-message="No subjects found" @page-change="handlePageChange"
+                @sort="handleSort" @per-page-change="handlePerPageChange">
                 <template #subject_type="{ item: subject }">
                     <div>{{ subject.subject_type?.name || 'N/A' }}</div>
                 </template>
@@ -275,13 +280,21 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                             <Can permission="subjects-edit">
                                 <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
                             </Can>
+                            <Can permission="documents-create">
+                                <ActionMenuButton :icon="Upload" text="Request Document Upload"
+                                    @click="() => openUploadRequestModal(subject)" />
+                            </Can>
                             <Can permission="subjects-delete">
-                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
+                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive"
+                                    @click="(e) => handleAction('delete', e)" />
                             </Can>
                         </template>
                     </ActionMenu>
                 </template>
             </DataTable>
         </div>
+
+        <RequestUploadModal v-if="selectedSubject" :subject="selectedSubject" :documentTypes="props.documentTypes"
+            :show="showUploadRequestModal" @close="showUploadRequestModal = false" />
     </AppLayout>
 </template>

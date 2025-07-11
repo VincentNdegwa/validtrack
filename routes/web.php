@@ -45,5 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('impersonate/stop', [CompanyController::class, 'stopImpersonation'])->name('impersonate.stop');
 });
 
+// Include additional route files
+require __DIR__.'/document-uploads.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

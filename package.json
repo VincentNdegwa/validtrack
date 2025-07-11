@@ -24,6 +24,11 @@
     },
     "dependencies": {
         "@floating-ui/vue": "^1.1.7",
+        "@fullcalendar/core": "^6.1.18",
+        "@fullcalendar/daygrid": "^6.1.18",
+        "@fullcalendar/interaction": "^6.1.18",
+        "@fullcalendar/timegrid": "^6.1.18",
+        "@fullcalendar/vue3": "^6.1.18",
         "@inertiajs/vue3": "^2.0.0",
         "@tailwindcss/vite": "^4.1.1",
         "@vitejs/plugin-vue": "^5.2.1",

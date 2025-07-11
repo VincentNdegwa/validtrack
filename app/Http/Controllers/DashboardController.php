@@ -97,6 +97,12 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
             
+        // Get all documents with expiry dates for the calendar
+        $calendarDocuments = Document::where('company_id', $companyId)
+            ->whereNotNull('expiry_date')
+            ->with(['subject', 'documentType'])
+            ->get();
+            
         // Get company info
         $company = $user->company;
         
@@ -106,6 +112,7 @@ class DashboardController extends Controller
             'recentDocuments' => $recentDocuments,
             'recentActivities' => $recentActivities,
             'expiringDocuments' => $expiringDocuments,
+            'calendarDocuments' => $calendarDocuments,
             'company' => $company,
         ]);
     }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Can from '@/components/auth/Can.vue';
 import StatsCard from '@/components/dashboard/StatsCard.vue';
+import DocumentCalendar from '@/components/dashboard/DocumentCalendar.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DataTable } from '@/components/ui/data-table';
@@ -26,6 +27,7 @@ interface Props {
     recentDocuments?: Document[];
     recentActivities?: ActivityLog[];
     expiringDocuments?: Document[];
+    calendarDocuments?: Document[];
     company?: Company;
 }
 
@@ -46,6 +48,7 @@ const recentSubjects = ref(props.recentSubjects || []);
 const recentDocuments = ref(props.recentDocuments || []);
 const recentActivities = ref(props.recentActivities || []);
 const expiringDocuments = ref(props.expiringDocuments || []);
+const calendarDocuments = ref(props.calendarDocuments || []);
 const company = ref(props.company);
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -289,6 +292,9 @@ const formatActionType = (actionType: string): string => {
                     </CardContent>
                 </Card>
             </div>
+
+            <!-- Document Calendar -->
+            <DocumentCalendar :documents="calendarDocuments" />
 
             <!-- Recent Activity -->
             <Can permission="activity-log-view">

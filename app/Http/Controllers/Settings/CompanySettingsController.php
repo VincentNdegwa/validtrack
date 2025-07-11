@@ -49,7 +49,8 @@ class CompanySettingsController extends Controller
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'timezone' => ['required', 'string', 'in:' . implode(',', \DateTimeZone::listIdentifiers())],
-            'reminder_default_days' => ['required', 'numeric', 'min:1', 'max:365'],
+            'reminder_default_days' => ['required', 'array'], // Changed to array
+            'reminder_default_days.*' => ['required', 'numeric', 'min:1', 'max:365'], // Validate each value in array
             'notification_email_enabled' => ['required', 'boolean'],
             'logo' => ['nullable', 'image', 'max:1024'],
         ]);
@@ -69,10 +70,13 @@ class CompanySettingsController extends Controller
         $company->save();
         
         $company->setSetting(CompanySetting::TIMEZONE, $validatedData['timezone']);
-        $company->setSetting(CompanySetting::REMINDER_DEFAULT_DAYS, (int)$validatedData['reminder_default_days']);
         
-        // Handle checkbox value - ensure it's properly converted to boolean
-        // This helps with values like "1", "0", 1, 0, "true", "false"
+        $reminderDays = array_map('intval', $validatedData['reminder_default_days']);
+        sort($reminderDays, SORT_NUMERIC);
+        $reminderDays = array_reverse($reminderDays);
+        $company->setSetting(CompanySetting::REMINDER_DEFAULT_DAYS, $reminderDays);
+        
+       
         $notificationEnabled = filter_var(
             $validatedData['notification_email_enabled'], 
             FILTER_VALIDATE_BOOLEAN

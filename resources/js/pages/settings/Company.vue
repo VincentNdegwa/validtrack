@@ -52,19 +52,46 @@
 
                         <div class="grid gap-2">
                             <Label for="reminder_default_days">Default Reminder Days</Label>
-                            <Input
-                                id="reminder_default_days"
-                                name="reminder_default_days"
-                                type="number"
-                                v-model="form.reminder_default_days"
-                                class="mt-1 block w-full"
-                                min="1"
-                                max="365"
-                                required
-                                placeholder="5"
-                            />
-                            <p class="text-sm text-muted-foreground">Number of days before deadline when reminders will be sent by default</p>
-                            <InputError class="mt-2" :message="errors.reminder_default_days" />
+                            
+                            <div class="flex flex-col space-y-2">
+                                <div v-for="(day, index) in form.reminder_default_days" :key="index" class="flex items-center gap-2">
+                                    <Input
+                                        :id="`reminder_default_days_${index}`"
+                                        v-model="form.reminder_default_days[index]"
+                                        type="number"
+                                        class="mt-1 block w-full"
+                                        min="1"
+                                        max="365"
+                                        required
+                                        placeholder="Days before deadline"
+                                    />
+                                    <Button 
+                                        type="button" 
+                                        variant="destructive" 
+                                        class="shrink-0" 
+                                        @click="removeReminderDay(index)"
+                                        :disabled="form.reminder_default_days.length <= 1"
+                                    >
+                                        Remove
+                                    </Button>
+                                </div>
+                                
+                                <Button
+                                    type="button"
+                                    variant="secondary"
+                                    class="mt-2"
+                                    @click="addReminderDay"
+                                >
+                                    + Add Another Reminder
+                                </Button>
+                            </div>
+                            
+                            <p class="text-sm text-muted-foreground">
+                                Configure multiple reminders before deadline (e.g., 30, 14, 7, 1 days before)
+                            </p>
+                            
+                            <InputError class="mt-2" :message="errors?.['reminder_default_days']" />
+                            <InputError v-if="errors?.['reminder_default_days.0']" class="mt-1" :message="errors?.['reminder_default_days.0']" />
                         </div>
                     </div>
 
@@ -127,7 +154,7 @@ interface Props {
         name: string;
         logo: string | null;
         timezone: string;
-        reminder_default_days: number;
+        reminder_default_days: number[] | number; // Changed to array or number for backward compatibility
         notification_email_enabled: boolean;
     };
     timezones: string[];
@@ -159,16 +186,42 @@ const normalizeBoolean = (value: any): boolean => {
 
     return false;
 };
+const normalizeReminderDays = (days: number[] | number): number[] => {
+    if (Array.isArray(days)) {
+        return days;
+    }
+    return [Number(days)]; 
+};
+
 const form = useForm({
     name: props.settings.name,
     logo: null as File | null,
     timezone: props.settings.timezone,
-    reminder_default_days: Number(props.settings.reminder_default_days),
+    reminder_default_days: normalizeReminderDays(props.settings.reminder_default_days),
     notification_email_enabled: normalizeBoolean(props.settings.notification_email_enabled),
 });
 
 const logoInput = ref<HTMLInputElement | null>(null);
 const logoPreview = ref<string | null>(null);
+
+
+const addReminderDay = () => {
+    const defaultValue = form.reminder_default_days.length > 0 ? 
+        Math.min(...form.reminder_default_days) - 1 : 7;    
+    const newValue = Math.max(1, defaultValue);
+    form.reminder_default_days.push(newValue);
+    form.reminder_default_days.sort((a, b) => b - a);
+};
+
+
+const removeReminderDay = (index: number) => {
+    if (form.reminder_default_days.length <= 1) {
+        return;
+    }
+    
+    form.reminder_default_days.splice(index, 1);
+};
+
 
 const updateLogo = (e: Event) => {
     const target = e.target as HTMLInputElement;
@@ -189,7 +242,9 @@ const submit = () => {
     formData.append('_method', 'put');
     formData.append('name', form.name);
     formData.append('timezone', form.timezone);
-    formData.append('reminder_default_days', form.reminder_default_days.toString());
+    form.reminder_default_days.forEach((day, index) => {
+        formData.append(`reminder_default_days[${index}]`, day.toString());
+    });
     formData.append('notification_email_enabled', form.notification_email_enabled ? '1' : '0');
     if (form.logo) {
         formData.append('logo', form.logo);

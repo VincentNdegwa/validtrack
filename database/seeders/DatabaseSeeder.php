@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
         
         $this->seedPermissionsAndRoles();
         $this->assignRolesToUsers($users, $clientCompany, $superAdminCompany);
+        $this->call([
+            CompanySettingsSeeder::class,
+        ]);
     }
 
     /**

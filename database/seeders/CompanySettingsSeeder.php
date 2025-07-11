@@ -18,10 +18,13 @@ class CompanySettingsSeeder extends Seeder
 
         foreach ($companies as $company) {
             foreach (CompanySetting::DEFAULTS as $key => $value) {
-                CompanySetting::create([
+                $formattedValue = is_array($value) ? json_encode($value) : $value;
+                
+                CompanySetting::updateOrCreate([
                     'company_id' => $company->id,
                     'key' => $key,
-                    'value' => $value,
+                ],[
+                    'value' => $formattedValue,
                 ]);
             }
         }

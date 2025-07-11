@@ -9,7 +9,7 @@ use App\Traits\LogsActivity;
 class CompanySetting extends Model
 {
     use HasFactory, LogsActivity;
-    
+
     protected $fillable = [
         'company_id',
         'key',
@@ -38,7 +38,7 @@ class CompanySetting extends Model
      */
     const DEFAULTS = [
         self::TIMEZONE => 'UTC',
-        self::REMINDER_DEFAULT_DAYS => 7,
+        self::REMINDER_DEFAULT_DAYS => array(30,14,7,1), 
         self::NOTIFICATION_EMAIL_ENABLED => true,
     ];
 

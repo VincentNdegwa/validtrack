@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+
+
 use App\Models\Document;
 use App\Models\DocumentType;
 use App\Models\DocumentUploadRequest;
@@ -10,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class DocumentUploadRequestController extends Controller
@@ -99,60 +103,104 @@ class DocumentUploadRequestController extends Controller
 
     public function processUpload(Request $request, string $token)
     {
-        $request->validate([
-            'verification_code' => 'required|string|size:6',
-            'upload_request_item_id' => 'required|exists:document_upload_request_items,id',
-            'file' => 'required|file|max:10240', // 10MB max
-            'issue_date' => 'required|date',
-            'expiry_date' => 'nullable|date|after:issue_date',
-            'notes' => 'nullable|string|max:1000',
-        ]);
-
-        $uploadRequest = DocumentUploadRequest::where('token', $token)
-            ->where('verification_code', $request->verification_code)
-            ->where('status', 'pending')
-            ->where('expires_at', '>', now())
-            ->firstOrFail();
-            
-        $requestItem = $uploadRequest->items()
-            ->where('id', $request->upload_request_item_id)
-            ->where('status', 'pending')
-            ->firstOrFail();
-
-        $document = new Document();
-        $document->subject_id = $uploadRequest->subject_id;
-        $document->document_type_id = $requestItem->document_type_id;
-        $document->upload_request_item_id = $requestItem->id;
-        $document->issue_date = $request->issue_date;
-        $document->expiry_date = $request->expiry_date;
-        $document->status = 1;
-        $document->notes = $request->notes;
-        $document->company_id = $uploadRequest->subject->company_id;
-        
-        if ($request->hasFile('file')) {
-            $file_request = upload_file($request->file('file'), 'documents');
-            if($file_request['success']){
-                $path = $file_request['url'];
-                $document->file_url = $path;
-            } else {
-                return back()->withErrors(['file' => 'File upload failed. Please try again.']);
-            }
-        }
-        
-        $document->save();
-        $requestItem->markAsCompleted();
-        $pendingRequiredItems = $uploadRequest->items()
-            ->where('is_required', true)
-            ->where('status', 'pending')
-            ->count();
-        
-        if ($pendingRequiredItems === 0) {
-            $uploadRequest->markAsUsed();
-            return Inertia::render('documents/PublicUploadSuccess', [
-                'allCompleted' => true
+        try {
+            $request->validate([
+                'verification_code' => 'required|string|size:6',
+                'upload_request_item_id' => 'required|exists:document_upload_request_items,id',
+                'file' => 'required|file|max:10240', // 10MB max
+                'issue_date' => 'required|date',
+                'expiry_date' => 'nullable|date|after:issue_date',
+                'notes' => 'nullable|string|max:1000',
             ]);
+
+            $tokenExists = DocumentUploadRequest::where('token', $token)->exists();
+            if (!$tokenExists) {
+                return back()->withErrors(['error' => 'Invalid upload link. The link may have expired or been removed.']);
+            }
+            $codeCorrect = DocumentUploadRequest::where('token', $token)
+                ->where('verification_code', $request->verification_code)
+                ->exists();
+            
+            if (!$codeCorrect) {
+                return back()->withErrors(['verification_code' => 'Incorrect verification code. Please check and try again.']);
+            }
+            
+            $uploadRequest = DocumentUploadRequest::where('token', $token)
+                ->where('verification_code', $request->verification_code)
+                ->where('status', 'pending')
+                ->first();
+            
+            if (!$uploadRequest) {
+                return back()->withErrors(['error' => 'This upload request has already been used or cancelled.']);
+            }
+            
+            if ($uploadRequest->expires_at < now()) {
+                return back()->withErrors(['error' => 'This upload link has expired. Please request a new upload link.']);
+            }
+            
+            $requestItem = $uploadRequest->items()
+                ->where('id', $request->upload_request_item_id)
+                ->where('status', 'pending')
+                ->first();
+                
+            if (!$requestItem) {
+                return back()->withErrors(['upload_request_item_id' => 'The selected document has already been uploaded or is no longer available.']);
+            }
+            
+            DB::beginTransaction();
+            
+            try {
+                $document = new Document();
+                $document->subject_id = $uploadRequest->subject_id;
+                $document->document_type_id = $requestItem->document_type_id;
+                $document->upload_request_item_id = $requestItem->id;
+                $document->issue_date = $request->issue_date;
+                $document->expiry_date = $request->expiry_date;
+                $document->status = 1;
+                $document->notes = $request->notes;
+                $document->company_id = $uploadRequest->subject->company_id;
+                
+                if ($request->hasFile('file')) {
+                    $file_request = upload_file($request->file('file'), 'documents');
+                    if ($file_request['success']) {
+                        $path = $file_request['path'];
+                        $document->file_url = $path;
+                    } else {
+                        DB::rollBack();
+                        return back()->withErrors(['file' => 'File upload failed. Please try again.']);
+                    }
+                }
+                
+                $document->save();
+                $requestItem->markAsCompleted();
+                
+                $pendingRequiredItems = $uploadRequest->items()
+                    ->where('is_required', true)
+                    ->where('status', 'pending')
+                    ->count();
+                
+                if ($pendingRequiredItems === 0) {
+                    $uploadRequest->markAsUsed();
+                    DB::commit();
+                    return Inertia::render('documents/PublicUploadSuccess', [
+                        'allCompleted' => true
+                    ]);
+                }
+                
+                DB::commit();
+                return back()->with('success', 'Document uploaded successfully. Please upload the remaining required documents.');
+                
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Document upload failed: ' . $e->getMessage());
+                return back()->withErrors(['error' => 'An error occurred while processing your upload. Please try again.']);
+            }
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            Log::error('Document upload request error: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'An unexpected error occurred. Please try again or contact support.']);
         }
-        
-        return back()->with('success', 'Document uploaded successfully. Please upload the remaining required documents.');
     }
 }

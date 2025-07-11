@@ -281,7 +281,7 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                                 <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
                             </Can>
                             <Can permission="documents-create">
-                                <ActionMenuButton :icon="Upload" text="Request Document Upload"
+                                <ActionMenuButton :icon="Upload" text="Request Upload"
                                     @click="() => openUploadRequestModal(subject)" />
                             </Can>
                             <Can permission="subjects-delete">

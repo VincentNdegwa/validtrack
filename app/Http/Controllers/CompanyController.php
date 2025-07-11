@@ -17,6 +17,10 @@ class CompanyController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
         $sortField = $request->input('sort', 'name');
         $sortDirection = $request->input('direction', 'asc');
         $perPage = (int) $request->input('per_page', 10);
@@ -60,6 +64,9 @@ class CompanyController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         return Inertia::render('companies/Create');
     }
     
@@ -68,6 +75,9 @@ class CompanyController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -95,6 +105,9 @@ class CompanyController extends Controller
      */
     public function show($id)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $company = is_numeric($id) ? Company::findOrFail($id) : Company::findBySlugOrFail($id);
 
         $company->load(['users.roles' => function($query) {
@@ -111,6 +124,9 @@ class CompanyController extends Controller
      */
     public function edit($id)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $company = is_numeric($id) ? Company::findOrFail($id) : Company::findBySlugOrFail($id);
 
         return Inertia::render('companies/Edit', [
@@ -123,6 +139,9 @@ class CompanyController extends Controller
      */
     public function update(Request $request, Company $company)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -143,6 +162,9 @@ class CompanyController extends Controller
      */
     public function destroy(Company $company)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         // Check if any users are associated with this company
         if ($company->users()->count() > 0) {
             return redirect()->route('companies.index')
@@ -157,6 +179,9 @@ class CompanyController extends Controller
 
     public function switchCompany(Request $request)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $companyId = $request->input('company_id');
         
         if (!$companyId) {
@@ -184,6 +209,9 @@ class CompanyController extends Controller
      */
     public function impersonateUser(Request $request)
     {
+        if (!Auth::user()->hasRole('super-admin')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $userId = $request->input('user_id');
         
         if (!$userId) {

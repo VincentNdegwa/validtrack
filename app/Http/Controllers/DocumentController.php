@@ -19,6 +19,9 @@ class DocumentController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::user()->can('documents-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $query = Document::with(['subject', 'documentType'])
             ->where('company_id', Auth::user()->company_id);
             
@@ -64,6 +67,9 @@ class DocumentController extends Controller
      */
     public function create(Request $request)
     {
+        if (!Auth::user()->can('documents-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subjects = Subject::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
@@ -90,6 +96,9 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('documents-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'document_type_id' => 'nullable|exists:document_types,id',
@@ -103,7 +112,7 @@ class DocumentController extends Controller
         // Make sure the subject belongs to the user's company
         $subject = Subject::findOrFail($validated['subject_id']);
         if ($subject->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         // Store the file
@@ -130,9 +139,12 @@ class DocumentController extends Controller
      */
     public function show($id)
     {
+        if (!Auth::user()->can('documents-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);        
         if ($document->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $document->load(['subject', 'documentType', 'uploader']);
@@ -148,12 +160,14 @@ class DocumentController extends Controller
      */
     public function edit($id)
     {
-        
+        if (!Auth::user()->can('documents-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
         
         // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $subjects = Subject::where('company_id', Auth::user()->company_id)
@@ -177,12 +191,14 @@ class DocumentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
+        if (!Auth::user()->can('documents-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
         
         // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $validated = $request->validate([
@@ -198,7 +214,7 @@ class DocumentController extends Controller
         // Make sure the subject belongs to the user's company
         $subject = Subject::findOrFail($validated['subject_id']);
         if ($subject->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         if ($request->hasFile('file')) {
@@ -234,11 +250,13 @@ class DocumentController extends Controller
      */
     public function destroy($id)
     {
-        
+        if (!Auth::user()->can('documents-delete')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
         
         if ($document->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $exists = check_file_exists($document->file_url);

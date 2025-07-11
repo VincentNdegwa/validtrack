@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -74,7 +75,9 @@ const submit = () => {
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
                                 <label for="subject_type_id" class="block text-sm font-medium">Subject Type</label>
-                                <Link href="/subject-types" class="text-xs text-primary hover:underline"> Manage Types </Link>
+                                <Can permission="subject-types-view" >
+                                    <Link href="/subject-types" class="text-xs text-primary hover:underline"> Manage Types </Link>
+                                </Can>
                             </div>
                             <div class="flex space-x-2">
                                 <select
@@ -86,9 +89,11 @@ const submit = () => {
                                     <option value="">Select Type</option>
                                     <option v-for="type in props.subjectTypes" :key="type.id" :value="type.id">{{ type.name }}</option>
                                 </select>
-                                <Link href="/subject-types/create">
-                                    <Button type="button" variant="outline" size="icon" class="h-10 w-10">+</Button>
-                                </Link>
+                                <Can permission="subject-types-create" >
+                                    <Link href="/subject-types/create">
+                                        <Button type="button" variant="outline" size="icon" class="h-10 w-10">+</Button>
+                                    </Link>
+                                </Can>
                             </div>
                             <p v-if="form.errors.subject_type_id" class="mt-1 text-xs text-red-500">{{ form.errors.subject_type_id }}</p>
                         </div>

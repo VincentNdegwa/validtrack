@@ -15,6 +15,9 @@ class SubjectController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::user()->can('subjects-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $query = Subject::with('subjectType')
             ->where('company_id', Auth::user()->company_id);
         
@@ -65,6 +68,9 @@ class SubjectController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('subjects-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
@@ -79,6 +85,9 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('subjects-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'subject_type_id' => 'nullable|exists:subject_types,id',
@@ -104,12 +113,14 @@ class SubjectController extends Controller
      */
     public function show($id)
     {
-        // Try to find the subject by ID or slug
+        if (!Auth::user()->can('subjects-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
         
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $subject->load('subjectType');
@@ -127,12 +138,14 @@ class SubjectController extends Controller
      */
     public function edit($id)
     {
-        // Try to find the subject by ID or slug
+        if (!Auth::user()->can('subjects-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
         
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
@@ -150,12 +163,14 @@ class SubjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Try to find the subject by ID or slug
+        if (!Auth::user()->can('subjects-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
         
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $validated = $request->validate([
@@ -180,12 +195,14 @@ class SubjectController extends Controller
      */
     public function destroy($id)
     {
-        // Try to find the subject by ID or slug
+        if (!Auth::user()->can('subjects-delete')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
         
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $subject->delete();

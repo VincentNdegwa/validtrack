@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\Auth;
 
 class DocumentTypeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index(Request $request)
     {
+        if (!Auth::user()->can('document-types-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $query = DocumentType::where('company_id', Auth::user()->company_id);
         
         if ($request->has('search')) {
@@ -53,6 +54,9 @@ class DocumentTypeController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('document-types-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         return Inertia::render('documents/types/Create');
     }
 
@@ -61,6 +65,9 @@ class DocumentTypeController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('document-types-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
@@ -92,12 +99,14 @@ class DocumentTypeController extends Controller
      */
     public function show($id)
     {
-        // Try to find the document type by ID or slug
+        if (!Auth::user()->can('document-types-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
         
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $documents = $documentType->documents;
@@ -113,12 +122,13 @@ class DocumentTypeController extends Controller
      */
     public function edit($id)
     {
-        // Try to find the document type by ID or slug
-        $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
+        if (!Auth::user()->can('document-types-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }        $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
         
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         return Inertia::render('documents/types/Edit', [
@@ -131,12 +141,14 @@ class DocumentTypeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Try to find the document type by ID or slug
+        if (!Auth::user()->can('document-types-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }        
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
         
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $validated = $request->validate([
@@ -169,12 +181,14 @@ class DocumentTypeController extends Controller
      */
     public function destroy($id)
     {
-        // Try to find the document type by ID or slug
+        if (!Auth::user()->can('document-types-delete')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
         
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         // Check if there are any documents using this type

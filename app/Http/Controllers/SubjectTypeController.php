@@ -14,6 +14,9 @@ class SubjectTypeController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::user()->can('subject-types-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $query = SubjectType::where('company_id', Auth::user()->company_id);
         
         if ($request->has('search')) {
@@ -53,6 +56,9 @@ class SubjectTypeController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('subject-types-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         return Inertia::render('subjects/types/Create');
     }
 
@@ -61,6 +67,9 @@ class SubjectTypeController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('subject-types-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
         ]);
@@ -89,10 +98,13 @@ class SubjectTypeController extends Controller
      */
     public function show($id)
     {
+        if (!Auth::user()->can('subject-types-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
         
         if ($subjectType->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $subjects = $subjectType->subjects;
@@ -108,12 +120,14 @@ class SubjectTypeController extends Controller
      */
     public function edit($id)
     {
-        // Try to find the subject type by ID or slug
+        if (!Auth::user()->can('subject-types-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
         
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         return Inertia::render('subjects/types/Edit', [
@@ -126,12 +140,14 @@ class SubjectTypeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Try to find the subject type by ID or slug
+        if (!Auth::user()->can('subject-types-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
         
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $validated = $request->validate([
@@ -161,12 +177,14 @@ class SubjectTypeController extends Controller
      */
     public function destroy($id)
     {
-        // Try to find the subject type by ID or slug
+        if (!Auth::user()->can('subject-types-delete')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
         
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         // Check if there are any subjects using this type

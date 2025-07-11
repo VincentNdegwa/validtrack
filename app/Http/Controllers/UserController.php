@@ -21,6 +21,9 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::user()->can('users-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $query = $this->scopeToCompany(User::query())
             ->with('roles');
         
@@ -70,6 +73,9 @@ class UserController extends Controller
      */
     public function create()
     {
+        if (!Auth::user()->can('users-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $roles = Role::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
@@ -84,6 +90,9 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        if (!Auth::user()->can('users-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',
@@ -128,12 +137,14 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        // Try to find the user by ID or slug
+        if (!Auth::user()->can('users-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
         
         // Make sure the user belongs to the current company
         if ($user->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $user->load('roles');
@@ -148,12 +159,14 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        // Try to find the user by ID or slug
+        if (!Auth::user()->can('users-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
         
         // Make sure the user belongs to the current company
         if ($user->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $roles = Role::where('company_id', Auth::user()->company_id)
@@ -174,12 +187,14 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // Try to find the user by ID or slug
+        if (!Auth::user()->can('users-edit')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
         
         // Make sure the user belongs to the current company
         if ($user->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         $validated = $request->validate([
@@ -229,12 +244,14 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        // Try to find the user by ID or slug
+        if (!Auth::user()->can('users-delete')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
         
         // Make sure the user belongs to the current company
         if ($user->company_id !== Auth::user()->company_id) {
-            abort(403, 'Unauthorized action.');
+            return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         // Don't allow deleting yourself

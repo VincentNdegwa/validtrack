@@ -232,6 +232,14 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Edit Company Settings',
                 'description' => 'Can edit company settings',
             ],
+
+            // Activity Log permissions
+            [
+                'name' => 'activity-log-view',
+                'display_name' => 'View Activity Log',
+                'description' => 'Can view the activity log of the company',
+            ],
+      
         ];
     }
 }

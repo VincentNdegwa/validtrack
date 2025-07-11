@@ -14,6 +14,9 @@ class ActivityLogController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::user()->can('activity-log-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
         $query = ActivityLog::with(['user', 'company'])
             ->where('company_id', Auth::user()->company_id);
         
@@ -83,10 +86,14 @@ class ActivityLogController extends Controller
      */
     public function show($id)
     {
+        if (!Auth::user()->can('activity-log-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+        
         $activityLog = is_numeric($id) ? ActivityLog::findOrFail($id) : ActivityLog::findBySlugOrFail($id);
 
         if ($activityLog->company_id !== Auth::user()->company_id) {
-            abort(403);
+            return redirect()->back()->with('error', 'Permission denied.');
         }
 
         $activityLog->load(['user', 'company']);

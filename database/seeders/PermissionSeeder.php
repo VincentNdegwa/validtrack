@@ -220,6 +220,18 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Export Reports',
                 'description' => 'Can export company reports',
             ],
+
+            // Company Settings permissions
+            [
+                'name' => 'company-settings-view',
+                'display_name' => 'View Company Settings',
+                'description' => 'Can view company settings',
+            ],
+            [
+                'name' => 'company-settings-edit',
+                'display_name' => 'Edit Company Settings',
+                'description' => 'Can edit company settings',
+            ],
         ];
     }
 }

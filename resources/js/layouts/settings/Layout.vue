@@ -4,27 +4,38 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
+const page = usePage();
+
+const user = computed(() => page.props.auth?.user);
+const hasPermission = (permission: string): boolean => {
+    if (!user.value?.permissions) return false;
+    return user.value?.permissions?.includes(permission) || false;
+};
 const sidebarNavItems: NavItem[] = [
     {
         title: 'Company',
         href: '/settings/company',
+        show: hasPermission('company-settings-view')
     },
     {
         title: 'Profile',
         href: '/settings/profile',
+        show: true
     },
     {
         title: 'Password',
         href: '/settings/password',
+        show: true
     },
     {
         title: 'Appearance',
         href: '/settings/appearance',
+        show: true
     },
 ];
 
-const page = usePage();
 
 const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.location).pathname : '';
 </script>
@@ -43,7 +54,7 @@ const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.locati
                         :class="['w-full justify-start', { 'bg-muted': currentPath === item.href }]"
                         as-child
                     >
-                        <Link :href="item.href">
+                        <Link v-if="item.show" :href="item.href">
                             {{ item.title }}
                         </Link>
                     </Button>

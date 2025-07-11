@@ -8,6 +8,8 @@ use App\Models\Subject;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentController extends Controller
@@ -119,7 +121,7 @@ class DocumentController extends Controller
         $document->company_id = Auth::user()->company_id;
         $document->save();
 
-        return redirect()->route('documents.show', $document->id)
+        return redirect()->route('documents.show',  Crypt::encrypt($document->id))
             ->with('success', 'Document uploaded successfully.');
     }
 
@@ -137,7 +139,7 @@ class DocumentController extends Controller
 
         return Inertia::render('documents/Show', [
             'document' => $document,
-            'fileUrl' => Storage::url($document->file_url),
+            'fileUrl' => get_file_url($document->file_url),
         ]);
     }
 
@@ -166,7 +168,7 @@ class DocumentController extends Controller
             'document' => $document,
             'subjects' => $subjects,
             'documentTypes' => $documentTypes,
-            'fileUrl' => Storage::url($document->file_url),
+            'fileUrl' => get_file_url($document->file_url),
         ]);
     }
 
@@ -199,16 +201,20 @@ class DocumentController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Handle file update if provided
         if ($request->hasFile('file')) {
-            // Delete the old file
-            if (Storage::exists($document->file_url)) {
-                Storage::delete($document->file_url);
+            $exists = check_file_exists($document->file_url);
+            if($exists){
+                $deleteResult = delete_file($document->file_url);
+                if (!$deleteResult['success']) {
+                    Log::warning('Failed to delete old document: ' . $deleteResult['message']);
+                }
+                $uploadResult = upload_file($request->file('file'), 'documents/' . $subject->id, 'public');
+                if ($uploadResult['success']) {
+                    $document->file_url = $uploadResult['path'];
+                } else {
+                    return back()->withErrors(['logo' => $uploadResult['message']]);
+                }
             }
-
-            // Store the new file
-            $path = $request->file('file')->store('documents/' . $subject->id, 'public');
-            $document->file_url = $path;
         }
 
         $document->subject_id = $validated['subject_id'];
@@ -219,7 +225,7 @@ class DocumentController extends Controller
         $document->notes = $validated['notes'] ?? null;
         $document->save();
 
-        return redirect()->route('documents.show', $document->id)
+        return redirect()->route('documents.show', Crypt::encrypt($document->id))
             ->with('success', 'Document updated successfully.');
     }
 
@@ -231,14 +237,16 @@ class DocumentController extends Controller
         
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
         
-        // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        // Delete the file from storage
-        if (Storage::exists($document->file_url)) {
-            Storage::delete($document->file_url);
+        $exists = check_file_exists($document->file_url);
+        if ($exists) {
+            $deleteResult = delete_file($document->file_url);
+            if (!$deleteResult['success']) {
+                Log::warning('Failed to delete old document: ' . $deleteResult['message']);
+            }
         }
 
         $document->delete();

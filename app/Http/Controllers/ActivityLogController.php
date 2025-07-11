@@ -62,7 +62,7 @@ class ActivityLogController extends Controller
                 'message' => $log->message,
                 'friendly_target_name' => $log->friendly_target_name,
                 'friendly_date' => $log->friendly_date,
-                'created_at' => $log->created_at->format('Y-m-d H:i:s'),
+                'created_at' => company_datetime($log->created_at->format('Y-m-d H:i:s'), $log->company),
                 'updated_at' => $log->updated_at->format('Y-m-d H:i:s'),
             ];
         });
@@ -107,7 +107,7 @@ class ActivityLogController extends Controller
             'message' => $activityLog->message,
             'friendly_target_name' => $activityLog->friendly_target_name,
             'friendly_date' => $activityLog->friendly_date,
-            'created_at' => $activityLog->created_at->format('Y-m-d H:i:s'),
+            'created_at' => company_datetime($activityLog->created_at->format('Y-m-d H:i:s'), $activityLog->company),
             'updated_at' => $activityLog->updated_at->format('Y-m-d H:i:s'),
             'payload' => $activityLog->payload,
             'changes' => $activityLog->getChanges(),

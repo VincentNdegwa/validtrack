@@ -11,26 +11,58 @@
                 <form @submit.prevent="submit" class="space-y-8">
                     <!-- Company Profile Section -->
                     <div class="space-y-6">
-                        <HeadingSmall title="Company Profile" description="Update your company's name and logo" />
+                        <HeadingSmall title="Company Profile" description="Update your company's name and contact information" />
 
-                        <div class="grid gap-2">
-                            <Label for="name">Company Name</Label>
-                            <Input id="name" v-model="form.name" class="mt-1 block w-full" required placeholder="Company name" />
-                            <InputError class="mt-2" :message="errors.name" />
-                        </div>
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div class="grid gap-2">
+                                <Label for="name">Company Name</Label>
+                                <Input id="name" v-model="form.name" class="mt-1 block w-full" required placeholder="Company name" />
+                                <InputError class="mt-2" :message="errors.name" />
+                            </div>
 
-                        <div class="grid gap-2">
-                            <Label for="logo">Company Logo</Label>
-                            <div class="flex items-center space-x-4">
-                                <img
-                                    v-if="logoPreview || settings.logo"
-                                    :src="logoPreview || `/storage/${settings.logo}`"
-                                    alt="Company Logo"
-                                    class="h-16 w-16 rounded-md object-cover"
-                                />
-                                <div>
-                                    <Input id="logo" type="file" accept="image/*" @input="updateLogo" ref="logoInput" />
-                                    <InputError class="mt-2" :message="errors.logo" />
+                            <div class="grid gap-2">
+                                <Label for="email">Company Email</Label>
+                                <Input id="email" type="email" v-model="form.email" class="mt-1 block w-full" placeholder="company@example.com" />
+                                <InputError class="mt-2" :message="errors.email" />
+                            </div>
+
+                            <div class="grid gap-2">
+                                <Label for="phone">Phone Number</Label>
+                                <Input id="phone" v-model="form.phone" class="mt-1 block w-full" placeholder="+1 (555) 123-4567" />
+                                <InputError class="mt-2" :message="errors.phone" />
+                            </div>
+
+                            <div class="grid gap-2">
+                                <Label for="website">Website</Label>
+                                <Input id="website" v-model="form.website" class="mt-1 block w-full" placeholder="https://yourcompany.com" />
+                                <InputError class="mt-2" :message="errors.website" />
+                            </div>
+
+                            <div class="grid gap-2 sm:col-span-2">
+                                <Label for="address">Address</Label>
+                                <Input id="address" v-model="form.address" class="mt-1 block w-full" placeholder="123 Business Ave, Suite 100, City, State, ZIP" />
+                                <InputError class="mt-2" :message="errors.address" />
+                            </div>
+
+                            <div class="grid gap-2">
+                                <Label for="location">Location</Label>
+                                <Input id="location" v-model="form.location" class="mt-1 block w-full" placeholder="City, Country" />
+                                <InputError class="mt-2" :message="errors.location" />
+                            </div>
+
+                            <div class="grid gap-2 sm:col-span-2">
+                                <Label for="logo">Company Logo</Label>
+                                <div class="flex items-center space-x-4">
+                                    <img
+                                        v-if="logoPreview || settings.logo"
+                                        :src="logoPreview || `${settings.logo}`"
+                                        alt="Company Logo"
+                                        class="h-16 w-16 rounded-md object-cover"
+                                    />
+                                    <div>
+                                        <Input id="logo" type="file" accept="image/*" @input="updateLogo" ref="logoInput" />
+                                        <InputError class="mt-2" :message="errors.logo" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -115,7 +147,7 @@
                     </div>
 
                     <div class="flex items-center gap-4 pt-4">
-                        <Button type="submit" :disabled="loading">Save Changes</Button>
+                        <Button type="submit" :disabled="form.processing">Save Changes</Button>
 
                         <Transition
                             enter-active-class="transition ease-in-out"
@@ -152,16 +184,20 @@ import { type BreadcrumbItem } from '@/types';
 interface Props {
     settings: {
         name: string;
+        email: string | null;
+        phone: string | null;
+        address: string | null;
+        website: string | null;
+        location: string | null;
         logo: string | null;
         timezone: string;
-        reminder_default_days: number[] | number; // Changed to array or number for backward compatibility
+        reminder_default_days: number[] | number;
         notification_email_enabled: boolean;
     };
     timezones: string[];
 }
 
 const props = defineProps<Props>();
-const loading = ref(false);
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -171,6 +207,11 @@ const breadcrumbItems: BreadcrumbItem[] = [
 ];
 const errors = ref({
     name: '',
+    email: '',
+    phone: '',
+    address: '',
+    website: '',
+    location: '',
     logo: '',
     timezone: '',
     reminder_default_days: '',
@@ -195,6 +236,11 @@ const normalizeReminderDays = (days: number[] | number): number[] => {
 
 const form = useForm({
     name: props.settings.name,
+    email: props.settings.email || '',
+    phone: props.settings.phone || '',
+    address: props.settings.address || '',
+    website: props.settings.website || '',
+    location: props.settings.location || '',
     logo: null as File | null,
     timezone: props.settings.timezone,
     reminder_default_days: normalizeReminderDays(props.settings.reminder_default_days),
@@ -241,6 +287,11 @@ const submit = () => {
     const formData = new FormData();
     formData.append('_method', 'put');
     formData.append('name', form.name);
+    formData.append('email', form.email);
+    formData.append('phone', form.phone);
+    formData.append('address', form.address);
+    formData.append('website', form.website);
+    formData.append('location', form.location);
     formData.append('timezone', form.timezone);
     form.reminder_default_days.forEach((day, index) => {
         formData.append(`reminder_default_days[${index}]`, day.toString());
@@ -249,7 +300,7 @@ const submit = () => {
     if (form.logo) {
         formData.append('logo', form.logo);
     }
-    loading.value = true;
+    form.processing = true;
     router.post(route('settings.company.update'), formData, {
         preserveScroll: true,
         onSuccess: () => {
@@ -266,6 +317,11 @@ const submit = () => {
         onError: (err) => {
             errors.value = {
                 name: err?.name ?? '',
+                email: err?.email ?? '',
+                phone: err?.phone ?? '',
+                address: err?.address ?? '',
+                website: err?.website ?? '',
+                location: err?.location ?? '',
                 logo: err?.logo ?? '',
                 timezone: err?.timezone ?? '',
                 reminder_default_days: err?.reminder_default_days ?? '',
@@ -273,7 +329,7 @@ const submit = () => {
             };
         },
         onFinish: () => {
-            loading.value = false;
+            form.processing = false;
         },
     });
 };

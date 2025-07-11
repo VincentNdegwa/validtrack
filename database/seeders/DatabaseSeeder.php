@@ -84,7 +84,6 @@ class DatabaseSeeder extends Seeder
      */
     private function assignRolesToUsers(array $users, Company $regularCompany, Company $adminCompany): void
     {
-        // For the regular company: assign admin role to the admin user and user roles to regular users
         $this->assignAdminRole($users['admin'], $regularCompany);
         $this->assignUserRolesToRegularUsers(
             $users['admin']->id, 
@@ -92,7 +91,6 @@ class DatabaseSeeder extends Seeder
             $regularCompany
         );
         
-        // For the admin company: assign super-admin role to the super admin user only
         $this->assignSuperAdminRole($users['superAdmin'], $adminCompany);
     }
 
@@ -112,7 +110,6 @@ class DatabaseSeeder extends Seeder
 
     private function assignSuperAdminRole(User $superAdminUser, Company $adminCompany): void
     {
-        // 1. Assign the global super-admin role (in their own company)
         $superAdminRole = Role::where('name', 'super-admin')
             ->whereNull('company_id')
             ->first();
@@ -121,7 +118,6 @@ class DatabaseSeeder extends Seeder
             $superAdminUser->roles()->attach($superAdminRole->id, ['company_id' => $adminCompany->id]);
         }
 
-        // 2. Also give the super-admin user admin access to all other companies
         $otherCompanies = Company::where('id', '!=', $adminCompany->id)->get();
         
         foreach ($otherCompanies as $company) {

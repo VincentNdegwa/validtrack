@@ -61,10 +61,31 @@ class DashboardController extends Controller
             
         // Get recent activity logs (last 10)
         $recentActivities = ActivityLog::where('company_id', $companyId)
-            ->with('user')
+            ->with('user', 'company')
             ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get();
+            ->limit(5)
+            ->get()
+            ->map(function ($log) {
+                return [
+                    'id' => $log->id,
+                    'slug' => $log->slug,
+                    'user' => $log->user ? [
+                        'name' => $log->user->name,
+                        'email' => $log->user->email,
+                    ] : null,
+                    'company' => $log->company ? [
+                        'name' => $log->company->name,
+                    ] : null,
+                    'action_type' => $log->action_type,
+                    'target_type' => $log->target_type,
+                    'target_id' => $log->target_id,
+                    'message' => $log->message,
+                    'friendly_target_name' => $log->friendly_target_name,
+                    'friendly_date' => $log->friendly_date,
+                    'created_at' => company_datetime($log->created_at->format('Y-m-d H:i:s'), $log->company),
+                    'updated_at' => $log->updated_at->format('Y-m-d H:i:s'),
+                ];
+            });
             
         // Get expiring documents (next 30 days)
         $expiringDocuments = Document::where('company_id', $companyId)

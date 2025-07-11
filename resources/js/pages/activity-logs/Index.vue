@@ -112,7 +112,6 @@ const formatDate = (dateString: string): string => {
 };
 
 const formatTargetType = (targetType: string): string => {
-    // Extract the class name from the fully qualified class name
     const parts = targetType.split('\\');
     return parts[parts.length - 1];
 };

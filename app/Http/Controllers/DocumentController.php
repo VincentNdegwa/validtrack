@@ -19,7 +19,7 @@ class DocumentController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->can('documents-view')) {
+        if (!Auth::user()->hasPermission('documents-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = Document::with(['subject', 'documentType'])
@@ -67,7 +67,7 @@ class DocumentController extends Controller
      */
     public function create(Request $request)
     {
-        if (!Auth::user()->can('documents-create')) {
+        if (!Auth::user()->hasPermission('documents-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjects = Subject::where('company_id', Auth::user()->company_id)
@@ -96,7 +96,7 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->can('documents-create')) {
+        if (!Auth::user()->hasPermission('documents-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $validated = $request->validate([
@@ -139,7 +139,7 @@ class DocumentController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->can('documents-view')) {
+        if (!Auth::user()->hasPermission('documents-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);        
@@ -160,7 +160,7 @@ class DocumentController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->can('documents-edit')) {
+        if (!Auth::user()->hasPermission('documents-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
@@ -191,7 +191,7 @@ class DocumentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->can('documents-edit')) {
+        if (!Auth::user()->hasPermission('documents-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
@@ -250,7 +250,7 @@ class DocumentController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->can('documents-delete')) {
+        if (!Auth::user()->hasPermission('documents-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);

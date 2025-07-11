@@ -12,7 +12,7 @@ class DocumentTypeController extends Controller
 
     public function index(Request $request)
     {
-        if (!Auth::user()->can('document-types-view')) {
+        if (!Auth::user()->hasPermission('document-types-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = DocumentType::where('company_id', Auth::user()->company_id);
@@ -54,7 +54,7 @@ class DocumentTypeController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->can('document-types-create')) {
+        if (!Auth::user()->hasPermission('document-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         return Inertia::render('documents/types/Create');
@@ -65,7 +65,7 @@ class DocumentTypeController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->can('document-types-create')) {
+        if (!Auth::user()->hasPermission('document-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $validated = $request->validate([
@@ -99,7 +99,7 @@ class DocumentTypeController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->can('document-types-view')) {
+        if (!Auth::user()->hasPermission('document-types-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
@@ -122,7 +122,7 @@ class DocumentTypeController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->can('document-types-edit')) {
+        if (!Auth::user()->hasPermission('document-types-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }        $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
         
@@ -141,7 +141,7 @@ class DocumentTypeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->can('document-types-edit')) {
+        if (!Auth::user()->hasPermission('document-types-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }        
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
@@ -181,7 +181,7 @@ class DocumentTypeController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->can('document-types-delete')) {
+        if (!Auth::user()->hasPermission('document-types-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);

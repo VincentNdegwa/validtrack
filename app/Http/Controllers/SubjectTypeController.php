@@ -14,7 +14,7 @@ class SubjectTypeController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->can('subject-types-view')) {
+        if (!Auth::user()->hasPermission('subject-types-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = SubjectType::where('company_id', Auth::user()->company_id);
@@ -56,7 +56,7 @@ class SubjectTypeController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->can('subject-types-create')) {
+        if (!Auth::user()->hasPermission('subject-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         return Inertia::render('subjects/types/Create');
@@ -67,7 +67,7 @@ class SubjectTypeController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->can('subject-types-create')) {
+        if (!Auth::user()->hasPermission('subject-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $validated = $request->validate([
@@ -98,7 +98,7 @@ class SubjectTypeController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->can('subject-types-view')) {
+        if (!Auth::user()->hasPermission('subject-types-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
@@ -120,7 +120,7 @@ class SubjectTypeController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->can('subject-types-edit')) {
+        if (!Auth::user()->hasPermission('subject-types-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
@@ -140,7 +140,7 @@ class SubjectTypeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->can('subject-types-edit')) {
+        if (!Auth::user()->hasPermission('subject-types-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
@@ -177,7 +177,7 @@ class SubjectTypeController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->can('subject-types-delete')) {
+        if (!Auth::user()->hasPermission('subject-types-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);

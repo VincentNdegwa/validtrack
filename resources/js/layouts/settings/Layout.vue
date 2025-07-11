@@ -17,25 +17,24 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Company',
         href: '/settings/company',
-        show: hasPermission('company-settings-view')
+        show: hasPermission('company-settings-view'),
     },
     {
         title: 'Profile',
         href: '/settings/profile',
-        show: true
+        show: true,
     },
     {
         title: 'Password',
         href: '/settings/password',
-        show: true
+        show: true,
     },
     {
         title: 'Appearance',
         href: '/settings/appearance',
-        show: true
+        show: true,
     },
 ];
-
 
 const currentPath = page.props.ziggy?.location ? new URL(page.props.ziggy.location).pathname : '';
 </script>

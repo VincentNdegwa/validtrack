@@ -19,7 +19,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        if (!Auth::user()->can('dashboard-view') && !Auth::user()->hasRole(['super-admin', 'admin'])) {
+        if (!Auth::user()->hasPermission('dashboard-view') && !Auth::user()->hasRole(['super-admin', 'admin'])) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = Auth::user();

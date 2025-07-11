@@ -21,7 +21,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->can('users-view')) {
+        if (!Auth::user()->hasPermission('users-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = $this->scopeToCompany(User::query())
@@ -73,7 +73,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->can('users-create')) {
+        if (!Auth::user()->hasPermission('users-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $roles = Role::where('company_id', Auth::user()->company_id)
@@ -90,7 +90,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->can('users-create')) {
+        if (!Auth::user()->hasPermission('users-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $validated = $request->validate([
@@ -137,7 +137,7 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->can('users-view')) {
+        if (!Auth::user()->hasPermission('users-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
@@ -159,7 +159,7 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->can('users-edit')) {
+        if (!Auth::user()->hasPermission('users-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
@@ -187,7 +187,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->can('users-edit')) {
+        if (!Auth::user()->hasPermission('users-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
@@ -244,7 +244,7 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->can('users-delete')) {
+        if (!Auth::user()->hasPermission('users-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);

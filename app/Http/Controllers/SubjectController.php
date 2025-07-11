@@ -15,7 +15,7 @@ class SubjectController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->can('subjects-view')) {
+        if (!Auth::user()->hasPermission('subjects-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = Subject::with('subjectType')
@@ -68,7 +68,7 @@ class SubjectController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->can('subjects-create')) {
+        if (!Auth::user()->hasPermission('subjects-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
@@ -85,7 +85,7 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->can('subjects-create')) {
+        if (!Auth::user()->hasPermission('subjects-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $validated = $request->validate([
@@ -113,7 +113,7 @@ class SubjectController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->can('subjects-view')) {
+        if (!Auth::user()->hasPermission('subjects-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
@@ -138,7 +138,7 @@ class SubjectController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->can('subjects-edit')) {
+        if (!Auth::user()->hasPermission('subjects-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
@@ -163,7 +163,7 @@ class SubjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->can('subjects-edit')) {
+        if (!Auth::user()->hasPermission('subjects-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
@@ -195,7 +195,7 @@ class SubjectController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->can('subjects-delete')) {
+        if (!Auth::user()->hasPermission('subjects-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);

@@ -75,7 +75,7 @@ const submit = () => {
                         <div class="space-y-2">
                             <div class="flex items-center justify-between">
                                 <label for="subject_type_id" class="block text-sm font-medium">Subject Type</label>
-                                <Can permission="subject-types-view" >
+                                <Can permission="subject-types-view">
                                     <Link href="/subject-types" class="text-xs text-primary hover:underline"> Manage Types </Link>
                                 </Can>
                             </div>
@@ -89,7 +89,7 @@ const submit = () => {
                                     <option value="">Select Type</option>
                                     <option v-for="type in props.subjectTypes" :key="type.id" :value="type.id">{{ type.name }}</option>
                                 </select>
-                                <Can permission="subject-types-create" >
+                                <Can permission="subject-types-create">
                                     <Link href="/subject-types/create">
                                         <Button type="button" variant="outline" size="icon" class="h-10 w-10">+</Button>
                                     </Link>

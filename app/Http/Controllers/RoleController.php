@@ -38,7 +38,7 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->can('roles-view')) {
+        if (!Auth::user()->hasPermission('roles-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = $this->scopeToCompany(Role::query())
@@ -86,7 +86,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->can('roles-create')) {
+        if (!Auth::user()->hasPermission('roles-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $permissions = $this->getAvailablePermissions();
@@ -101,7 +101,7 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->can('roles-create')) {
+        if (!Auth::user()->hasPermission('roles-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $validated = $request->validate([
@@ -146,7 +146,7 @@ class RoleController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->can('roles-view')) {
+        if (!Auth::user()->hasPermission('roles-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $role = is_numeric($id) ? Role::findOrFail($id) : Role::findBySlugOrFail($id);
@@ -168,7 +168,7 @@ class RoleController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->can('roles-edit')) {
+        if (!Auth::user()->hasPermission('roles-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $role = is_numeric($id) ? Role::findOrFail($id) : Role::findBySlugOrFail($id);
@@ -193,7 +193,7 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->can('roles-edit')) {
+        if (!Auth::user()->hasPermission('roles-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $role = is_numeric($id) ? Role::findOrFail($id) : Role::findBySlugOrFail($id);
@@ -242,7 +242,7 @@ class RoleController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->can('roles-delete')) {
+        if (!Auth::user()->hasPermission('roles-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $role = is_numeric($id) ? Role::findOrFail($id) : Role::findBySlugOrFail($id);        

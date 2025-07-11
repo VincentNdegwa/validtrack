@@ -44,7 +44,7 @@ class CompanySettingsController extends Controller
 
     public function update(Request $request)
     {
-        if(!Auth::user()->can('company-settings-edit')){
+        if(!Auth::user()->hasPermission('company-settings-edit')){
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $validatedData = $request->validate([

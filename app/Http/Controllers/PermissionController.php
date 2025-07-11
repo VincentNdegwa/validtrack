@@ -12,7 +12,7 @@ class PermissionController extends Controller
 
     public function index(Request $request)
     {
-        if (!Auth::user()->can('roles-view')) {
+        if (!Auth::user()->hasPermission('roles-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = Permission::where(function ($query) {

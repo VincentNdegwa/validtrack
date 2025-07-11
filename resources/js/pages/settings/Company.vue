@@ -1,72 +1,71 @@
 <template>
     <AppLayout :breadcrumbs="breadcrumbItems">
-
         <Head title="Company Settings" />
 
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
-                <HeadingSmall title="Company Settings"
-                    description="Update your company's name, logo, and preferences" />
+                <HeadingSmall title="Company Settings" description="Update your company's name, logo, and preferences" />
 
                 <Separator />
 
                 <form @submit.prevent="submit" class="space-y-8">
                     <!-- Company Profile Section -->
                     <div class="space-y-6">
-                        <HeadingSmall title="Company Profile"
-                            description="Update your company's name and contact information" />
+                        <HeadingSmall title="Company Profile" description="Update your company's name and contact information" />
 
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div class="grid gap-2">
                                 <Label for="name">Company Name</Label>
-                                <Input id="name" v-model="form.name" class="mt-1 block w-full" required
-                                    placeholder="Company name" />
+                                <Input id="name" v-model="form.name" class="mt-1 block w-full" required placeholder="Company name" />
                                 <InputError class="mt-2" :message="errors.name" />
                             </div>
 
                             <div class="grid gap-2">
                                 <Label for="email">Company Email</Label>
-                                <Input id="email" type="email" v-model="form.email" class="mt-1 block w-full"
-                                    placeholder="company@example.com" />
+                                <Input id="email" type="email" v-model="form.email" class="mt-1 block w-full" placeholder="company@example.com" />
                                 <InputError class="mt-2" :message="errors.email" />
                             </div>
 
                             <div class="grid gap-2">
                                 <Label for="phone">Phone Number</Label>
-                                <Input id="phone" v-model="form.phone" class="mt-1 block w-full"
-                                    placeholder="+1 (555) 123-4567" />
+                                <Input id="phone" v-model="form.phone" class="mt-1 block w-full" placeholder="+1 (555) 123-4567" />
                                 <InputError class="mt-2" :message="errors.phone" />
                             </div>
 
                             <div class="grid gap-2">
                                 <Label for="website">Website</Label>
-                                <Input id="website" v-model="form.website" class="mt-1 block w-full"
-                                    placeholder="https://yourcompany.com" />
+                                <Input id="website" v-model="form.website" class="mt-1 block w-full" placeholder="https://yourcompany.com" />
                                 <InputError class="mt-2" :message="errors.website" />
                             </div>
 
                             <div class="grid gap-2 sm:col-span-2">
                                 <Label for="address">Address</Label>
-                                <Input id="address" v-model="form.address" class="mt-1 block w-full"
-                                    placeholder="123 Business Ave, Suite 100, City, State, ZIP" />
+                                <Input
+                                    id="address"
+                                    v-model="form.address"
+                                    class="mt-1 block w-full"
+                                    placeholder="123 Business Ave, Suite 100, City, State, ZIP"
+                                />
                                 <InputError class="mt-2" :message="errors.address" />
                             </div>
 
                             <div class="grid gap-2">
                                 <Label for="location">Location</Label>
-                                <Input id="location" v-model="form.location" class="mt-1 block w-full"
-                                    placeholder="City, Country" />
+                                <Input id="location" v-model="form.location" class="mt-1 block w-full" placeholder="City, Country" />
                                 <InputError class="mt-2" :message="errors.location" />
                             </div>
 
                             <div class="grid gap-2 sm:col-span-2">
                                 <Label for="logo">Company Logo</Label>
                                 <div class="flex items-center space-x-4">
-                                    <img v-if="logoPreview || settings.logo" :src="logoPreview || `${settings.logo}`"
-                                        alt="Company Logo" class="h-16 w-16 rounded-md object-cover" />
+                                    <img
+                                        v-if="logoPreview || settings.logo"
+                                        :src="logoPreview || `${settings.logo}`"
+                                        alt="Company Logo"
+                                        class="h-16 w-16 rounded-md object-cover"
+                                    />
                                     <div>
-                                        <Input id="logo" type="file" accept="image/*" @input="updateLogo"
-                                            ref="logoInput" />
+                                        <Input id="logo" type="file" accept="image/*" @input="updateLogo" ref="logoInput" />
                                         <InputError class="mt-2" :message="errors.logo" />
                                     </div>
                                 </div>
@@ -92,31 +91,35 @@
                             <Label for="reminder_default_days">Default Reminder Days</Label>
 
                             <div class="flex flex-col space-y-2">
-                                <div v-for="(day, index) in form.reminder_default_days" :key="index"
-                                    class="flex items-center gap-2">
-                                    <Input :id="`reminder_default_days_${index}`"
-                                        v-model="form.reminder_default_days[index]" type="number"
-                                        class="mt-1 block w-full" min="1" max="365" required
-                                        placeholder="Days before deadline" />
-                                    <Button type="button" variant="destructive" class="shrink-0"
+                                <div v-for="(day, index) in form.reminder_default_days" :key="index" class="flex items-center gap-2">
+                                    <Input
+                                        :id="`reminder_default_days_${index}`"
+                                        v-model="form.reminder_default_days[index]"
+                                        type="number"
+                                        class="mt-1 block w-full"
+                                        min="1"
+                                        max="365"
+                                        required
+                                        placeholder="Days before deadline"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        class="shrink-0"
                                         @click="removeReminderDay(index)"
-                                        :disabled="form.reminder_default_days.length <= 1">
+                                        :disabled="form.reminder_default_days.length <= 1"
+                                    >
                                         Remove
                                     </Button>
                                 </div>
 
-                                <Button type="button" variant="secondary" class="mt-2" @click="addReminderDay">
-                                    + Add Another Reminder
-                                </Button>
+                                <Button type="button" variant="secondary" class="mt-2" @click="addReminderDay"> + Add Another Reminder </Button>
                             </div>
 
-                            <p class="text-sm text-muted-foreground">
-                                Configure multiple reminders before deadline (e.g., 30, 14, 7, 1 days before)
-                            </p>
+                            <p class="text-sm text-muted-foreground">Configure multiple reminders before deadline (e.g., 30, 14, 7, 1 days before)</p>
 
                             <InputError class="mt-2" :message="errors?.['reminder_default_days']" />
-                            <InputError v-if="errors?.['reminder_default_days.0']" class="mt-1"
-                                :message="errors?.['reminder_default_days.0']" />
+                            <InputError v-if="errors?.['reminder_default_days.0']" class="mt-1" :message="errors?.['reminder_default_days.0']" />
                         </div>
                     </div>
 
@@ -127,11 +130,13 @@
                         <HeadingSmall title="Notifications" description="Configure your notification preferences" />
                         <div class="space-y-2">
                             <div class="flex items-center space-x-2">
-                                <input type="checkbox" id="notification_email_enabled"
+                                <input
+                                    type="checkbox"
+                                    id="notification_email_enabled"
                                     class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                    v-model="form.notification_email_enabled" />
-                                <Label for="notification_email_enabled" class="cursor-pointer select-none"> Enable email
-                                    notifications </Label>
+                                    v-model="form.notification_email_enabled"
+                                />
+                                <Label for="notification_email_enabled" class="cursor-pointer select-none"> Enable email notifications </Label>
                             </div>
                             <InputError :message="errors.notification_email_enabled" />
                         </div>
@@ -142,8 +147,12 @@
                             <Button type="submit" :disabled="form.processing">Save Changes</Button>
                         </Can>
 
-                        <Transition enter-active-class="transition ease-in-out" enter-from-class="opacity-0"
-                            leave-active-class="transition ease-in-out" leave-to-class="opacity-0">
+                        <Transition
+                            enter-active-class="transition ease-in-out"
+                            enter-from-class="opacity-0"
+                            leave-active-class="transition ease-in-out"
+                            leave-to-class="opacity-0"
+                        >
                             <p v-show="form.recentlySuccessful" class="text-sm text-green-600">Saved successfully!</p>
                         </Transition>
                     </div>
@@ -159,6 +168,7 @@ import { ref } from 'vue';
 import { route } from 'ziggy-js';
 
 // Components
+import Can from '@/components/auth/Can.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -169,7 +179,6 @@ import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { type BreadcrumbItem } from '@/types';
-import Can from '@/components/auth/Can.vue';
 
 interface Props {
     settings: {
@@ -221,7 +230,7 @@ const normalizeReminderDays = (days: number[] | number): number[] => {
     if (Array.isArray(days)) {
         return days;
     }
-    return [Number(days)]; 
+    return [Number(days)];
 };
 
 const form = useForm({
@@ -240,24 +249,20 @@ const form = useForm({
 const logoInput = ref<HTMLInputElement | null>(null);
 const logoPreview = ref<string | null>(null);
 
-
 const addReminderDay = () => {
-    const defaultValue = form.reminder_default_days.length > 0 ? 
-        Math.min(...form.reminder_default_days) - 1 : 7;    
+    const defaultValue = form.reminder_default_days.length > 0 ? Math.min(...form.reminder_default_days) - 1 : 7;
     const newValue = Math.max(1, defaultValue);
     form.reminder_default_days.push(newValue);
     form.reminder_default_days.sort((a, b) => b - a);
 };
 
-
 const removeReminderDay = (index: number) => {
     if (form.reminder_default_days.length <= 1) {
         return;
     }
-    
+
     form.reminder_default_days.splice(index, 1);
 };
-
 
 const updateLogo = (e: Event) => {
     const target = e.target as HTMLInputElement;

@@ -91,4 +91,28 @@ class Company extends Model
     {
         return $this->hasMany(ActivityLog::class);
     }
+
+    public function settings()
+    {
+        return $this->hasMany(CompanySetting::class);
+    }
+
+    public function getSetting($key, $default = null)
+    {
+        $setting = $this->settings()->where('key', $key)->first();
+        
+        if (!$setting) {
+            return $default ?? CompanySetting::getDefaultValue($key);
+        }
+        
+        return $setting->value;
+    }
+
+    public function setSetting($key, $value)
+    {
+        $this->settings()->updateOrCreate(
+            ['key' => $key],
+            ['value' => $value]
+        );
+    }
 }

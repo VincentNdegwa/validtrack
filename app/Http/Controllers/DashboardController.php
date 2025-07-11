@@ -102,6 +102,25 @@ class DashboardController extends Controller
             ->whereNotNull('expiry_date')
             ->with(['subject', 'documentType'])
             ->get();
+        
+        // Get all documents for charts
+        $allDocuments = Document::where('company_id', $companyId)
+            ->with(['subject', 'documentType'])
+            ->get();
+            
+        // Get all subjects for charts
+        $allSubjects = Subject::where('company_id', $companyId)
+            ->select('id', 'name', 'subject_type_id')
+            ->with('subjectType:id,name')
+            ->get();
+            
+        // Get document counts by status
+        $documentsByStatus = [
+            'draft' => Document::where('company_id', $companyId)->where('status', 0)->count(),
+            'active' => Document::where('company_id', $companyId)->where('status', 1)->count(),
+            'expired' => Document::where('company_id', $companyId)->where('status', 2)->count(),
+            'archived' => Document::where('company_id', $companyId)->where('status', 3)->count(),
+        ];
             
         // Get company info
         $company = $user->company;
@@ -113,6 +132,9 @@ class DashboardController extends Controller
             'recentActivities' => $recentActivities,
             'expiringDocuments' => $expiringDocuments,
             'calendarDocuments' => $calendarDocuments,
+            'allDocuments' => $allDocuments,
+            'allSubjects' => $allSubjects,
+            'documentsByStatus' => $documentsByStatus,
             'company' => $company,
         ]);
     }

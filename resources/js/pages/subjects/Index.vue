@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Can from '@/components/auth/Can.vue';
+import RequestUploadModal from '@/components/documents/RequestUploadModal.vue';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
-import RequestUploadModal from '@/components/documents/RequestUploadModal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Subject, type SubjectType } from '@/types/models';
@@ -240,7 +240,6 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
 </script>
 
 <template>
-
     <Head title="Subjects" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -252,27 +251,38 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                 <div class="flex gap-2">
                     <div class="mb-0 flex items-center">
                         <div class="relative mr-2">
-                            <input type="text" v-model="search" placeholder="Search subjects..."
+                            <input
+                                type="text"
+                                v-model="search"
+                                placeholder="Search subjects..."
                                 class="rounded-md border px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
-                                @keyup.enter="handleSearch" />
+                                @keyup.enter="handleSearch"
+                            />
                         </div>
                     </div>
                     <Can permission="subject-types-view">
                         <Link href="/subject-types">
-                        <Button variant="outline" class="mr-2"> Subject Types </Button>
+                            <Button variant="outline" class="mr-2"> Subject Types </Button>
                         </Link>
                     </Can>
                     <Can permission="subjects-create">
                         <Link href="/subjects/create">
-                        <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
+                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
                         </Link>
                     </Can>
                 </div>
             </div>
 
-            <DataTable :data="props.subjects?.data || []" :columns="columns" :pagination="pagination || undefined"
-                :show-pagination="!!pagination" empty-message="No subjects found" @page-change="handlePageChange"
-                @sort="handleSort" @per-page-change="handlePerPageChange">
+            <DataTable
+                :data="props.subjects?.data || []"
+                :columns="columns"
+                :pagination="pagination || undefined"
+                :show-pagination="!!pagination"
+                empty-message="No subjects found"
+                @page-change="handlePageChange"
+                @sort="handleSort"
+                @per-page-change="handlePerPageChange"
+            >
                 <template #subject_type="{ item: subject }">
                     <div>{{ subject.subject_type?.name || 'N/A' }}</div>
                 </template>
@@ -286,8 +296,7 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
 
                 <template #compliance_status="{ item: subject }">
                     <span class="inline-flex items-center">
-                        <span
-                            :class="[subject.compliance_status ? 'bg-green-500' : 'bg-red-500', 'mr-2 h-2 w-2 rounded-full']"></span>
+                        <span :class="[subject.compliance_status ? 'bg-green-500' : 'bg-red-500', 'mr-2 h-2 w-2 rounded-full']"></span>
                         {{ subject.compliance_status ? 'Compliant' : 'Non-Compliant' }}
                     </span>
                 </template>
@@ -302,12 +311,10 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                                 <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
                             </Can>
                             <Can permission="documents-create">
-                                <ActionMenuButton :icon="Upload" text="Request Upload"
-                                    @click="() => openUploadRequestModal(subject)" />
+                                <ActionMenuButton :icon="Upload" text="Request Upload" @click="() => openUploadRequestModal(subject)" />
                             </Can>
                             <Can permission="subjects-delete">
-                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive"
-                                    @click="(e) => handleAction('delete', e)" />
+                                <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
                             </Can>
                         </template>
                     </ActionMenu>
@@ -315,7 +322,12 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
             </DataTable>
         </div>
 
-        <RequestUploadModal v-if="selectedSubject" :subject="selectedSubject" :documentTypes="props.documentTypes"
-            :show="showUploadRequestModal" @close="showUploadRequestModal = false" />
+        <RequestUploadModal
+            v-if="selectedSubject"
+            :subject="selectedSubject"
+            :documentTypes="props.documentTypes"
+            :show="showUploadRequestModal"
+            @close="showUploadRequestModal = false"
+        />
     </AppLayout>
 </template>

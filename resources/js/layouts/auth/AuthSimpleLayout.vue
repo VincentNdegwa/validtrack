@@ -21,17 +21,19 @@ onMounted(() => {
     <div class="relative flex min-h-svh w-full flex-col items-center justify-center bg-background p-6 md:p-0">
         <div class="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5"></div>
         <div
-            class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20">
-        </div>
-        <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]"></div>
+            class="absolute top-0 left-0 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] [background-size:20px_20px] opacity-20"
+        ></div>
+        <div class="absolute right-0 bottom-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[100px]"></div>
 
         <!-- Content -->
         <div class="relative z-10 flex w-full items-stretch md:h-svh">
             <!-- Left panel - visible only on md+ screens -->
-            <div :class="[
+            <div
+                :class="[
                     'hidden flex-col justify-between p-8 transition-opacity duration-700 md:flex md:w-1/2',
                     { 'opacity-100': loaded, 'opacity-0': !loaded },
-                ]">
+                ]"
+            >
                 <!-- <div>
                     <Link :href="route('home')" class="flex items-center gap-2 font-medium">
                     <div
@@ -43,41 +45,44 @@ onMounted(() => {
                 </div> -->
 
                 <!-- Hero image and text -->
-                <div :class="['space-y-6', { 'translate-y-0 opacity-100': loaded, 'translate-y-4 opacity-0': !loaded }]"
+                <div
+                    :class="['space-y-6', { 'translate-y-0 opacity-100': loaded, 'translate-y-4 opacity-0': !loaded }]"
                     style="
                         transition:
                             opacity 0.7s ease-out 0.2s,
                             transform 0.7s ease-out 0.2s;
-                    ">
+                    "
+                >
                     <h1 class="text-3xl font-bold text-foreground md:text-4xl">Stay Compliant, <br />Stay Ahead</h1>
-                    <p class="max-w-md text-lg text-muted-foreground">Track your compliance documents securely and never
-                        miss critical deadlines.</p>
+                    <p class="max-w-md text-lg text-muted-foreground">Track your compliance documents securely and never miss critical deadlines.</p>
                     <div class="relative mt-8 overflow-hidden rounded-xl border border-border">
-                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
-                            alt="ValidTrack Dashboard" class="aspect-video w-full object-cover" />
-                        <div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-accent/10 mix-blend-overlay">
-                        </div>
+                        <img
+                            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
+                            alt="ValidTrack Dashboard"
+                            class="aspect-video w-full object-cover"
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-tr from-primary/10 to-accent/10 mix-blend-overlay"></div>
                     </div>
                 </div>
 
                 <!-- Footer -->
-                <div class="text-sm text-muted-foreground">&copy; {{ new Date().getFullYear() }} ValidTrack. All rights
-                    reserved.</div>
+                <div class="text-sm text-muted-foreground">&copy; {{ new Date().getFullYear() }} ValidTrack. All rights reserved.</div>
             </div>
 
             <!-- Right panel - form content -->
             <div class="w-full md:w-1/2">
-                <div :class="[
+                <div
+                    :class="[
                         'mx-auto flex h-full w-full max-w-lg flex-col justify-center transition-opacity duration-700',
                         { 'opacity-100': loaded, 'opacity-0': !loaded },
-                    ]">
+                    ]"
+                >
                     <div class="mb-4 md:hidden">
                         <Link :href="route('home')" class="flex items-center gap-2 font-medium">
-                        <div
-                            class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
-                            <AppLogoIcon class="h-6 w-6 fill-current text-white" />
-                        </div>
-                        <span class="text-xl font-bold text-foreground">ValidTrack</span>
+                            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-accent">
+                                <AppLogoIcon class="h-6 w-6 fill-current text-white" />
+                            </div>
+                            <span class="text-xl font-bold text-foreground">ValidTrack</span>
                         </Link>
                     </div>
 

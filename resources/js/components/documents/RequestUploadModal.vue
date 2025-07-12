@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DocumentType, Subject } from '@/types/models';
 import { useForm } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
@@ -33,7 +26,7 @@ const form = useForm({
 });
 
 const addDocumentType = (docType: DocumentType) => {
-    const alreadyExists = selectedDocTypes.value.some(item => item.id === docType.id);
+    const alreadyExists = selectedDocTypes.value.some((item) => item.id === docType.id);
     if (!alreadyExists) {
         selectedDocTypes.value.push({
             id: docType.id,
@@ -46,12 +39,12 @@ const addDocumentType = (docType: DocumentType) => {
 };
 
 const removeDocumentType = (docTypeId: number | string) => {
-    selectedDocTypes.value = selectedDocTypes.value.filter(item => item.id !== docTypeId);
+    selectedDocTypes.value = selectedDocTypes.value.filter((item) => item.id !== docTypeId);
     updateFormDocTypes();
 };
 
 const toggleRequired = (docTypeId: number | string) => {
-    const docType = selectedDocTypes.value.find(item => item.id === docTypeId);
+    const docType = selectedDocTypes.value.find((item) => item.id === docTypeId);
     if (docType) {
         docType.required = !docType.required;
         updateFormDocTypes();
@@ -59,7 +52,7 @@ const toggleRequired = (docTypeId: number | string) => {
 };
 
 const updateFormDocTypes = () => {
-    form.document_types = selectedDocTypes.value.map(item => ({
+    form.document_types = selectedDocTypes.value.map((item) => ({
         id: item.id,
         required: item.required,
     }));
@@ -68,13 +61,13 @@ const updateFormDocTypes = () => {
 const initializeSelectedDocTypes = () => {
     if (props.preSelectedDocumentTypes && props.preSelectedDocumentTypes.length > 0 && props.documentTypes) {
         selectedDocTypes.value = [];
-        
-        props.preSelectedDocumentTypes.forEach(preSelectedDoc => {
+
+        props.preSelectedDocumentTypes.forEach((preSelectedDoc) => {
             const docTypeId = preSelectedDoc.document_type_id;
-            const matchingDocType = props.documentTypes?.find(dt => dt.id === docTypeId);
-            
+            const matchingDocType = props.documentTypes?.find((dt) => dt.id === docTypeId);
+
             if (matchingDocType) {
-                const alreadyExists = selectedDocTypes.value.some(item => item.id === matchingDocType.id);
+                const alreadyExists = selectedDocTypes.value.some((item) => item.id === matchingDocType.id);
                 if (!alreadyExists) {
                     selectedDocTypes.value.push({
                         id: matchingDocType.id,
@@ -84,16 +77,20 @@ const initializeSelectedDocTypes = () => {
                 }
             }
         });
-        
+
         updateFormDocTypes();
     }
 };
 
-watch(() => props.show, (newVal) => {
-    if (newVal && props.preSelectedDocumentTypes?.length) {
-        initializeSelectedDocTypes();
-    }
-}, { immediate: true });
+watch(
+    () => props.show,
+    (newVal) => {
+        if (newVal && props.preSelectedDocumentTypes?.length) {
+            initializeSelectedDocTypes();
+        }
+    },
+    { immediate: true },
+);
 
 const closeModal = () => {
     emit('close');
@@ -105,7 +102,7 @@ const closeModal = () => {
 
 const submit = () => {
     formError.value = null;
-    
+
     if (selectedDocTypes.value.length === 0) {
         formError.value = 'Please select at least one document type';
         return;
@@ -131,18 +128,16 @@ const expiryOptions = [
         <DialogContent class="sm:max-w-md">
             <DialogHeader>
                 <DialogTitle>Request Document Upload</DialogTitle>
-                <DialogDescription>
-                    Send a secure document upload link to {{ subject.name }}
-                </DialogDescription>
+                <DialogDescription> Send a secure document upload link to {{ subject.name }} </DialogDescription>
             </DialogHeader>
 
             <form @submit.prevent="submit" class="mt-4 space-y-4">
-                <div v-if="formError" class="rounded-md bg-destructive/10 p-3 text-sm text-destructive border border-destructive/20">
+                <div v-if="formError" class="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
                     {{ formError }}
                 </div>
-            
+
                 <div class="space-y-2">
-                    <label for="email" class="text-sm font-medium flex items-center">
+                    <label for="email" class="flex items-center text-sm font-medium">
                         Email Address
                         <span class="ml-1 text-destructive">*</span>
                     </label>
@@ -151,13 +146,22 @@ const expiryOptions = [
                             id="email"
                             v-model="form.email"
                             type="email"
-                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none"
                             :class="{ 'border-destructive ring-1 ring-destructive': form.errors.email }"
                             placeholder="Enter recipient email"
                             required
                         />
-                        <div v-if="form.errors.email" class="absolute right-2 top-1/2 -translate-y-1/2 text-destructive">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                        <div v-if="form.errors.email" class="absolute top-1/2 right-2 -translate-y-1/2 text-destructive">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                class="h-4 w-4"
+                            >
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="12" y1="8" x2="12" y2="12"></line>
                                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -170,15 +174,15 @@ const expiryOptions = [
                 </div>
 
                 <div class="space-y-2">
-                    <label class="text-sm font-medium flex items-center">
+                    <label class="flex items-center text-sm font-medium">
                         Document Types
                         <span class="ml-1 text-destructive">*</span>
                     </label>
-                    
+
                     <div class="flex gap-2">
                         <select
                             id="document_type_selector"
-                            class="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                            class="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none"
                             :class="{ 'border-destructive ring-1 ring-destructive': form.errors.document_types }"
                         >
                             <option value="" disabled selected>Select document type</option>
@@ -186,29 +190,31 @@ const expiryOptions = [
                                 v-for="docType in documentTypes"
                                 :key="docType.id"
                                 :value="docType.id"
-                                :disabled="selectedDocTypes.some(item => item.id === docType.id)"
+                                :disabled="selectedDocTypes.some((item) => item.id === docType.id)"
                             >
                                 {{ docType.name }}
                             </option>
                         </select>
-                        <Button 
+                        <Button
                             type="button"
-                            @click="(e: MouseEvent) => {
-                                const select = (e.target as HTMLElement).previousElementSibling as HTMLSelectElement;
-                                const docType = documentTypes?.find(dt => dt.id.toString() === select.value);
-                                if (docType) addDocumentType(docType);
-                                select.value = '';
-                            }"
+                            @click="
+                                (e: MouseEvent) => {
+                                    const select = (e.target as HTMLElement).previousElementSibling as HTMLSelectElement;
+                                    const docType = documentTypes?.find((dt) => dt.id.toString() === select.value);
+                                    if (docType) addDocumentType(docType);
+                                    select.value = '';
+                                }
+                            "
                         >
                             Add
                         </Button>
                     </div>
-                    
+
                     <div v-if="selectedDocTypes.length > 0" class="mt-3 rounded-md border border-border p-3">
                         <p class="mb-2 text-sm font-medium text-muted-foreground">Selected Documents:</p>
                         <ul class="space-y-2">
-                            <li 
-                                v-for="docType in selectedDocTypes" 
+                            <li
+                                v-for="docType in selectedDocTypes"
                                 :key="docType.id"
                                 class="flex items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm shadow-sm"
                             >
@@ -223,8 +229,8 @@ const expiryOptions = [
                                         />
                                     </div>
                                     <label :for="`required-${docType.id}`" class="cursor-pointer">
-                                        {{ docType.name }} 
-                                        <span 
+                                        {{ docType.name }}
+                                        <span
                                             class="ml-1 rounded-full px-2 py-0.5 text-xs font-medium"
                                             :class="docType.required ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-600'"
                                         >
@@ -232,13 +238,22 @@ const expiryOptions = [
                                         </span>
                                     </label>
                                 </div>
-                                <button 
-                                    type="button" 
-                                    class="rounded-full p-1 text-destructive/70 hover:bg-muted hover:text-destructive transition-colors duration-200"
+                                <button
+                                    type="button"
+                                    class="rounded-full p-1 text-destructive/70 transition-colors duration-200 hover:bg-muted hover:text-destructive"
                                     @click="removeDocumentType(docType.id)"
                                     title="Remove document type"
                                 >
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
                                         <path d="M18 6L6 18"></path>
                                         <path d="M6 6l12 12"></path>
                                     </svg>
@@ -246,7 +261,7 @@ const expiryOptions = [
                             </li>
                         </ul>
                     </div>
-                    
+
                     <p v-if="form.errors.document_types" class="mt-1 text-xs text-destructive">
                         {{ form.errors.document_types }}
                     </p>
@@ -257,7 +272,7 @@ const expiryOptions = [
                     <select
                         id="expiry_hours"
                         v-model="form.expiry_hours"
-                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none"
                     >
                         <option v-for="option in expiryOptions" :key="option.value" :value="option.value">
                             {{ option.label }}
@@ -267,14 +282,20 @@ const expiryOptions = [
 
                 <DialogFooter class="mt-6">
                     <Button type="button" variant="outline" @click="closeModal" class="transition-all duration-200">Cancel</Button>
-                    <Button
-                        type="submit"
-                        class="ml-2 transition-all duration-200"
-                        :disabled="form.processing"
-                    >
-                        <svg v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <Button type="submit" class="ml-2 transition-all duration-200" :disabled="form.processing">
+                        <svg
+                            v-if="form.processing"
+                            class="mr-2 h-4 w-4 animate-spin"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                         </svg>
                         {{ form.processing ? 'Sending...' : 'Send Upload Request' }}
                     </Button>

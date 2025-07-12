@@ -67,12 +67,14 @@ const trendClass = props.trend
 
 <template>
     <component :is="href ? 'a' : 'div'" :href="href" :class="['block w-full', href ? 'hover:no-underline' : '']">
-        <Card :class="[
-            'relative overflow-hidden border-l-4 transition-all hover:translate-y-[-2px]', 
-            href ? 'cursor-pointer hover:shadow-lg' : '',
-            `border-l-${colorMap[color].iconLight.replace('text-', '')}`
-        ]">
-            <div class="absolute right-0 top-0 opacity-5">
+        <Card
+            :class="[
+                'relative overflow-hidden border-l-4 transition-all hover:translate-y-[-2px]',
+                href ? 'cursor-pointer hover:shadow-lg' : '',
+                `border-l-${colorMap[color].iconLight.replace('text-', '')}`,
+            ]"
+        >
+            <div class="absolute top-0 right-0 opacity-5">
                 <component :is="icon" class="h-20 w-20 -rotate-12" />
             </div>
 
@@ -88,11 +90,17 @@ const trendClass = props.trend
                 <!-- Value and trend -->
                 <div class="mb-2 flex items-baseline justify-between">
                     <div class="text-3xl font-bold tracking-tight">{{ value }}</div>
-                    <div v-if="trend !== undefined" 
-                        :class="['flex items-center rounded-full px-2 py-0.5 text-xs font-medium', 
-                        trend > 0 ? 'bg-green-50 dark:bg-green-900/20' : 
-                        trend < 0 ? 'bg-red-50 dark:bg-red-900/20' : 
-                        'bg-gray-50 dark:bg-gray-800/30']">
+                    <div
+                        v-if="trend !== undefined"
+                        :class="[
+                            'flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                            trend > 0
+                                ? 'bg-green-50 dark:bg-green-900/20'
+                                : trend < 0
+                                  ? 'bg-red-50 dark:bg-red-900/20'
+                                  : 'bg-gray-50 dark:bg-gray-800/30',
+                        ]"
+                    >
                         <span :class="trendClass" class="flex items-center">
                             <svg v-if="trend > 0" class="mr-1 h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5 5 5M7 17l5-5 5 5" />
@@ -109,9 +117,9 @@ const trendClass = props.trend
                 <div class="flex items-center text-sm text-muted-foreground">
                     <span>{{ description }}</span>
                 </div>
-                
+
                 <!-- Hover indicator for clickable cards -->
-                <div v-if="href" class="absolute bottom-2 right-2 opacity-0 transition-opacity group-hover:opacity-70">
+                <div v-if="href" class="absolute right-2 bottom-2 opacity-0 transition-opacity group-hover:opacity-70">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>

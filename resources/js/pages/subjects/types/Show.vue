@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ActionMenu from '@/components/ui/dropdown-menu/ActionMenu.vue';
+import ActionMenuButton from '@/components/ui/dropdown-menu/ActionMenuButton.vue';
+import { Select } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { RequiredDocumentType, type Subject, type SubjectType } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Select } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ref, computed } from 'vue';
-import ActionMenu from '@/components/ui/dropdown-menu/ActionMenu.vue';
-import ActionMenuButton from '@/components/ui/dropdown-menu/ActionMenuButton.vue';
-import { Eye, Edit, Trash } from 'lucide-vue-next';
+import { Edit, Eye, Trash } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 interface Props {
     subjectType: SubjectType;
@@ -35,7 +35,7 @@ const selectedDocumentId = ref<number | string>('');
 const isRequired = ref(true);
 
 const requiredDocumentTypeIds = computed(() => {
-    return props.requiredDocumentTypes.map(item => item.document_type_id);
+    return props.requiredDocumentTypes.map((item) => item.document_type_id);
 });
 
 const isDocumentLinked = (documentTypeId: number) => {
@@ -44,49 +44,56 @@ const isDocumentLinked = (documentTypeId: number) => {
 
 const saveDocumentRequirement = () => {
     if (selectedDocumentId.value && selectedDocumentId.value !== '') {
-        router.post('/required-documents', {
-            subject_type_id: props.subjectType.id,
-            document_type_id: selectedDocumentId.value,
-            is_required: isRequired.value
-        }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                isDialogOpen.value = false;
-                selectedDocumentId.value = '';
-            }
-        });
+        router.post(
+            '/required-documents',
+            {
+                subject_type_id: props.subjectType.id,
+                document_type_id: selectedDocumentId.value,
+                is_required: isRequired.value,
+            },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    isDialogOpen.value = false;
+                    selectedDocumentId.value = '';
+                },
+            },
+        );
     }
 };
 
 // Handle removing a document requirement
 const removeDocumentRequirement = (requiredDocId: number) => {
     router.delete(`/required-documents/${requiredDocId}`, {
-        preserveScroll: true
+        preserveScroll: true,
     });
 };
 
 // Toggle a document requirement's required status
 const toggleDocumentRequired = (requiredDoc: RequiredDocumentType) => {
     const newRequiredStatus = !requiredDoc.is_required;
-    
-    router.post('/required-documents', {
-        subject_type_id: props.subjectType.id,
-        document_type_id: requiredDoc.document_type_id,
-        is_required: newRequiredStatus // Toggle the is_required value
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-        }
-    });
+
+    router.post(
+        '/required-documents',
+        {
+            subject_type_id: props.subjectType.id,
+            document_type_id: requiredDoc.document_type_id,
+            is_required: newRequiredStatus, // Toggle the is_required value
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {},
+        },
+    );
 };
 
 // Handle menu action selection for document types
 const handleMenuAction = (action: string, documentId: string | number) => {
     const docId = Number(documentId);
-    const requiredDoc = props.requiredDocumentTypes.find(doc => doc.id === docId);
-    
+    const requiredDoc = props.requiredDocumentTypes.find((doc) => doc.id === docId);
+
     if (!requiredDoc && action !== 'remove') return;
-    
+
     switch (action) {
         case 'edit':
             if (requiredDoc) {
@@ -102,9 +109,9 @@ const handleMenuAction = (action: string, documentId: string | number) => {
 // Handle menu action selection for subjects
 const handleSubjectAction = (action: string, subjectId: string | number) => {
     const subject = props.subjects.find((s) => s.id === subjectId);
-    
+
     if (!subject) return;
-    
+
     switch (action) {
         case 'view':
             router.visit(`/subjects/${subject.slug}`);
@@ -172,7 +179,6 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
 </script>
 
 <template>
-
     <Head :title="`Subject Type: ${subjectType.name}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -186,38 +192,28 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
                     <Button variant="ghost" as-child>
                         <Link href="/subject-types">Back to Subject Types</Link>
                     </Button>
-                    
+
                     <ActionMenu :item-id="subjectType.id" @select="handleSubjectTypeAction">
                         <template #trigger>
                             <Button variant="outline">Actions</Button>
                         </template>
                         <template #menu-items="{ handleAction }">
                             <Can permission="subject-types-edit">
-                                <ActionMenuButton 
-                                    :icon="Edit" 
-                                    text="Edit" 
-                                    @click="(e) => handleAction('edit', e)" 
-                                />
+                                <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
                             </Can>
                             <Can permission="subjects-create">
-                                <ActionMenuButton 
-                                    :icon="Eye" 
-                                    text="Create Subject" 
-                                    @click="(e) => handleAction('createSubject', e)" 
-                                />
+                                <ActionMenuButton :icon="Eye" text="Create Subject" @click="(e) => handleAction('createSubject', e)" />
                             </Can>
                         </template>
                     </ActionMenu>
                 </div>
             </div>
 
-            <div class="rounded-xl border border-border bg-card p-6 mb-4">
-                <div class="flex items-center justify-between mb-4">
+            <div class="mb-4 rounded-xl border border-border bg-card p-6">
+                <div class="mb-4 flex items-center justify-between">
                     <h2 class="text-xl font-semibold">Document Requirements</h2>
                     <Can permission="subject-types-edit">
-                        <Button variant="outline" @click="isDialogOpen = true">
-                            Link Document Type
-                        </Button>
+                        <Button variant="outline" @click="isDialogOpen = true"> Link Document Type </Button>
                     </Can>
                 </div>
 
@@ -235,10 +231,8 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="doc in requiredDocumentTypes" :key="doc.id"
-                                class="border-t border-border hover:bg-muted/30">
-                                <td class="px-6 py-4 font-medium">{{ doc.document_type?.name || 'Unknown Document' }}
-                                </td>
+                            <tr v-for="doc in requiredDocumentTypes" :key="doc.id" class="border-t border-border hover:bg-muted/30">
+                                <td class="px-6 py-4 font-medium">{{ doc.document_type?.name || 'Unknown Document' }}</td>
                                 <td class="px-6 py-4">
                                     <span v-if="doc.is_required" class="inline-flex items-center">
                                         <span class="mr-2 h-2 w-2 rounded-full bg-green-500"></span>
@@ -253,16 +247,16 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
                                     <ActionMenu :item-id="doc.id" @select="handleMenuAction">
                                         <template #menu-items="{ handleAction }">
                                             <Can permission="subject-types-edit">
-                                                <ActionMenuButton 
-                                                    :icon="Edit" 
+                                                <ActionMenuButton
+                                                    :icon="Edit"
                                                     :text="getToggleActionText(doc)"
-                                                    @click="(e) => handleAction('edit', e)" 
+                                                    @click="(e) => handleAction('edit', e)"
                                                 />
-                                                <ActionMenuButton 
-                                                    :icon="Trash" 
-                                                    text="Remove" 
+                                                <ActionMenuButton
+                                                    :icon="Trash"
+                                                    text="Remove"
                                                     variant="destructive"
-                                                    @click="(e) => handleAction('remove', e)" 
+                                                    @click="(e) => handleAction('remove', e)"
                                                 />
                                             </Can>
                                         </template>
@@ -282,7 +276,7 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
                     <div class="mt-4">
                         <Can permission="subjects-create">
                             <Link href="/subjects/create">
-                            <Button size="sm">Create Subject</Button>
+                                <Button size="sm">Create Subject</Button>
                             </Link>
                         </Can>
                     </div>
@@ -300,15 +294,13 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="subject in subjects" :key="subject.id"
-                                class="border-t border-border hover:bg-muted/30">
+                            <tr v-for="subject in subjects" :key="subject.id" class="border-t border-border hover:bg-muted/30">
                                 <td class="px-6 py-4 font-medium">{{ subject.name }}</td>
                                 <td class="px-6 py-4">{{ subject.email || 'N/A' }}</td>
                                 <td class="px-6 py-4">{{ subject.phone || 'N/A' }}</td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center">
-                                        <span
-                                            :class="[getStatusColor(subject.status), 'mr-2 h-2 w-2 rounded-full']"></span>
+                                        <span :class="[getStatusColor(subject.status), 'mr-2 h-2 w-2 rounded-full']"></span>
                                         {{ getStatusText(subject.status) }}
                                     </span>
                                 </td>
@@ -316,11 +308,7 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
                                     <ActionMenu :item-id="subject.id" @select="handleSubjectAction">
                                         <template #menu-items="{ handleAction }">
                                             <Can permission="subjects-view">
-                                                <ActionMenuButton 
-                                                    :icon="Eye" 
-                                                    text="View" 
-                                                    @click="(e) => handleAction('view', e)" 
-                                                />
+                                                <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
                                             </Can>
                                         </template>
                                     </ActionMenu>
@@ -336,21 +324,15 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Link Document Type</DialogTitle>
-                        <DialogDescription>
-                            Select a document type and set whether it's required for this subject type.
-                        </DialogDescription>
+                        <DialogDescription> Select a document type and set whether it's required for this subject type. </DialogDescription>
                     </DialogHeader>
 
                     <div class="py-4">
                         <div class="mb-4">
-                            <label class="text-sm font-medium mb-2 block">Document Type</label>
-                            <Select 
-                                v-model="selectedDocumentId"
-                                class="w-full"
-                            >
+                            <label class="mb-2 block text-sm font-medium">Document Type</label>
+                            <Select v-model="selectedDocumentId" class="w-full">
                                 <option value="" disabled>Select a document type</option>
-                                <option v-for="doc in documentTypes" :key="doc.id" :value="doc.id"
-                                    :disabled="isDocumentLinked(doc.id)">
+                                <option v-for="doc in documentTypes" :key="doc.id" :value="doc.id" :disabled="isDocumentLinked(doc.id)">
                                     {{ doc.name }} {{ isDocumentLinked(doc.id) ? '(Already linked)' : '' }}
                                 </option>
                             </Select>
@@ -364,9 +346,7 @@ const getToggleActionText = (doc: RequiredDocumentType) => {
 
                     <DialogFooter>
                         <Button variant="outline" @click="isDialogOpen = false">Cancel</Button>
-                        <Button :disabled="!selectedDocumentId" @click="saveDocumentRequirement()">
-                            Save
-                        </Button>
+                        <Button :disabled="!selectedDocumentId" @click="saveDocumentRequirement()"> Save </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

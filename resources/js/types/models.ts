@@ -121,7 +121,7 @@ export interface RequiredDocumentType {
     subject_type?: SubjectType;
     document_type?: DocumentType;
     slug: string;
- }
+}
 
 export interface Document {
     id: number;

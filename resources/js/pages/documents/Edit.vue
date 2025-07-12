@@ -227,7 +227,7 @@ const goBack = () => {
                     </div>
 
                     <div class="flex justify-end space-x-3">
-                        <Button @click="goBack" type="button" variant="ghost" >Cancel</Button>
+                        <Button @click="goBack" type="button" variant="ghost">Cancel</Button>
                         <Button type="submit" class="bg-primary text-primary-foreground hover:bg-primary/90" :disabled="form.processing">
                             <span v-if="form.processing">Saving...</span>
                             <span v-else>Save Changes</span>

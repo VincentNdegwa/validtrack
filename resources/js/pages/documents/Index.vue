@@ -263,7 +263,6 @@ const handleMenuAction = (action: string, documentId: string | number) => {
                 @sort="handleSort"
                 @per-page-change="handlePerPageChange"
             >
-
                 <template #subject="{ item: document }">
                     <div>{{ document.subject?.name || 'N/A' }}</div>
                 </template>

@@ -27,8 +27,13 @@ class AppServiceProvider extends ServiceProvider
         $router->aliasMiddleware('permission', \App\Http\Middleware\CheckPermission::class);
         $router->aliasMiddleware('super-admin', \App\Http\Middleware\SuperAdmin::class);
         $router->aliasMiddleware('company-context', \App\Http\Middleware\CompanyContext::class);
-        
-        Inertia::share([
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \App\Console\Commands\SendDocumentExpiryReminders::class,
+            ]);
+        }
+            Inertia::share([
             'flash' => function () {
                 return [
                     'success' => Session::get('success'),

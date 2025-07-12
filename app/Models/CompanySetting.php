@@ -15,6 +15,13 @@ class CompanySetting extends Model
         'key',
         'value',
     ];
+    
+    /**
+     * The attributes that should be cast.
+     */
+    protected $casts = [
+        'value' => 'json',
+    ];
 
     /**
      * Get the company that owns the setting.

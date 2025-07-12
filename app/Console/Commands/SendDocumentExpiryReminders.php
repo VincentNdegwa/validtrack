@@ -67,6 +67,19 @@ class SendDocumentExpiryReminders extends Command
             [30, 14, 7, 1]
         );
         
+        if (is_string($reminderDays)) {
+            $decodedArray = json_decode($reminderDays, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decodedArray)) {
+                $reminderDays = $decodedArray;
+            } elseif (is_numeric($reminderDays)) {
+                $reminderDays = [(int)$reminderDays];
+            }
+        }
+        
+        Log::info("Reminder days for company {$company->id}: ", [
+            'reminderDays' => $reminderDays
+        ]);
+        
         if (!is_array($reminderDays) || empty($reminderDays)) {
             $this->warn("No reminder days configured for company: {$company->name}");
             return;
@@ -88,10 +101,16 @@ class SendDocumentExpiryReminders extends Command
             ->first();
             
         if ($setting) {
+            // Since the value might be stored as a JSON string, we need to return it as is
+            // The conversion will happen in the calling method
             return $setting->value ?? $default;
         }
         
-        return CompanySetting::getDefaultValue($key) ?? $default;
+        // Get default value from CompanySetting class constants
+        $defaultValue = CompanySetting::getDefaultValue($key);
+        
+        // If default value exists in the constants, use it, otherwise use the provided default
+        return $defaultValue !== null ? $defaultValue : $default;
     }
     
     /**

@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         $this->assignRolesToUsers($users, $clientCompany, $superAdminCompany);
         $this->call([
             CompanySettingsSeeder::class,
+            CommonDocumentTypesSeeder::class,
+            CommonSubjectTypesSeeder::class,
         ]);
     }
 

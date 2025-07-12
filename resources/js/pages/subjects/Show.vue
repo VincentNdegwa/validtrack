@@ -5,8 +5,11 @@ import RequestUploadModal from '@/components/documents/RequestUploadModal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Document, SubjectType, type DocumentType } from '@/types/models';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select } from '@/components/ui/select';
+import Checkbox from '@/components/ui/checkbox/Checkbox.vue';
 
 interface CustomSubject {
     id: number;
@@ -44,6 +47,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const isDialogOpen = ref(false);
+const selectedDocumentId = ref<number | string>('');
+const isRequired = ref(true);
 
 const showUploadRequestModal = ref(false);
 const selectedDocTypesForRequest = ref<Array<any>>([]);
@@ -68,6 +74,21 @@ const missingDocuments = computed(() => {
     return missingDocs;
 });
 
+const saveDocumentRequirement = () => {
+    if (selectedDocumentId.value && selectedDocumentId.value !== '') {
+        router.post('/required-documents', {
+            subject_type_id: props.subject.subject_type_id,
+            document_type_id: selectedDocumentId.value,
+            is_required: isRequired.value
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                isDialogOpen.value = false;
+                selectedDocumentId.value = '';
+            }
+        });
+    }
+};
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -143,6 +164,13 @@ const requestAllMissingDocumentsUpload = () => {
     selectedDocTypesForRequest.value = missingDocuments.value;
     showUploadRequestModal.value = true;
 };
+const requiredDocumentTypeIds = computed(() => {
+    return (props.requiredDocumentTypes ?? []).map(item => item.document_type_id);
+});
+const isDocumentLinked = (documentTypeId: number) => {
+    return requiredDocumentTypeIds.value.includes(documentTypeId);
+};
+
 </script>
 
 <template>
@@ -270,10 +298,15 @@ const requestAllMissingDocumentsUpload = () => {
 
                 <div class="flex flex-col gap-4 h-[570px] overflow-scroll no-scrollbar ">
                     <!-- Compliance Card -->
-                    <div class="rounded-xl h-full border border-border bg-card p-6"
-                        v-if="requiredDocumentTypes && requiredDocumentTypes.length > 0">
+                    <div class="rounded-xl h-full border border-border bg-card p-6">
                         <div class="mb-4 flex items-center justify-between">
                             <h2 class="text-xl font-semibold">Required Documents</h2>
+                            <Can permission="subject-types-edit">
+                                <Button size="sm" class="bg-primary text-primary-foreground hover:bg-primary/90"
+                                    @click="isDialogOpen = true">
+                                    Add
+                                </Button>
+                            </Can>
                         </div>
 
                         <div class="space-y-3">
@@ -314,6 +347,12 @@ const requestAllMissingDocumentsUpload = () => {
                                         </Can>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="flex flex-col"
+                                v-if="!requiredDocumentTypes || requiredDocumentTypes.length == 0">
+                                <p class="text-sm w-full mb-10 text-muted-foreground">No required documents for this
+                                    subject type.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -366,5 +405,41 @@ const requestAllMissingDocumentsUpload = () => {
 
         <RequestUploadModal :subject="subject" :document-types="props.documentTypes" :show="showUploadRequestModal"
             :pre-selected-document-types="selectedDocTypesForRequest" @close="showUploadRequestModal = false" />
+        <Dialog v-model:open="isDialogOpen">
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Link Document Type</DialogTitle>
+                    <DialogDescription>
+                        Select a document type and set whether it's required for this subject type.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div class="py-4">
+                    <div class="mb-4">
+                        <label class="text-sm font-medium mb-2 block">Document Type</label>
+                        <Select v-model="selectedDocumentId" class="w-full">
+                            <option value="" disabled>Select a document type</option>
+                            <option v-for="doc in documentTypes" :key="doc.id" :value="doc.id"
+                                :disabled="isDocumentLinked(doc.id)">
+                                {{ doc.name }} {{ isDocumentLinked(doc.id) ? '(Already linked)' : '' }}
+                            </option>
+                        </Select>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <Checkbox id="isRequired" v-model="isRequired" />
+                        <label for="isRequired" class="text-sm font-medium">Mark as required for compliance</label>
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <Button variant="outline" @click="isDialogOpen = false">Cancel</Button>
+                    <Button :disabled="!selectedDocumentId" @click="saveDocumentRequirement()">
+                        Save
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
     </AppLayout>
 </template>

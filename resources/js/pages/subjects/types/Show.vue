@@ -76,7 +76,6 @@ const toggleDocumentRequired = (requiredDoc: RequiredDocumentType) => {
     }, {
         preserveScroll: true,
         onSuccess: () => {
-            // The page will automatically refresh with new data from the server
         }
     });
 };

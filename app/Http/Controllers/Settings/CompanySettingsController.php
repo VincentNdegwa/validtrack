@@ -15,7 +15,7 @@ class CompanySettingsController extends Controller
 {
     public function index(Request $request)
     {
-        if(Auth::user()->can('company-settings-view')){
+        if(Auth::user()->hasPermission('company-settings-view')){
             $company = $request->user()->company;
 
             $settings = [

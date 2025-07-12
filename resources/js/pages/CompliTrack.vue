@@ -6,7 +6,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 const loaded = ref(false);
 const scrollY = ref(0);
 const showFloatingCTA = ref(false);
-const currentDemoTab = ref('dashboard');
+ref('dashboard');
 
 // Track scroll position for animations
 const handleScroll = () => {

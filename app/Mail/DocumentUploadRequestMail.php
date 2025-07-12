@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class DocumentUploadRequestMail extends Mailable
+class DocumentUploadRequestMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

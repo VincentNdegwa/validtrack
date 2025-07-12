@@ -52,7 +52,7 @@ class DocumentUploadRequestController extends Controller
             ]);
         }
 
-        Mail::to($validated['email'])->send(new \App\Mail\DocumentUploadRequestMail($uploadRequest));
+        Mail::to($validated['email'])->queue(new \App\Mail\DocumentUploadRequestMail($uploadRequest));
 
         return back()->with('success', 'Document upload request has been sent successfully.');
     }

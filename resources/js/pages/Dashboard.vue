@@ -18,11 +18,19 @@ import { ref } from 'vue';
 
 interface Stats {
     subjects: number;
+    subjectsTrend?: number;
+    compliantPercentage: number;
+    complianceTrend?: number;
     documents: number;
+    documentsTrend?: number;
     subjectTypes: number;
+    subjectTypesTrend?: number;
     documentTypes: number;
+    documentTypesTrend?: number;
     users: number;
+    usersTrend?: number;
     expiringDocuments: number;
+    expiringDocumentsTrend?: number;
 }
 
 interface Props {
@@ -43,11 +51,19 @@ const props = defineProps<Props>();
 const stats = ref(
     props.stats || {
         subjects: 0,
+        subjectsTrend: 0,
+        compliantPercentage: 0,
+        complianceTrend: 0,
         documents: 0,
+        documentsTrend: 0,
         subjectTypes: 0,
+        subjectTypesTrend: 0,
         documentTypes: 0,
+        documentTypesTrend: 0,
         users: 0,
+        usersTrend: 0,
         expiringDocuments: 0,
+        expiringDocumentsTrend: 0,
     },
 );
 
@@ -137,24 +153,32 @@ const formatActionType = (actionType: string): string => {
             </div>
 
             <!-- Stats Cards -->
-            <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
-                <StatsCard title="Subjects" :value="stats.subjects" description="Total subjects" :icon="User"
-                    color="primary" href="/subjects" />
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <!-- Primary Stats (First Row) -->
+                <StatsCard title="Subjects" :value="stats.subjects" description="Total managed subjects" :icon="User"
+                    color="primary" :trend="stats.subjectsTrend" href="/subjects" />
 
-                <StatsCard title="Documents" :value="stats.documents" description="Total documents" :icon="FileText"
-                    color="success" href="/documents" />
+                <StatsCard title="Compliance Rate" :value="stats.compliantPercentage + '%'"
+                    description="Overall subject compliance" :icon="User"
+                    :color="stats.compliantPercentage >= 80 ? 'success' : stats.compliantPercentage >= 50 ? 'warning' : 'danger'"
+                    :trend="stats.complianceTrend" />
 
+                <StatsCard title="Documents" :value="stats.documents" description="Total active documents"
+                    :icon="FileText" color="success" :trend="stats.documentsTrend" href="/documents" />
+
+                <StatsCard title="Expiring Soon" :value="stats.expiringDocuments"
+                    description="Documents expiring in 30 days" :icon="AlertCircle" color="warning"
+                    :trend="stats.expiringDocumentsTrend" />
+
+                <!-- Secondary Stats (Second Row) -->
                 <StatsCard title="Subject Types" :value="stats.subjectTypes" description="Subject classifications"
-                    :icon="Tags" color="default" href="/subject-types" />
+                    :icon="Tags" color="default" :trend="stats.subjectTypesTrend" href="/subject-types" />
 
                 <StatsCard title="Document Types" :value="stats.documentTypes" description="Document classifications"
-                    :icon="BookType" color="default" href="/document-types" />
+                    :icon="BookType" color="default" :trend="stats.documentTypesTrend" href="/document-types" />
 
-                <StatsCard title="Users" :value="stats.users" description="Team members" :icon="Users"
-                    color="primary" />
-
-                <StatsCard title="Expiring Soon" :value="stats.expiringDocuments" description="Expiring in 30 days"
-                    :icon="AlertCircle" color="warning" />
+                <StatsCard title="Team Members" :value="stats.users" description="Active system users" :icon="Users"
+                    color="primary" :trend="stats.usersTrend" href="/users" />
             </div>
 
             <!-- Two column layout for lists -->
@@ -164,12 +188,14 @@ const formatActionType = (actionType: string): string => {
                     <CardHeader>
                         <div class="flex items-center justify-between">
                             <CardTitle>Recent Subjects</CardTitle>
-                            <Link href="/subjects">
-                            <Button variant="ghost" size="sm" class="text-xs">
-                                View All
-                                <ChevronRight class="ml-1 h-4 w-4" />
-                            </Button>
-                            </Link>
+                            <Can permission="subjects-view">
+                                <Link href="/subjects">
+                                <Button variant="ghost" size="sm" class="text-xs">
+                                    View All
+                                    <ChevronRight class="ml-1 h-4 w-4" />
+                                </Button>
+                                </Link>
+                            </Can>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -180,9 +206,15 @@ const formatActionType = (actionType: string): string => {
                                 class="flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
                                 <div class="space-y-1">
                                     <p class="text-sm leading-none font-medium">
-                                        <Link :href="`/subjects/${subject.id}`" class="hover:underline">
-                                        {{ subject.name }}
-                                        </Link>
+                                        <Can permission="subjects-view">
+                                            <Link :href="`/subjects/${subject.slug}`" class="hover:underline">
+                                            {{ subject.name }}
+                                            </Link>
+
+                                            <template #fallback>
+                                                {{ subject.name }}>
+                                            </template>
+                                        </Can>
                                     </p>
                                     <p class="text-xs text-muted-foreground">
                                         {{ subject.subject_type?.name || 'No type' }}
@@ -201,12 +233,14 @@ const formatActionType = (actionType: string): string => {
                     <CardHeader>
                         <div class="flex items-center justify-between">
                             <CardTitle>Recent Documents</CardTitle>
-                            <Link href="/documents">
-                            <Button variant="ghost" size="sm" class="text-xs">
-                                View All
-                                <ChevronRight class="ml-1 h-4 w-4" />
-                            </Button>
-                            </Link>
+                            <Can permission="documents-view">
+                                <Link href="/documents">
+                                <Button variant="ghost" size="sm" class="text-xs">
+                                    View All
+                                    <ChevronRight class="ml-1 h-4 w-4" />
+                                </Button>
+                                </Link>
+                            </Can>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -217,9 +251,14 @@ const formatActionType = (actionType: string): string => {
                                 class="flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
                                 <div class="space-y-1">
                                     <p class="text-sm leading-none font-medium">
-                                        <Link :href="`/documents/${document.slug}`" class="hover:underline">
-                                        {{ document.subject?.name || 'Unknown Subject' }}
-                                        </Link>
+                                        <Can permission="documents-view">
+                                            <Link :href="`/documents/${document.slug}`" class="hover:underline">
+                                            {{ document.subject?.name || 'Unknown Subject' }}
+                                            </Link>
+                                            <template #fallback>
+                                                {{ document.subject?.name || 'Unknown Subject' }}
+                                            </template>
+                                        </Can>
                                     </p>
                                     <p class="text-xs text-muted-foreground">
                                         {{ document.document_type?.name || 'No type' }}
@@ -258,9 +297,14 @@ const formatActionType = (actionType: string): string => {
                                 class="flex items-center justify-between border-b border-border pb-2 last:border-0 last:pb-0">
                                 <div class="space-y-1">
                                     <p class="text-sm leading-none font-medium">
-                                        <Link :href="`/documents/${document.slug}`" class="hover:underline">
-                                        {{ document.subject?.name || 'Unknown Subject' }}
-                                        </Link>
+                                        <Can permission="documents-view">
+                                            <Link :href="`/documents/${document.slug}`" class="hover:underline">
+                                            {{ document.subject?.name || 'Unknown Subject' }}
+                                            </Link>
+                                            <template #fallback>
+                                                {{ document.subject?.name || 'Unknown Subject' }}
+                                            </template>
+                                        </Can>
                                     </p>
                                     <p class="text-xs text-muted-foreground">
                                         {{ document.document_type?.name || 'No type' }}
@@ -322,32 +366,32 @@ const formatActionType = (actionType: string): string => {
                             </div>
 
                             <DataTable v-else :data="recentActivities" :columns="[
-                                    {
-                                        key: 'created_at',
-                                        label: 'Date/Time',
-                                        sortable: false,
-                                    },
-                                    {
-                                        key: 'message',
-                                        label: 'Activity',
-                                        sortable: false,
-                                    },
-                                    {
-                                        key: 'user',
-                                        label: 'User',
-                                        sortable: false,
-                                    },
-                                    {
-                                        key: 'action_type',
-                                        label: 'Action',
-                                        sortable: false,
-                                    },
-                                    {
-                                        key: 'target_type',
-                                        label: 'Target',
-                                        sortable: false,
-                                    },
-                                ]" :show-pagination="false" empty-message="No recent activity found">
+                                {
+                                    key: 'created_at',
+                                    label: 'Date/Time',
+                                    sortable: false,
+                                },
+                                {
+                                    key: 'message',
+                                    label: 'Activity',
+                                    sortable: false,
+                                },
+                                {
+                                    key: 'user',
+                                    label: 'User',
+                                    sortable: false,
+                                },
+                                {
+                                    key: 'action_type',
+                                    label: 'Action',
+                                    sortable: false,
+                                },
+                                {
+                                    key: 'target_type',
+                                    label: 'Target',
+                                    sortable: false,
+                                },
+                            ]" :show-pagination="false" empty-message="No recent activity found">
                                 <template #created_at="{ item: log }">
                                     <div>
                                         {{ formatDate(log.created_at) }}
@@ -366,11 +410,11 @@ const formatActionType = (actionType: string): string => {
                                 <template #action_type="{ item: log }">
                                     <div>
                                         <span :class="{
-                                                'rounded-full px-2 py-1 text-xs': true,
-                                                'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': log.action_type === 'created',
-                                                'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400': log.action_type === 'updated',
-                                                'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': log.action_type === 'deleted',
-                                            }">
+                                            'rounded-full px-2 py-1 text-xs': true,
+                                            'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400': log.action_type === 'created',
+                                            'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400': log.action_type === 'updated',
+                                            'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400': log.action_type === 'deleted',
+                                        }">
                                             {{ formatActionType(log.action_type) }}
                                         </span>
                                     </div>

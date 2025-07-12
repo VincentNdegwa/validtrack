@@ -48,13 +48,6 @@ const pagination = computed(() => {
 // Define columns for the DataTable
 const columns = computed(() => [
     {
-        key: 'name',
-        label: 'Name',
-        class: 'font-medium',
-        sortable: true,
-        sortDirection: sortField.value === 'name' ? sortDirection.value : null,
-    },
-    {
         key: 'subject',
         label: 'Subject',
         sortable: false,
@@ -270,12 +263,6 @@ const handleMenuAction = (action: string, documentId: string | number) => {
                 @sort="handleSort"
                 @per-page-change="handlePerPageChange"
             >
-                <template #name="{ item: document }">
-                    <div>
-                        <div>{{ document.name }}</div>
-                        <div class="text-xs text-muted-foreground" v-if="document.notes">{{ document.notes }}</div>
-                    </div>
-                </template>
 
                 <template #subject="{ item: document }">
                     <div>{{ document.subject?.name || 'N/A' }}</div>

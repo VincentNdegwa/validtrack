@@ -167,3 +167,35 @@
         color: var(--foreground);
     }
 }
+
+/* Hide scrollbars while maintaining scrolling functionality */
+@layer utilities {
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+    
+    /* Custom scrollbar with minimal styling */
+    .minimal-scrollbar::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+    }
+    
+    .minimal-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .minimal-scrollbar::-webkit-scrollbar-thumb {
+        background: var(--muted-foreground);
+        border-radius: 10px;
+    }
+    
+    .minimal-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+    }
+}

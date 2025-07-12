@@ -10,12 +10,13 @@ import {
 } from '@/components/ui/dialog';
 import { DocumentType, Subject } from '@/types/models';
 import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 interface Props {
     subject: Subject;
     documentTypes?: DocumentType[];
     show: boolean;
+    preSelectedDocumentTypes?: Array<any>;
 }
 
 const props = defineProps<Props>();
@@ -63,6 +64,36 @@ const updateFormDocTypes = () => {
         required: item.required,
     }));
 };
+
+const initializeSelectedDocTypes = () => {
+    if (props.preSelectedDocumentTypes && props.preSelectedDocumentTypes.length > 0 && props.documentTypes) {
+        selectedDocTypes.value = [];
+        
+        props.preSelectedDocumentTypes.forEach(preSelectedDoc => {
+            const docTypeId = preSelectedDoc.document_type_id;
+            const matchingDocType = props.documentTypes?.find(dt => dt.id === docTypeId);
+            
+            if (matchingDocType) {
+                const alreadyExists = selectedDocTypes.value.some(item => item.id === matchingDocType.id);
+                if (!alreadyExists) {
+                    selectedDocTypes.value.push({
+                        id: matchingDocType.id,
+                        name: matchingDocType.name,
+                        required: true,
+                    });
+                }
+            }
+        });
+        
+        updateFormDocTypes();
+    }
+};
+
+watch(() => props.show, (newVal) => {
+    if (newVal && props.preSelectedDocumentTypes?.length) {
+        initializeSelectedDocTypes();
+    }
+}, { immediate: true });
 
 const closeModal = () => {
     emit('close');

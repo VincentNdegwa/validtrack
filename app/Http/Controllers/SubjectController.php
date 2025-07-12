@@ -9,6 +9,7 @@ use App\Models\SubjectType;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 
 class SubjectController extends Controller
 {
@@ -201,7 +202,7 @@ class SubjectController extends Controller
 
         $subject->update($validated);
 
-        return redirect()->route('subjects.show', $subject->id)
+        return redirect()->route('subjects.show', Crypt::encrypt($subject->id))
             ->with('success', 'Subject updated successfully.');
     }
 

@@ -78,6 +78,19 @@ const columns = computed(() => [
         sortDirection: sortField.value === 'email' ? sortDirection.value : null,
     },
     {
+        key: 'status',
+        label: 'Status',
+        sortable: true,
+        sortDirection: sortField.value === 'status' ? sortDirection.value : null,
+        class: 'text-center',
+    },
+    {
+        key: 'compliance_status',
+        label: 'Compliance',
+        sortable: false,
+        class: 'text-center',
+    },
+    {
         key: 'phone',
         label: 'Phone',
         sortable: true,
@@ -268,6 +281,14 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                     <span class="inline-flex items-center">
                         <span :class="[getStatusColor(subject.status), 'mr-2 h-2 w-2 rounded-full']"></span>
                         {{ getStatusText(subject.status) }}
+                    </span>
+                </template>
+
+                <template #compliance_status="{ item: subject }">
+                    <span class="inline-flex items-center">
+                        <span
+                            :class="[subject.compliance_status ? 'bg-green-500' : 'bg-red-500', 'mr-2 h-2 w-2 rounded-full']"></span>
+                        {{ subject.compliance_status ? 'Compliant' : 'Non-Compliant' }}
                     </span>
                 </template>
 

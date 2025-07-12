@@ -165,10 +165,10 @@ const handleMenuAction = (action: string, typeId: string | number) => {
 
     switch (action) {
         case 'view':
-            router.visit(`/subject-types/${type.id}`);
+            router.visit(`/subject-types/${type.slug}`);
             break;
         case 'edit':
-            router.visit(`/subject-types/${type.id}/edit`);
+            router.visit(`/subject-types/${type.slug}/edit`);
             break;
         case 'delete':
             if ((type.subjects_count || 0) === 0) {

@@ -56,9 +56,7 @@
                         </div>
 
                         <div class="flex justify-end space-x-2">
-                            <Link :href="`/companies/${company.slug}`">
-                                <Button type="button" variant="outline">Cancel</Button>
-                            </Link>
+                            <Button @click="goBack" type="button" variant="ghost">Cancel</Button>
                             <Button :disabled="form.processing" type="submit" class="bg-primary text-primary-foreground"> Update Company </Button>
                         </div>
                     </form>
@@ -116,7 +114,7 @@ import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Company } from '@/types/models';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 interface Props {
@@ -185,5 +183,8 @@ const deleteCompany = () => {
             showDeleteDialog.value = false;
         },
     });
+};
+const goBack = () => {
+    window.history.back();
 };
 </script>

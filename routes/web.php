@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\DocumentTypeController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RequiredDocumentTypeController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\SubjectTypeController;
@@ -27,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('subject-types', SubjectTypeController::class);
     Route::resource('documents', DocumentController::class);
     Route::resource('document-types', DocumentTypeController::class);
+    Route::resource('required-documents', RequiredDocumentTypeController::class)->only(['store', 'destroy']);
     Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show']);
     
     // User management routes

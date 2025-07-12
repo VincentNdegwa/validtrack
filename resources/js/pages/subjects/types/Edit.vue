@@ -35,6 +35,9 @@ const submit = () => {
         preserveScroll: true,
     });
 };
+const goBack = () => {
+    window.history.back();
+};
 </script>
 
 <template>
@@ -63,7 +66,7 @@ const submit = () => {
                     </div>
 
                     <div class="flex justify-end space-x-3">
-                        <Button type="button" variant="outline" :href="route('subject-types.index')">Cancel</Button>
+                        <Button @click="goBack" type="button" variant="outline" >Cancel</Button>
                         <Button type="submit" class="bg-primary text-primary-foreground hover:bg-primary/90" :disabled="form.processing">
                             <span v-if="form.processing">Saving...</span>
                             <span v-else>Save Changes</span>

@@ -45,6 +45,24 @@ class SubjectType extends Model
     }
 
     /**
+     * Get the required document types for this subject type.
+     */
+    public function requiredDocumentTypes()
+    {
+        return $this->hasMany(RequiredDocumentType::class);
+    }
+    
+    /**
+     * Get the document types that are required for this subject type.
+     */
+    public function documentTypes()
+    {
+        return $this->belongsToMany(DocumentType::class, 'required_document_types')
+            ->withPivot(['is_required', 'validity_period', 'notify_on_expiry'])
+            ->withTimestamps();
+    }
+
+    /**
      * Get the activity logs where this is the target.
      */
     public function activityLogs()

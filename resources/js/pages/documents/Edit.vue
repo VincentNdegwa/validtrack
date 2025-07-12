@@ -92,6 +92,10 @@ const getFileType = (url: string) => {
 
     return 'other';
 };
+
+const goBack = () => {
+    window.history.back();
+};
 </script>
 
 <template>
@@ -223,7 +227,7 @@ const getFileType = (url: string) => {
                     </div>
 
                     <div class="flex justify-end space-x-3">
-                        <Button type="button" variant="ghost" :href="`/documents/${document.slug}`">Cancel</Button>
+                        <Button @click="goBack" type="button" variant="ghost" >Cancel</Button>
                         <Button type="submit" class="bg-primary text-primary-foreground hover:bg-primary/90" :disabled="form.processing">
                             <span v-if="form.processing">Saving...</span>
                             <span v-else>Save Changes</span>

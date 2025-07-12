@@ -194,7 +194,7 @@ onMounted(() => {
   border: 1px solid var(--border);
 }
 .fc .fc-daygrid-day.fc-day-today{
-    background-color: var(--popover);
+    background-color: var(--sidebar-accent);
 }
 .fc-daygrid-day.fc-day-future:has(.fc-event){
     background-color: var(--popover) !important;

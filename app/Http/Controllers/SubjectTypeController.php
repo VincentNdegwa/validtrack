@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SubjectType;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\SubjectType;
+use App\Models\DocumentType;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SubjectTypeController extends Controller
@@ -106,12 +107,19 @@ class SubjectTypeController extends Controller
         if ($subjectType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
-
+        $user = Auth::user();
         $subjects = $subjectType->subjects;
+        $documentTypes = DocumentType::where('company_id',$user->company_id)->where('is_active', 1)->get();
+        $requiredDocumentTypes = $subjectType->requiredDocumentTypes()
+            ->with('documentType', 'subjectType')
+            ->where('company_id', $user->company_id)
+            ->get();
 
         return Inertia::render('subjects/types/Show', [
             'subjectType' => $subjectType,
-            'subjects' => $subjects
+            'subjects' => $subjects,
+            'documentTypes' => $documentTypes,
+            'requiredDocumentTypes' => $requiredDocumentTypes,
         ]);
     }
 

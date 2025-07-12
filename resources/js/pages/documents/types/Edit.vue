@@ -41,6 +41,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 const submit = () => {
     form.put(`/document-types/${props.documentType.id}`);
 };
+
+const goBack = () => {
+    window.history.back();
+};
 </script>
 
 <template>
@@ -79,7 +83,7 @@ const submit = () => {
                     </div>
 
                     <div class="flex justify-end gap-2">
-                        <Button type="button" variant="outline" :href="route('document-types.index')">Cancel</Button>
+                        <Button @click="goBack" type="button" variant="outline">Cancel</Button>
                         <Button type="submit" :disabled="form.processing">Update Document Type</Button>
                     </div>
                 </form>

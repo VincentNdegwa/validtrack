@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DocumentType;
+use App\Models\RequiredDocumentType;
 use App\Models\Subject;
 use App\Models\SubjectType;
 use Illuminate\Http\Request;
@@ -46,7 +47,7 @@ class SubjectController extends Controller
         
         // Paginate the results
         $perPage = $request->get('per_page', 10);
-        $subjects = $query->paginate($perPage);
+        $subjects = $query->with(['documents', 'documents.documentType'])->paginate($perPage);
         
         $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
@@ -128,17 +129,22 @@ class SubjectController extends Controller
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
-        $subject->load('subjectType');
+        $subject->load(['subjectType', 'documents', 'documents.documentType']);
         
-        $documents = $subject->documents()->with('documentType')->get();
         $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
+            ->get();
+            
+        $requiredDocumentTypes = RequiredDocumentType::where('subject_type_id', $subject->subject_type_id)
+            ->where('company_id', Auth::user()->company_id)
+            ->with('documentType')
             ->get();
 
         return Inertia::render('subjects/Show', [
             'subject' => $subject,
-            'documents' => $documents,
+            'documents' => $subject->documents,
             'documentTypes' => $documentTypes,
+            'requiredDocumentTypes' => $requiredDocumentTypes,
         ]);
     }
 

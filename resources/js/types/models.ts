@@ -94,6 +94,7 @@ export interface Subject {
     user?: User;
     documents?: Document[];
     slug: string;
+    compliance_status: boolean;
 }
 
 export interface DocumentType {
@@ -109,6 +110,18 @@ export interface DocumentType {
     documents_count: number;
     slug: string;
 }
+
+export interface RequiredDocumentType {
+    id: number;
+    subject_type_id: number;
+    document_type_id: number;
+    is_required: boolean;
+    created_at: string;
+    updated_at: string;
+    subject_type?: SubjectType;
+    document_type?: DocumentType;
+    slug: string;
+ }
 
 export interface Document {
     id: number;

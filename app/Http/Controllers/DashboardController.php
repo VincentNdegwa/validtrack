@@ -47,7 +47,7 @@ class DashboardController extends Controller
         
         // Get recent subjects (last 5)
         $recentSubjects = Subject::where('company_id', $companyId)
-            ->with(['subjectType'])
+            ->with(['subjectType', 'documents', 'documents.documentType'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();

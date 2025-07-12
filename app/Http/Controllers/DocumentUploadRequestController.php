@@ -115,14 +115,14 @@ class DocumentUploadRequestController extends Controller
 
             $tokenExists = DocumentUploadRequest::where('token', $token)->exists();
             if (!$tokenExists) {
-                return back()->withErrors(['error' => 'Invalid upload link. The link may have expired or been removed.']);
+                return back()->with('error', 'Invalid upload link. The link may have expired or been removed.');
             }
             $codeCorrect = DocumentUploadRequest::where('token', $token)
                 ->where('verification_code', $request->verification_code)
                 ->exists();
             
             if (!$codeCorrect) {
-                return back()->withErrors(['verification_code' => 'Incorrect verification code. Please check and try again.']);
+                return back()->with('error', 'Incorrect verification code. Please check and try again.');
             }
             
             $uploadRequest = DocumentUploadRequest::where('token', $token)
@@ -131,11 +131,11 @@ class DocumentUploadRequestController extends Controller
                 ->first();
             
             if (!$uploadRequest) {
-                return back()->withErrors(['error' => 'This upload request has already been used or cancelled.']);
+                return back()->with('error', 'This upload request has already been used or cancelled.');
             }
             
             if ($uploadRequest->expires_at < now()) {
-                return back()->withErrors(['error' => 'This upload link has expired. Please request a new upload link.']);
+                return back()->with('error', 'This upload link has expired. Please request a new upload link.');
             }
             
             $requestItem = $uploadRequest->items()
@@ -144,7 +144,7 @@ class DocumentUploadRequestController extends Controller
                 ->first();
                 
             if (!$requestItem) {
-                return back()->withErrors(['upload_request_item_id' => 'The selected document has already been uploaded or is no longer available.']);
+                return back()->with('error', 'The selected document has already been uploaded or is no longer available.');
             }
             
             DB::beginTransaction();
@@ -167,7 +167,7 @@ class DocumentUploadRequestController extends Controller
                         $document->file_url = $path;
                     } else {
                         DB::rollBack();
-                        return back()->withErrors(['file' => 'File upload failed. Please try again.']);
+                        return back()->with('error', 'File upload failed. Please try again.');
                     }
                 }
                 
@@ -193,14 +193,12 @@ class DocumentUploadRequestController extends Controller
             } catch (\Exception $e) {
                 DB::rollBack();
                 Log::error('Document upload failed: ' . $e->getMessage());
-                return back()->withErrors(['error' => 'An error occurred while processing your upload. Please try again.']);
+                return back()->with('error', 'An error occurred while processing your upload. Please try again.');
             }
             
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             Log::error('Document upload request error: ' . $e->getMessage());
-            return back()->withErrors(['error' => 'An unexpected error occurred. Please try again or contact support.']);
+            return back()->with('error', 'An unexpected error occurred. Please try again or contact support.');
         }
     }
 }

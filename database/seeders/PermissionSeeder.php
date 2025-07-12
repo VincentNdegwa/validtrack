@@ -67,7 +67,7 @@ class PermissionSeeder extends Seeder
      *
      * @return array
      */
-    private function getDefaultPermissions(): array
+    public static function getDefaultPermissions(): array
     {
         return [
             // User permissions

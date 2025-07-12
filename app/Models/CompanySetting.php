@@ -23,6 +23,16 @@ class CompanySetting extends Model
         'value' => 'json',
     ];
 
+    public function setValueAttribute($value)
+    {
+        // Make sure arrays are properly handled before json casting
+        if (is_array($value)) {
+            $this->attributes['value'] = json_encode($value);
+        } else {
+            $this->attributes['value'] = $value;
+        }
+    }
+
     /**
      * Get the company that owns the setting.
      */

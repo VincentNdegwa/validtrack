@@ -1,0 +1,41 @@
+ValidTrack Pricing Tiers
+Basic Plan - $9.99/month
+
+Document Storage: 500MB storage
+User Management: Up to 5 users
+Document Types: Up to 3 custom document types
+Subject Management: Basic subject tracking
+Document Expiry Alerts: Basic email notifications
+Document Upload: Manual uploads only
+Access Control: Basic role-based permissions
+
+Professional Plan - $24.99/month
+Everything in Basic, plus:
+Document Storage: 5GB storage
+User Management: Up to 15 users
+Document Types: Unlimited custom document types
+Subject Management: Enhanced subject tracking with custom fields
+Document Upload Requests: Send document upload requests to external parties
+Verification Codes: Secure document submissions via verification codes
+Activity Logging: Basic audit trails for document activities
+Custom Notifications: Customizable email notifications
+Search & Filter: Advanced search and filtering capabilities
+Bulk Operations: Batch document processing
+
+Enterprise Plan - $49.99/month
+Everything in Professional, plus:
+Document Storage: Unlimited storage
+User Management: Unlimited users
+Custom Domain: Use your own domain for accessing the ValidTrack system
+E-signature: Legally binding electronic signature capabilities for documents
+MultiTenant Support: Host multiple separate organizations with complete data isolation
+Scheduled Reports: Automated report generation and delivery at specified intervals
+API Access: Full REST API access for custom integrations and automation
+Add-on Options:
+Additional Storage: $5/month per 10GB
+SSO Integration: $10/month
+Custom Integrations: Starting at $15/month
+Advanced Analytics Package: $20/month
+Dedicated Account Manager: $50/month
+Annual Discount:
+Save 20% when billed annually on any plan

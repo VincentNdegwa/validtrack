@@ -33,7 +33,7 @@ class DocumentCRUDTest extends TestCase
         Storage::fake('public');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_list_documents()
     {
         Document::factory()->count(5)->create([
@@ -51,7 +51,7 @@ class DocumentCRUDTest extends TestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_create_new_document()
     {
         $this->actingAs($this->admin);
@@ -84,7 +84,7 @@ class DocumentCRUDTest extends TestCase
         
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_update_existing_document()
     {
         $this->actingAs($this->admin);
@@ -127,7 +127,7 @@ class DocumentCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_delete_a_document()
     {
         $this->actingAs($this->admin);
@@ -152,7 +152,7 @@ class DocumentCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_validates_document_creation()
     {
         $this->actingAs($this->admin);
@@ -164,7 +164,7 @@ class DocumentCRUDTest extends TestCase
         $response->assertSessionHasErrors(['subject_id','file', 'status']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_enforces_expiry_date_after_issue_date()
     {
         $this->actingAs($this->admin);
@@ -179,7 +179,7 @@ class DocumentCRUDTest extends TestCase
         $response->assertSessionHasErrors('expiry_date');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function users_can_only_access_their_company_documents()
     {
         $anotherCompany = Company::factory()->create();

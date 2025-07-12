@@ -37,7 +37,7 @@ class SubjectCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_list_subjects()
     {
         // Create multiple subjects
@@ -59,7 +59,7 @@ class SubjectCRUDTest extends TestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_create_new_subject()
     {
         $this->actingAs($this->admin);
@@ -88,7 +88,7 @@ class SubjectCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_update_existing_subject()
     {
         $this->actingAs($this->admin);
@@ -121,7 +121,7 @@ class SubjectCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_view_subject_details()
     {
         $this->actingAs($this->admin);
@@ -142,7 +142,7 @@ class SubjectCRUDTest extends TestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_disable_a_subject()
     {
         $this->actingAs($this->admin);
@@ -169,7 +169,7 @@ class SubjectCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_validates_subject_creation()
     {
         $this->actingAs($this->admin);
@@ -180,7 +180,7 @@ class SubjectCRUDTest extends TestCase
         $response->assertSessionHasErrors(['name', 'status']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_validates_email_format()
     {
         $this->actingAs($this->admin);
@@ -195,7 +195,7 @@ class SubjectCRUDTest extends TestCase
         $response->assertSessionHasErrors(['email']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function users_can_only_access_their_company_subjects()
     {
         $anotherCompany = Company::factory()->create();

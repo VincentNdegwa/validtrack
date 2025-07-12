@@ -29,7 +29,7 @@ class SubjectTypeCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_list_subject_types()
     {
         SubjectType::factory()->count(5)->create([
@@ -45,7 +45,7 @@ class SubjectTypeCRUDTest extends TestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_create_new_subject_type()
     {
         $this->actingAs($this->admin);
@@ -65,7 +65,7 @@ class SubjectTypeCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_update_existing_subject_type()
     {
         $this->actingAs($this->admin);
@@ -86,7 +86,7 @@ class SubjectTypeCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_delete_a_subject_type()
     {
         $this->actingAs($this->admin);
@@ -105,7 +105,7 @@ class SubjectTypeCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_validates_subject_type_creation()
     {
         $this->actingAs($this->admin);
@@ -116,7 +116,7 @@ class SubjectTypeCRUDTest extends TestCase
         $response->assertSessionHasErrors(['name']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_validates_subject_type_name_uniqueness_within_company()
     {
         $this->actingAs($this->admin);
@@ -131,7 +131,7 @@ class SubjectTypeCRUDTest extends TestCase
         $response->assertSessionHasErrors(['name']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function users_can_only_access_their_company_subject_types()
     {
         $anotherCompany = Company::factory()->create();
@@ -145,7 +145,7 @@ class SubjectTypeCRUDTest extends TestCase
         $response->assertSessionHas('error');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_associate_document_types_with_subject_types()
     {
         $this->actingAs($this->admin);

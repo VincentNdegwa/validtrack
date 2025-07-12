@@ -59,7 +59,7 @@ class DocumentUploadRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function admin_can_create_document_upload_request()
     {
         $this->actingAs($this->admin);
@@ -105,7 +105,7 @@ class DocumentUploadRequestFlowTest extends TestCase
         Mail::assertQueued(DocumentUploadRequestMail::class);
     }
     
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function user_can_view_public_upload_form_with_valid_token()
     {
         // Create an upload request
@@ -135,7 +135,7 @@ class DocumentUploadRequestFlowTest extends TestCase
         );
     }
     
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function user_cannot_view_expired_or_used_upload_form()
     {
         // Create an expired upload request
@@ -162,7 +162,7 @@ class DocumentUploadRequestFlowTest extends TestCase
         $response2->assertStatus(404);
     }
     
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function user_can_upload_document_with_valid_verification_code()
     {
         // Create an upload request
@@ -220,7 +220,7 @@ class DocumentUploadRequestFlowTest extends TestCase
         ]);
     }
     
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function user_cannot_upload_with_incorrect_verification_code()
     {
         // Create an upload request
@@ -260,7 +260,7 @@ class DocumentUploadRequestFlowTest extends TestCase
     }
     
     
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function multiple_documents_flow_completes_correctly()
     {
         // Create an upload request with multiple document types

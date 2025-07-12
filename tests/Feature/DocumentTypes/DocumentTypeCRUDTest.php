@@ -26,7 +26,7 @@ class DocumentTypeCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_list_document_types()
     {
         // Create multiple document types
@@ -47,7 +47,7 @@ class DocumentTypeCRUDTest extends TestCase
         );
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_create_new_document_type()
     {
         $this->actingAs($this->admin);
@@ -70,7 +70,7 @@ class DocumentTypeCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_update_existing_document_type()
     {
         $this->actingAs($this->admin);
@@ -99,7 +99,7 @@ class DocumentTypeCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_delete_a_document_type()
     {
         $this->actingAs($this->admin);
@@ -122,7 +122,7 @@ class DocumentTypeCRUDTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_validates_document_type_creation()
     {
         $this->actingAs($this->admin);
@@ -136,7 +136,7 @@ class DocumentTypeCRUDTest extends TestCase
         $response->assertSessionHasErrors(['name']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function it_validates_document_type_name_uniqueness_within_company()
     {
         $this->actingAs($this->admin);
@@ -156,7 +156,7 @@ class DocumentTypeCRUDTest extends TestCase
         $response->assertSessionHasErrors(['name']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function users_can_only_access_their_company_document_types()
     {
         // Create another company and document type

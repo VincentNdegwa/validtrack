@@ -59,3 +59,8 @@ if (!function_exists('delete_file')) {
         return CompanyHelper::deleteUploadedFile($path, $disk);
     }
 }
+if(!function_exists('get_company_owner')){
+    function get_company_owner($company){
+        return CompanyHelper::getCompanyOwner($company);
+    }
+}

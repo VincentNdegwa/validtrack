@@ -23,6 +23,11 @@ class PaddleBillingController extends Controller
     {
         $this->paddleService = $paddleService;
     }
+    private function getUser(){
+        $auth_user = Auth::user();
+        $user = get_company_owner($auth_user->company_id) ?? $auth_user;
+        return $user;
+    }
     
     /**
      * Display the user's billing page with available plans.
@@ -34,9 +39,7 @@ class PaddleBillingController extends Controller
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
-
-        $user = Auth::user();
-
+        $user = $this->getUser();
         $paddleSubscription = $user->subscriptions()->where('status', 'active')->first();
         $currentPlan = null;
         if ($paddleSubscription) {
@@ -113,7 +116,7 @@ class PaddleBillingController extends Controller
             return redirect()->back('error', 'Plan not found');
         };
         $billing_cycle = $request->route('billing_cycle');
-        $user = $request->user();
+        $user = $this->getUser();
 
         $priceId = $billing_cycle === 'yearly'
             ? $plan->paddle_yearly_price_id
@@ -161,7 +164,7 @@ class PaddleBillingController extends Controller
      */
     public function cancel(Request $request)
     {
-        $user = $request->user();
+        $user = $this->getUser();
         $subscription = $user->subscription('default');
         
         if (!$subscription) {
@@ -179,7 +182,7 @@ class PaddleBillingController extends Controller
      */
     public function resume(Request $request)
     {
-        $user = $request->user();
+        $user = $this->getUser();
         $subscription = $user->subscription('default');
         
         if (!$subscription || !$subscription->onGracePeriod()) {

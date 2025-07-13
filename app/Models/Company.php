@@ -31,6 +31,7 @@ class Company extends Model
         'address',
         'website',
         'logo',
+        'owner_id',
         'location',
         'description',
         'is_active',
@@ -51,6 +52,11 @@ class Company extends Model
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class, 'owner_id');
     }
 
     /**
@@ -104,7 +110,7 @@ class Company extends Model
         Log::info("Getting setting for key: {$key} in company: {$this->name}", [
             'setting' => $setting,
         ]);
-        
+
         if (!$setting) {
             return $default ?? CompanySetting::getDefaultValue($key);
         }

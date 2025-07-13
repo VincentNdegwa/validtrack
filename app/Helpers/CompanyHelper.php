@@ -199,4 +199,16 @@ class CompanyHelper
             ];
         }
     }
+
+    public static function getCompanyOwner($company): \App\Models\User|null
+    {
+        $company = self::getCompany($company);
+        
+        if (!$company) {
+            return null;
+        }
+        
+        return $company->owner;
+
+    }
 }

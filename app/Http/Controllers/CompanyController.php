@@ -28,7 +28,7 @@ class CompanyController extends Controller
         
         $perPage = in_array($perPage, [5, 10, 25, 50, 100]) ? $perPage : 10;
         
-        $query = Company::withCount('users');
+        $query = Company::withCount('users', 'owner');
         
         if (!empty($search)) {
             $query->where(function($q) use ($search) {
@@ -110,9 +110,12 @@ class CompanyController extends Controller
         }
         $company = is_numeric($id) ? Company::findOrFail($id) : Company::findBySlugOrFail($id);
 
-        $company->load(['users.roles' => function($query) {
+        $company->load([
+            'users.roles' => function($query) {
             $query->orderBy('name');
-        }]);
+            }, 
+        'owner'
+    ]);
         
         return Inertia::render('companies/Show', [
             'company' => $company

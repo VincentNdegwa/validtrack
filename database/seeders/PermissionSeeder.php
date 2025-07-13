@@ -239,6 +239,13 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'View Activity Log',
                 'description' => 'Can view the activity log of the company',
             ],
+
+            // Billing permissions
+            [
+                'name' => 'manage-billing',
+                'display_name' => 'Manage Billing',
+                'description' => 'Can manage billing plans and features',
+            ],
       
         ];
     }

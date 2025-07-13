@@ -45,9 +45,18 @@ class RoleSeeder extends Seeder
         
         $companyPermissions = Permission::where('company_id', $company->id)->get();
         
+        // First detach existing permissions to avoid constraint violations
         $adminRole->permissions()->detach();
+        
+        // Then attach each permission individually with error handling
         foreach ($companyPermissions as $permission) {
-            $adminRole->permissions()->attach($permission->id, ['company_id' => $company->id]);
+            try {
+                $adminRole->permissions()->attach($permission->id, [
+                    'company_id' => $company->id
+                ]);
+            } catch (\Exception $e) {
+                $this->command->warn("Error attaching permission {$permission->id} to admin role for company {$company->id}: " . $e->getMessage());
+            }
         }
     }
 
@@ -68,9 +77,18 @@ class RoleSeeder extends Seeder
             ->where('name', 'like', '%-view')
             ->get();
         
+        // First detach existing permissions to avoid constraint violations
         $managerRole->permissions()->detach();
+        
+        // Then attach each permission individually with error handling
         foreach ($viewPermissions as $permission) {
-            $managerRole->permissions()->attach($permission->id, ['company_id' => $company->id]);
+            try {
+                $managerRole->permissions()->attach($permission->id, [
+                    'company_id' => $company->id
+                ]);
+            } catch (\Exception $e) {
+                $this->command->warn("Error attaching permission {$permission->id} to manager role for company {$company->id}: " . $e->getMessage());
+            }
         }
     }
 
@@ -97,9 +115,18 @@ class RoleSeeder extends Seeder
             ])
             ->get();
         
+        // First detach existing permissions to avoid constraint violations
         $userRole->permissions()->detach();
+        
+        // Then attach each permission individually with error handling
         foreach ($basicPermissions as $permission) {
-            $userRole->permissions()->attach($permission->id, ['company_id' => $company->id]);
+            try {
+                $userRole->permissions()->attach($permission->id, [
+                    'company_id' => $company->id
+                ]);
+            } catch (\Exception $e) {
+                $this->command->warn("Error attaching permission {$permission->id} to user role for company {$company->id}: " . $e->getMessage());
+            }
         }
     }
 
@@ -119,15 +146,35 @@ class RoleSeeder extends Seeder
         $allPermissions = Permission::all();
         $allCompanies = Company::all();
         
+        // First detach all permissions to avoid unique constraint violations
         $superAdminRole->permissions()->detach();
         
+        // Build array of permissions to attach
         foreach ($allPermissions as $permission) {
             if ($permission->company_id === null) {
+                // Global permission - attach for all companies
                 foreach ($allCompanies as $company) {
-                    $superAdminRole->permissions()->attach($permission->id, ['company_id' => $company->id]);
+                    try {
+                        // Use attach with a try/catch to handle any errors
+                        $superAdminRole->permissions()->attach($permission->id, [
+                            'company_id' => $company->id
+                        ]);
+                    } catch (\Exception $e) {
+                        // Log the error but continue processing
+                        $this->command->warn("Error attaching permission {$permission->id} to role {$superAdminRole->id} for company {$company->id}: " . $e->getMessage());
+                    }
                 }
             } else {
-                $superAdminRole->permissions()->attach($permission->id, ['company_id' => $permission->company_id]);
+                // Company-specific permission
+                try {
+                    // Use attach with a try/catch to handle any errors
+                    $superAdminRole->permissions()->attach($permission->id, [
+                        'company_id' => $permission->company_id
+                    ]);
+                } catch (\Exception $e) {
+                    // Log the error but continue processing
+                    $this->command->warn("Error attaching permission {$permission->id} to role {$superAdminRole->id} for company {$permission->company_id}: " . $e->getMessage());
+                }
             }
         }
     }

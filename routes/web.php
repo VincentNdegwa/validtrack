@@ -43,11 +43,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('impersonate', [CompanyController::class, 'impersonateUser'])->name('impersonate.start');
     });
     
-    // Route available to all authenticated users to stop impersonation
     Route::post('impersonate/stop', [CompanyController::class, 'stopImpersonation'])->name('impersonate.stop');
+    Route::get('test-slack', function(){
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $user->notify(new \App\Notifications\TestSlackNotification());
+        return response()->json(['message' => 'Slack notification sent successfully.']);
+    });
 });
 
 // Include additional route files
 require __DIR__.'/document-uploads.php';
 require __DIR__.'/settings.php';
+require __DIR__.'/billing.php';
 require __DIR__.'/auth.php';

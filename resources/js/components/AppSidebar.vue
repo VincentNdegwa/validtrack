@@ -37,30 +37,13 @@ const mainNavItems = computed(() => {
                 show: true,
             },
             {
-                title: 'Users Management',
-                icon: Users,
-                show: true,
-                children: [
-                    {
-                        title: 'Users',
-                        href: '/users',
-                        icon: Users,
-                        show: true,
-                    },
-                    {
-                        title: 'Roles',
-                        href: '/roles',
-                        icon: ShieldCheck,
-                        show: true,
-                    },
-                    {
-                        title: 'Permissions',
-                        href: '/permissions',
-                        icon: Key,
-                        show: true,
-                    },
-                ],
-            },
+                title: 'Billing',
+                href: '/billing/plans',
+                icon: FileBadge2Icon,
+                show: hasPermission('manage-billing'),
+            }
+
+        
         ];
     }
 
@@ -119,7 +102,14 @@ const mainNavItems = computed(() => {
     return items.filter((item) => item.show === true);
 });
 
-const footerNavItems: NavItem[] = [];
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Billing',
+        href: '/billing',
+        icon: FileBadge2Icon,
+        show: hasPermission('manage-billing'),
+    }
+];
 </script>
 
 <template>

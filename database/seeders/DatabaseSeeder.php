@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             CompanySettingsSeeder::class,
             CommonDocumentTypesSeeder::class,
             CommonSubjectTypesSeeder::class,
+            BillingFeatureSeeder::class,
         ]);
     }
 
@@ -33,34 +34,56 @@ class DatabaseSeeder extends Seeder
      */
     private function createCompany(string $name, string $email, bool $isAdmin = false): Company
     {
-        return Company::factory()->create([
-            'name' => $name,
-            'email' => $email,
-            'location' => $isAdmin ? 'System Administration HQ' : 'Client Location',
-        ]);
+        // Use updateOrCreate to handle existing companies
+        return Company::updateOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'location' => $isAdmin ? 'System Administration HQ' : 'Client Location',
+            ]
+        );
     }
 
     private function createUsers(Company $regularCompany, Company $adminCompany): array
     {
-        $superAdminUser = User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@validtrack.com',
-            'company_id' => $adminCompany->id,
-            'role'=> 'super-admin',
-        ]);
+        // Check for existing super admin user
+        $superAdminUser = User::where('email', 'superadmin@validtrack.com')->first();
+        
+        if (!$superAdminUser) {
+            $superAdminUser = User::factory()->create([
+                'name' => 'Super Admin',
+                'email' => 'superadmin@validtrack.com',
+                'company_id' => $adminCompany->id,
+                'role'=> 'super-admin',
+            ]);
+        }
 
-        $adminUser = User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'company_id' => $regularCompany->id,
-            'role'=>'admin',
-        ]);
+        // Check for existing admin user
+        $adminUser = User::where('email', 'admin@example.com')->first();
         
+        if (!$adminUser) {
+            $adminUser = User::factory()->create([
+                'name' => 'Admin User',
+                'email' => 'admin@example.com',
+                'company_id' => $regularCompany->id,
+                'role'=>'admin',
+            ]);
+        }
         
-        User::factory(2)->create([
-            'company_id' => $regularCompany->id,
-            'role' => 'user',
-        ]);
+        // Only create regular users if we don't have enough
+        $existingRegularUsers = User::where('company_id', $regularCompany->id)
+            ->where('role', 'user')
+            ->count();
+            
+        if ($existingRegularUsers < 2) {
+            $neededUsers = 2 - $existingRegularUsers;
+            if ($neededUsers > 0) {
+                User::factory($neededUsers)->create([
+                    'company_id' => $regularCompany->id,
+                    'role' => 'user',
+                ]);
+            }
+        }
 
         return [
             'admin' => $adminUser,
@@ -106,7 +129,7 @@ class DatabaseSeeder extends Seeder
             ->first();
             
         if ($adminRole) {
-            $adminUser->roles()->attach($adminRole->id, ['company_id' => $company->id]);
+            $adminUser->roles()->syncWithoutDetaching([$adminRole->id => ['company_id' => $company->id]]);
         }
     }
 
@@ -117,7 +140,7 @@ class DatabaseSeeder extends Seeder
             ->first();
             
         if ($superAdminRole) {
-            $superAdminUser->roles()->attach($superAdminRole->id, ['company_id' => $adminCompany->id]);
+            $superAdminUser->roles()->syncWithoutDetaching([$superAdminRole->id => ['company_id' => $adminCompany->id]]);
         }
 
         $otherCompanies = Company::where('id', '!=', $adminCompany->id)->get();
@@ -128,7 +151,7 @@ class DatabaseSeeder extends Seeder
                 ->first();
                 
             if ($adminRole) {
-                $superAdminUser->roles()->attach($adminRole->id, ['company_id' => $company->id]);
+                $superAdminUser->roles()->syncWithoutDetaching([$adminRole->id => ['company_id' => $company->id]]);
             }
         }
     }
@@ -148,7 +171,7 @@ class DatabaseSeeder extends Seeder
                 ->where('company_id', $company->id)
                 ->get()
                 ->each(function ($user) use ($userRole, $company) {
-                    $user->roles()->attach($userRole->id, ['company_id' => $company->id]);
+                    $user->roles()->syncWithoutDetaching([$userRole->id => ['company_id' => $company->id]]);
                 });
         }
     }

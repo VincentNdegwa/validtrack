@@ -15,6 +15,7 @@ export interface User {
     updated_at: string;
     slug: string;
     roles?: Role[];
+    billing_plan?: UserBillingPlan;
 }
 
 // Add Role and Permission interfaces
@@ -156,4 +157,46 @@ export interface ActivityLog {
     user?: User;
     company?: Company;
     slug: string;
+}
+
+// Billing related interfaces
+export interface BillingFeature {
+    id: number;
+    name: string;
+    key: string;
+    type: string;
+    description?: string;
+    created_at: string;
+    updated_at: string;
+    pivot?: {
+        value: string | number;
+        billing_plan_id?: number;
+        billing_feature_id?: number;
+    };
+}
+
+export interface BillingPlan {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    monthly_price: number;
+    yearly_price: number;
+    is_active: boolean;
+    is_featured: boolean;
+    sort_order: number;
+    created_at: string;
+    updated_at: string;
+    features?: BillingFeature[];
+    users_count?: number;
+}
+
+export interface UserBillingPlan {
+    id: number;
+    billing_plan: BillingPlan;
+    billing_cycle: string;
+    current_period_start: string;
+    current_period_end: string;
+    trial_ends_at?: string;
+    status: string; // active, trial, canceled, past_due
 }

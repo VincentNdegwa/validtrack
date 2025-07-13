@@ -63,6 +63,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function routeNotificationForSlack()
+    {
+        return config('notification.SLACK_BOT_USER_DEFAULT_CHANNEL');
+    }
+
     /**
      * Get the company that owns the user.
      */
@@ -141,5 +146,47 @@ class User extends Authenticatable
         }
         
         return array_unique($permissions);
+    }
+    
+    /**
+     * Get the billing plans that belong to the user.
+     */
+    public function billingPlans()
+    {
+        return $this->belongsToMany(BillingPlan::class, 'user_billing_plans')
+            ->withPivot([
+                'id',
+                'billing_cycle',
+                'current_period_start',
+                'current_period_end',
+                'trial_ends_at',
+                'is_active',
+                'status',
+                'created_at',
+                'updated_at'
+            ])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the user's active billing plan.
+     */
+    public function activeBillingPlan()
+    {
+        return $this->belongsToMany(BillingPlan::class, 'user_billing_plans')
+            ->wherePivot('is_active', true)
+            ->withPivot([
+                'id',
+                'billing_cycle',
+                'current_period_start',
+                'current_period_end',
+                'trial_ends_at',
+                'is_active',
+                'status',
+                'created_at',
+                'updated_at'
+            ])
+            ->withTimestamps()
+            ->first();
     }
 }

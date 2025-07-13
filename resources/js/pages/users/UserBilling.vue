@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from '
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { BillingFeature, Transaction, type BillingPlan } from '@/types/models';
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
 interface BillingPlanWithFeatures extends BillingPlan {
@@ -74,7 +74,9 @@ const assignPlan = (): void => {
 };
 
 const cancelPlan = (): void => {
-    if (!props.currentPlan) return;
+    router.post(`/billing/cancel`, {
+        preserveScroll: true,
+    });
 };
 const formatDate = (dateString: string): string => {
     return dateString;

@@ -64,8 +64,12 @@ class PaddleBillingController extends Controller
                     'id' => $paddleSubscription->id,
                     'billing_plan' => $formattedBillingPlan,
                     'billing_cycle' => $billingCycle,
-                    'current_period_start' => company_datetime($paddleSubscription?->lastPayment()->date, $user->company_id) ?? null,
-                    'current_period_end' => company_datetime($paddleSubscription?->nextPayment()->date, $user->company_id) ?? null,
+                    'current_period_start' => ($paddleSubscription?->lastPayment() && $paddleSubscription?->lastPayment()->date)
+                        ? company_datetime($paddleSubscription->lastPayment()->date, $user->company_id)
+                        : null,
+                    'current_period_end' => ($paddleSubscription?->nextPayment() && $paddleSubscription?->nextPayment()->date)
+                        ? company_datetime($paddleSubscription->nextPayment()->date, $user->company_id)
+                        : null,
                     'status' => $paddleSubscription->status,
                 ];
 
@@ -163,10 +167,8 @@ class PaddleBillingController extends Controller
         if (!$subscription) {
             return redirect()->route('paddle.billing.index')
                 ->with('error', 'No active subscription found.');
-        }
-        
-        // Cancel at period end
-        $subscription->cancelAtPeriodEnd();
+        }        
+        $subscription->cancel();
         
         return redirect()->route('paddle.billing.index')
             ->with('success', 'Your subscription has been canceled. You will have access until the end of your billing period.');

@@ -58,6 +58,11 @@ const columns = computed(() => [
         sortable: true,
     },
     {
+        key: 'paddle_product_id',
+        label: 'Paddle Integration',
+        sortable: false,
+    },
+    {
         key: 'users_count',
         label: 'Users',
         sortable: true,

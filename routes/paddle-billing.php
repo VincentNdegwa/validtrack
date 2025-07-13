@@ -5,10 +5,10 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Paddle\Http\Controllers\WebhookController;
 
 // Paddle Billing routes (accessible only to authenticated users)
-Route::middleware(['auth', 'verified'])->prefix('paddle')->name('paddle.')->group(function () {
+Route::middleware(['auth', 'verified'])->name('paddle.')->group(function () {
     // User billing routes
     Route::get('billing', [PaddleBillingController::class, 'index'])->name('billing.index');
-    Route::post('billing/{plan}/subscribe', [PaddleBillingController::class, 'subscribe'])->name('billing.subscribe');
+    Route::get('billing/{plan}/subscribe/{billing_cycle}', [PaddleBillingController::class, 'subscribe'])->name('billing.subscribe');
     Route::post('billing/cancel', [PaddleBillingController::class, 'cancel'])->name('billing.cancel');
     Route::post('billing/resume', [PaddleBillingController::class, 'resume'])->name('billing.resume');
 });

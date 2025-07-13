@@ -17,6 +17,8 @@ class BillingFeature extends Model
         'description',
     ];
 
+    protected $appends = ['slug'];
+
     /**
      * Get the plans that have this feature
      */

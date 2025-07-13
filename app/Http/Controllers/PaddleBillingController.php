@@ -7,6 +7,8 @@ use App\Services\PaddleBillingService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -98,34 +100,57 @@ class PaddleBillingController extends Controller
     /**
      * Subscribe a user to a billing plan.
      */
-    public function subscribe(Request $request, BillingPlan $plan)
+    public function subscribe(Request $request)
     {
-        $validated = $request->validate([
-            'billing_cycle' => 'required|in:monthly,yearly',
-            'trial_days' => 'nullable|integer|min:0',
-        ]);
-        
+        $plan_encrypted = $request->route('plan');
+        $plan_id = Crypt::decrypt($plan_encrypted);
+        $plan = BillingPlan::findOrFail($plan_id);
+        if(!isset($plan)){
+            return redirect()->back('error', 'Plan not found');
+        };
+        $billing_cycle = $request->route('billing_cycle');
         $user = $request->user();
-        $result = $this->paddleService->createSubscription(
-            $user, 
-            $plan, 
-            $validated['billing_cycle'], 
-            $validated['trial_days'] ?? null
-        );
-        
-        if (!$result['success']) {
-            return redirect()->back()->withErrors(['subscription' => 'Failed to create subscription: ' . ($result['error'] ?? 'Unknown error')]);
+
+        $priceId = $billing_cycle === 'yearly'
+            ? $plan->paddle_yearly_price_id
+            : $plan->paddle_monthly_price_id;
+
+        if (!$priceId) {
+            return redirect()->back()->withErrors([
+                'subscription' => 'This plan is not available for ' . $billing_cycle . ' billing in Paddle'
+            ]);
         }
-        
-        // Redirect to Paddle checkout page
-        if (isset($result['checkout_url'])) {
-            return redirect($result['checkout_url']);
+
+        try {
+            $result = $this->paddleService->createSubscription(
+                $user, 
+                $plan, 
+                $billing_cycle,
+                $validated['trial_days'] ?? null
+            );
+            
+            Log::info('Paddle subscription creation result', $result);
+            
+            if (!$result['success']) {
+                return redirect()->back()->with(
+                    'Error creating subscription: ' . ($result['error'] ?? 'Unknown error'));
+            }
+            if (!empty($result['checkout'])) {
+                Log::info('Using checkout object directly with view');
+                return view('checkout', [
+                    'checkout' => $result['checkout'],
+                    'plan' => $plan
+                ]);
+            }
+            return redirect()->route('paddle.billing.index')
+                ->with('error', 'Failed to intiate subscription');
+        } catch (\Exception $e) {
+            Log::error('Error creating Paddle checkout: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error creating subscription: ' . $e->getMessage());
         }
-        
-        // Fallback - should not typically happen
-        return redirect()->route('billing.index')->with('success', 'Subscription process started.');
     }
-    
+
+
     /**
      * Cancel the user's current subscription.
      */
@@ -135,14 +160,14 @@ class PaddleBillingController extends Controller
         $subscription = $user->subscription('default');
         
         if (!$subscription) {
-            return redirect()->route('billing.index')
+            return redirect()->route('paddle.billing.index')
                 ->with('error', 'No active subscription found.');
         }
         
         // Cancel at period end
         $subscription->cancelAtPeriodEnd();
         
-        return redirect()->route('billing.index')
+        return redirect()->route('paddle.billing.index')
             ->with('success', 'Your subscription has been canceled. You will have access until the end of your billing period.');
     }
 
@@ -155,14 +180,14 @@ class PaddleBillingController extends Controller
         $subscription = $user->subscription('default');
         
         if (!$subscription || !$subscription->onGracePeriod()) {
-            return redirect()->route('billing.index')
+            return redirect()->route('paddle.billing.index')
                 ->with('error', 'No canceled subscription found or subscription cannot be resumed.');
         }
         
         // Resume the subscription
         $subscription->resume();
         
-        return redirect()->route('billing.index')
+        return redirect()->route('paddle.billing.index')
             ->with('success', 'Your subscription has been resumed.');
     }
     

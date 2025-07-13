@@ -39,6 +39,9 @@ const form = useForm({
     is_active: true,
     is_featured: false,
     sort_order: 10,
+    paddle_product_id: '',
+    paddle_monthly_price_id: '',
+    paddle_yearly_price_id: '',
     features: []
 });
 
@@ -135,6 +138,32 @@ const submit = () => {
                             <div class="flex items-center space-x-2">
                                 <Switch id="is_featured" v-model="form.is_featured" />
                                 <Label for="is_featured">Featured</Label>
+                            </div>
+
+                            <!-- Paddle Integration Fields -->
+                            <div class="space-y-2 md:col-span-2">
+                                <h4 class="text-lg font-medium mb-3 border-t pt-3">Paddle Integration</h4>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <Label for="paddle_product_id">Paddle Product ID</Label>
+                                <Input id="paddle_product_id" v-model="form.paddle_product_id" :error="form.errors.paddle_product_id"
+                                    placeholder="Enter Paddle Product ID" />
+                                <p v-if="form.errors.paddle_product_id" class="text-sm text-red-500">{{ form.errors.paddle_product_id }}</p>
+                            </div>
+
+                            <div class="space-y-2">
+                                <Label for="paddle_monthly_price_id">Paddle Monthly Price ID</Label>
+                                <Input id="paddle_monthly_price_id" v-model="form.paddle_monthly_price_id" :error="form.errors.paddle_monthly_price_id"
+                                    placeholder="Enter Paddle Monthly Price ID" />
+                                <p v-if="form.errors.paddle_monthly_price_id" class="text-sm text-red-500">{{ form.errors.paddle_monthly_price_id }}</p>
+                            </div>
+
+                            <div class="space-y-2 md:col-span-2">
+                                <Label for="paddle_yearly_price_id">Paddle Yearly Price ID</Label>
+                                <Input id="paddle_yearly_price_id" v-model="form.paddle_yearly_price_id" :error="form.errors.paddle_yearly_price_id"
+                                    placeholder="Enter Paddle Yearly Price ID" />
+                                <p v-if="form.errors.paddle_yearly_price_id" class="text-sm text-red-500">{{ form.errors.paddle_yearly_price_id }}</p>
                             </div>
                         </div>
 

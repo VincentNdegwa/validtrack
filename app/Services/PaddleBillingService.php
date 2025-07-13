@@ -38,20 +38,33 @@ class PaddleBillingService
                 throw new \Exception("Paddle price ID not found for plan {$plan->name} with billing cycle {$billingCycle}");
             }
             
-            // Build the checkout
-            $checkout = $user->checkout([$priceId]);
+
+            Log::info('Creating Paddle subscription', [
+                'user_id' => $user->id,
+                'plan' => $plan->name,
+                'billing_cycle' => $billingCycle,
+                'price_id' => $priceId,
+                'trial_days' => $trialDays,
+            ]);
             
+            // Use the original subscribe method that seems to be working in your other project
+            $checkout = $user->subscribe($priceId, 'default')
+                ->returnTo(route('paddle.billing.index'));
+            
+            // Add trial days if needed (Paddle handles this at the product level)
             if ($trialDays && $trialDays > 0) {
-                // Note: Paddle trial days need to be set at the product/plan level
-                // or handled via the Paddle dashboard
-                // For now we'll record this in our local database
+                Log::info('Trial days will be handled at the Paddle dashboard level', ['trial_days' => $trialDays]);
+            }
+                
+            if ($checkout) {
+                return [
+                    'success' => true,
+                    'checkout' => $checkout,
+                ];
             }
             
-            return [
-                'success' => true,
-                'checkout_url' => $checkout->url ?? '',
-                'checkout_id' => $checkout->id ?? '',
-            ];
+            // For cases where we couldn't get the checkout ID
+            throw new \Exception("Failed to retrieve checkout ID from Paddle response");
         } catch (\Exception $e) {
             Log::error("Paddle subscription creation failed: " . $e->getMessage());
             return [

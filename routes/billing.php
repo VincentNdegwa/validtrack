@@ -5,12 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 // Billing routes (accessible only to authenticated users)
 Route::middleware(['auth', 'verified'])->group(function () {
-    // User billing routes
-    Route::get('billing', [BillingController::class, 'index'])->name('billing.index');
-    Route::post('billing/{plan}/subscribe', [BillingController::class, 'subscribe'])->name('billing.subscribe');
-    Route::post('billing/cancel', [BillingController::class, 'cancel'])->name('billing.cancel');
-    Route::post('billing/resume', [BillingController::class, 'resume'])->name('billing.resume');
-    
     Route::middleware('super-admin')->prefix('billing')->name('billing.')->group(function () {
         // Plan management
         Route::get('/plans', [BillingController::class, 'indexPlans'])->name('plans.index');

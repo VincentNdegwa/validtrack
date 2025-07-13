@@ -29,6 +29,8 @@ class BillingPlan extends Model
         'paddle_yearly_price_id',
     ];
 
+    protected $appends = ['slug'];
+
     /**
      * The attributes that should be cast.
      *

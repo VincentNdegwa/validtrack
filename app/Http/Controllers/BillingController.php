@@ -168,6 +168,9 @@ class BillingController extends Controller
             'yearly_price' => 'required|numeric|min:0',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'paddle_product_id' => 'nullable|string',
+            'paddle_monthly_price_id' => 'nullable|string',
+            'paddle_yearly_price_id' => 'nullable|string',
             'features' => 'array',
         ]);
         
@@ -179,6 +182,9 @@ class BillingController extends Controller
             'yearly_price' => $validated['yearly_price'],
             'is_active' => $validated['is_active'] ?? true,
             'is_featured' => $validated['is_featured'] ?? false,
+            'paddle_product_id' => $validated['paddle_product_id'] ?? null,
+            'paddle_monthly_price_id' => $validated['paddle_monthly_price_id'] ?? null,
+            'paddle_yearly_price_id' => $validated['paddle_yearly_price_id'] ?? null,
             'sort_order' => BillingPlan::count() + 1,
         ]);
         
@@ -210,6 +216,9 @@ class BillingController extends Controller
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
+            'paddle_product_id' => 'nullable|string',
+            'paddle_monthly_price_id' => 'nullable|string',
+            'paddle_yearly_price_id' => 'nullable|string',
             'features' => 'array',
         ]);
         
@@ -222,6 +231,9 @@ class BillingController extends Controller
             'is_active' => $validated['is_active'] ?? true,
             'is_featured' => $validated['is_featured'] ?? false,
             'sort_order' => $validated['sort_order'] ?? $plan->sort_order,
+            'paddle_product_id' => $validated['paddle_product_id'] ?? null,
+            'paddle_monthly_price_id' => $validated['paddle_monthly_price_id'] ?? null,
+            'paddle_yearly_price_id' => $validated['paddle_yearly_price_id'] ?? null,
         ]);
         
         if (isset($validated['features'])) {

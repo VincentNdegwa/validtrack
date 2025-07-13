@@ -20,6 +20,7 @@ interface UserBillingPlan {
     current_period_end: string;
     trial_ends_at?: string;
     status: string;
+    slug: string;
 }
 
 interface Props {
@@ -64,21 +65,15 @@ const closeCancelDialog = (): void => {
     showCancelDialog.value = false;
 };
 
-// Helper functions
 const formatDate = (dateString?: string): string => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString();
 };
 
-// API interactions
 const assignPlan = (): void => {
-    router.post(`/billing/${form.plan_id}/subscribe`, { billing_cycle: form.billing_cycle }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            closeModal();
-        },
-    } )
+    const url = `/billing/${form.plan_id}/subscribe/${form.billing_cycle}`;
+    window.location.href = url;
 };
 
 const cancelPlan = (): void => {
@@ -277,6 +272,8 @@ const cancelPlan = (): void => {
                     <form @submit.prevent="assignPlan">
                         <!-- Billing cycle selector -->
                         <div class="mb-6">
+                                <input type="hidden" name="billing_cycle" :value="form.billing_cycle" />
+
                             <div class="flex justify-center">
                                 <div class="inline-flex rounded-md shadow-sm" role="group">
                                     <button
@@ -315,15 +312,15 @@ const cancelPlan = (): void => {
                             <div 
                                 v-for="plan in props.plans" 
                                 :key="plan.id" 
-                                @click="form.plan_id = plan.id.toString()"
+                                @click="form.plan_id = plan.slug"
                                 :class="[
                                     'relative cursor-pointer rounded-lg border p-4 hover:border-primary transition-all hover:shadow-md',
-                                    form.plan_id === plan.id.toString() ? 'border-primary ring-2 ring-primary/20 shadow-sm' : 'border-muted'
+                                    form.plan_id === plan.slug ? 'border-primary ring-2 ring-primary/20 shadow-sm' : 'border-muted'
                                 ]"
                             >
                                 <!-- Selected badge -->
                                 <div 
-                                    v-if="form.plan_id === plan.id.toString()" 
+                                    v-if="form.plan_id === plan.slug" 
                                     class="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-3 w-3">

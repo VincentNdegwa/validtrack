@@ -185,6 +185,9 @@ export interface BillingPlan {
     is_active: boolean;
     is_featured: boolean;
     sort_order: number;
+    paddle_product_id?: string;
+    paddle_monthly_price_id?: string;
+    paddle_yearly_price_id?: string;
     created_at: string;
     updated_at: string;
     features?: BillingFeature[];

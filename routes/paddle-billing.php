@@ -13,5 +13,4 @@ Route::middleware(['auth', 'verified'])->name('paddle.')->group(function () {
     Route::post('billing/resume', [PaddleBillingController::class, 'resume'])->name('billing.resume');
 });
 
-// Paddle webhook route - does not require auth
-Route::post('paddle/webhook', WebhookController::class)->name('paddle.webhook');
+// Route::post('paddle/webhook', WebhookController::class)->name('paddle.webhook');

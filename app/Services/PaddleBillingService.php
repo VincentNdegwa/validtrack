@@ -47,11 +47,9 @@ class PaddleBillingService
                 'trial_days' => $trialDays,
             ]);
             
-            // Use the original subscribe method that seems to be working in your other project
             $checkout = $user->subscribe($priceId, 'default')
-                ->returnTo(route('paddle.billing.index'));
+             ->returnTo(route('paddle.billing.index', ['checkout_completed' => 1]));
             
-            // Add trial days if needed (Paddle handles this at the product level)
             if ($trialDays && $trialDays > 0) {
                 Log::info('Trial days will be handled at the Paddle dashboard level', ['trial_days' => $trialDays]);
             }

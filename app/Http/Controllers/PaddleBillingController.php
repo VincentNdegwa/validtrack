@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
 use App\Models\BillingPlan;
-use App\Services\PaddleBillingService;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Inertia\Inertia;
+use App\Services\PaddleBillingService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class PaddleBillingController extends Controller
 {
@@ -33,31 +34,17 @@ class PaddleBillingController extends Controller
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
-            
+
         $user = Auth::user();
-        
-        // Get the user's active subscription from Paddle
+
+        $paddleSubscription = $user->subscriptions()->where('status', 'active')->first();
         $currentPlan = null;
-        $subscription = $user->subscription('default');
-        
-        if ($subscription) {
-            // Find the corresponding billing plan
-            $billingPlan = BillingPlan::with('features')->where('paddle_product_id', $subscription->paddle_id)->first();
-            
+        if ($paddleSubscription) {
+            $subItem = $paddleSubscription->items()->first();
+            $billingPlan = BillingPlan::with('features')->where('paddle_product_id', $subItem->product_id)->first();
+
             if ($billingPlan) {
-                // Format features for frontend
-                $features = $billingPlan->features->map(function ($feature) {
-                    return [
-                        'id' => $feature->id,
-                        'name' => $feature->name,
-                        'description' => $feature->description,
-                        'value' => $feature->value,
-                        'is_highlighted' => (bool)$feature->is_highlighted,
-                        'type' => $feature->type,
-                    ];
-                });
-                
-                // Format the billing plan for frontend
+                $features = $billingPlan->features;
                 $formattedBillingPlan = [
                     'id' => $billingPlan->id,
                     'name' => $billingPlan->name,
@@ -69,31 +56,44 @@ class PaddleBillingController extends Controller
                     'sort_order' => $billingPlan->sort_order,
                     'features' => $features,
                 ];
-                
-                // Map the billing cycle from Paddle
-                $billingCycle = $subscription->recurring ? 
-                    ($subscription->interval === 'year' ? 'yearly' : 'monthly') : 
-                    'monthly';
-                
+                $billingCycle = $subItem->price_id ===  $billingPlan->paddle_monthly_price_id
+                    ? 'monthly'
+                    : 'yearly';
+
                 $currentPlan = [
-                    'id' => $subscription->id,
+                    'id' => $paddleSubscription->id,
                     'billing_plan' => $formattedBillingPlan,
                     'billing_cycle' => $billingCycle,
-                    'current_period_start' => $subscription->current_period_start->toDateTimeString(),
-                    'current_period_end' => $subscription->current_period_end->toDateTimeString(),
-                    'status' => $subscription->status,
+                    'current_period_start' => company_datetime($paddleSubscription?->lastPayment()->date, $user->company_id) ?? null,
+                    'current_period_end' => company_datetime($paddleSubscription?->nextPayment()->date, $user->company_id) ?? null,
+                    'status' => $paddleSubscription->status,
                 ];
-                
-                // Add trial_ends_at if applicable
-                if ($subscription->onTrial()) {
-                    $currentPlan['trial_ends_at'] = $subscription->trial_ends_at->toDateTimeString();
+
+                if ($paddleSubscription->trial_ends_at) {
+                    $currentPlan['trial_ends_at'] = $paddleSubscription->trial_ends_at;
                 }
             }
         }
-            
+
+        $transactions = $user->transactions()
+            ->orderByDesc('billed_at')
+            ->limit(10)
+            ->get()
+            ->map(function ($txn)use($user) {
+                return array_merge(
+                    $txn->toArray(),
+                    [
+                        'billed_at' => company_datetime($txn->billed_at->format('Y-m-d H:i:s'), $user->company_id),
+                        'total' => number_format($txn->total / 100, 2),
+                    ]
+                );
+            });
+
+
         return Inertia::render('users/UserBilling', [
             'plans' => $plans,
             'currentPlan' => $currentPlan,
+            'transactions'=> $transactions,
         ]);
     }
     
@@ -139,7 +139,8 @@ class PaddleBillingController extends Controller
                 Log::info('Using checkout object directly with view');
                 return view('checkout', [
                     'checkout' => $result['checkout'],
-                    'plan' => $plan
+                    'plan' => $plan,
+                    'billing_cycle' => $billing_cycle,
                 ]);
             }
             return redirect()->route('paddle.billing.index')

@@ -77,7 +77,6 @@ class CompanyHelper
         if (!$dateTime) {
             $dateTime = now();
         }
-        
         if (is_string($dateTime)) {
             $dateTime = Carbon::parse($dateTime);
         }

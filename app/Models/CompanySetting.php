@@ -16,12 +16,6 @@ class CompanySetting extends Model
         'value',
     ];
     
-    /**
-     * The attributes that should be cast.
-     */
-    protected $casts = [
-        'value' => 'json',
-    ];
 
     public function setValueAttribute($value)
     {

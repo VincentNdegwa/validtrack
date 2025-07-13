@@ -5,11 +5,11 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\HasSlug;
 use App\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Paddle\Billable;
 use Illuminate\Notifications\Notifiable;
 use Laratrust\Traits\HasRolesAndPermissions;
-use Laravel\Paddle\Billable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
@@ -147,6 +147,11 @@ class User extends Authenticatable
         }
         
         return array_unique($permissions);
+    }
+
+    public function transactions()
+    {
+        return $this->morphMany(\Laravel\Paddle\Transaction::class, 'billable');
     }
     
     /**

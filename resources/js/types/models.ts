@@ -203,3 +203,18 @@ export interface UserBillingPlan {
     trial_ends_at?: string;
     status: string; // active, trial, canceled, past_due
 }
+export interface Transaction {
+    id: number;
+    billable_type: string;
+    billable_id: number;
+    paddle_id: string;
+    paddle_subscription_id: string | null;
+    invoice_number: string | null;
+    status: string;
+    total: string;
+    tax: string;
+    currency: string;
+    billed_at: string;
+    created_at: string;
+    updated_at: string;
+}

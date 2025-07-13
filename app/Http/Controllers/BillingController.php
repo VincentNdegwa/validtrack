@@ -7,6 +7,7 @@ use App\Models\BillingPlan;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -26,50 +27,42 @@ class BillingController extends Controller
             ->get();
             
         $user = Auth::user();
-        
-        $subscription = $user->billingPlans()
-            ->wherePivot('is_active', true)
-            ->withPivot(['billing_cycle', 'current_period_start', 'current_period_end', 'trial_ends_at', 'is_active'])
-            ->first();
-            
+
+        $paddleSubscription = $user->subscriptions()->where('status', 'active')->first();
         $currentPlan = null;
-        if ($subscription) {
-            $billingPlan = BillingPlan::with('features.plans')->find($subscription->id);
-            
-            $status = $subscription->pivot->status ?? 'active';
-            if ($subscription->pivot->trial_ends_at && now()->lt($subscription->pivot->trial_ends_at)) {
-                $status = 'trial';
-            } elseif (!$subscription->pivot->is_active) {
-                $status = 'canceled';
-            }
-            
-            $features = $billingPlan->features;
-            
-            // Format the billing plan for frontend
-            $formattedBillingPlan = [
-                'id' => $billingPlan->id,
-                'name' => $billingPlan->name,
-                'description' => $billingPlan->description,
-                'monthly_price' => $billingPlan->monthly_price,
-                'yearly_price' => $billingPlan->yearly_price,
-                'is_active' => (bool)$billingPlan->is_active,
-                'is_featured' => (bool)$billingPlan->is_featured,
-                'sort_order' => $billingPlan->sort_order,
-                'features' => $features,
-            ];
-            
-            $currentPlan = [
-                'id' => $subscription->pivot->id ?? null,
-                'billing_plan' => $formattedBillingPlan,
-                'billing_cycle' => $subscription->pivot->billing_cycle,
-                'current_period_start' => $subscription->pivot->current_period_start,
-                'current_period_end' => $subscription->pivot->current_period_end,
-                'status' => $status,
-            ];
-            
-            // Add trial_ends_at only if it exists
-            if ($subscription->pivot->trial_ends_at) {
-                $currentPlan['trial_ends_at'] = $subscription->pivot->trial_ends_at;
+        if ($paddleSubscription) {
+            $subItem = $paddleSubscription->items()->first();
+            $billingPlan = BillingPlan::with('features')->where('paddle_product_id', $subItem->product_id)->first();
+
+            if ($billingPlan) {
+                $features = $billingPlan->features;
+                $formattedBillingPlan = [
+                    'id' => $billingPlan->id,
+                    'name' => $billingPlan->name,
+                    'description' => $billingPlan->description,
+                    'monthly_price' => $billingPlan->monthly_price,
+                    'yearly_price' => $billingPlan->yearly_price,
+                    'is_active' => (bool)$billingPlan->is_active,
+                    'is_featured' => (bool)$billingPlan->is_featured,
+                    'sort_order' => $billingPlan->sort_order,
+                    'features' => $features,
+                ];
+                $billingCycle = $subItem->price_id ===  $billingPlan->paddle_monthly_price_id
+                    ? 'monthly'
+                    : 'yearly';
+
+                $currentPlan = [
+                    'id' => $paddleSubscription->id,
+                    'billing_plan' => $formattedBillingPlan,
+                    'billing_cycle' => $billingCycle,
+                    'current_period_start' => $paddleSubscription->current_period_start ?? null,
+                    'current_period_end' => $paddleSubscription->current_period_end ?? null,
+                    'status' => $paddleSubscription->status,
+                ];
+
+                if ($paddleSubscription->trial_ends_at) {
+                    $currentPlan['trial_ends_at'] = $paddleSubscription->trial_ends_at;
+                }
             }
         }
             

@@ -6,6 +6,7 @@ use App\Traits\HasSlug;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Company extends Model
 {
@@ -94,12 +95,15 @@ class Company extends Model
 
     public function settings()
     {
-        return $this->hasMany(CompanySetting::class);
+        return $this->hasMany(CompanySetting::class, 'company_id');
     }
 
     public function getSetting($key, $default = null)
     {
         $setting = $this->settings()->where('key', $key)->first();
+        Log::info("Getting setting for key: {$key} in company: {$this->name}", [
+            'setting' => $setting,
+        ]);
         
         if (!$setting) {
             return $default ?? CompanySetting::getDefaultValue($key);
@@ -107,13 +111,11 @@ class Company extends Model
         
         $value = $setting->value;
         
-        // If this is the reminder days setting, try to decode it from JSON
         if ($key === CompanySetting::REMINDER_DEFAULT_DAYS && is_string($value)) {
             $decoded = json_decode($value, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 return $decoded;
             }
-            // If it's a single number stored as string, convert to array with single value
             if (is_numeric($value)) {
                 return [(int)$value];
             }

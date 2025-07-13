@@ -27,19 +27,15 @@ class BillingController extends Controller
             
         $user = Auth::user();
         
-        // Get the user's active billing plan subscription
         $subscription = $user->billingPlans()
             ->wherePivot('is_active', true)
             ->withPivot(['billing_cycle', 'current_period_start', 'current_period_end', 'trial_ends_at', 'is_active'])
             ->first();
             
-        // Format the user's current plan to match the frontend expected format
         $currentPlan = null;
         if ($subscription) {
-            // Get the plan with features
-            $billingPlan = BillingPlan::with('features')->find($subscription->id);
+            $billingPlan = BillingPlan::with('features.plans')->find($subscription->id);
             
-            // Determine status (active, trial, canceled)
             $status = $subscription->pivot->status ?? 'active';
             if ($subscription->pivot->trial_ends_at && now()->lt($subscription->pivot->trial_ends_at)) {
                 $status = 'trial';
@@ -47,17 +43,7 @@ class BillingController extends Controller
                 $status = 'canceled';
             }
             
-            // Format features for frontend
-            $features = $billingPlan->features->map(function ($feature) {
-                return [
-                    'id' => $feature->id,
-                    'name' => $feature->name,
-                    'description' => $feature->description,
-                    'value' => $feature->value,
-                    'is_highlighted' => (bool)$feature->is_highlighted,
-                    'type' => $feature->type,
-                ];
-            });
+            $features = $billingPlan->features;
             
             // Format the billing plan for frontend
             $formattedBillingPlan = [

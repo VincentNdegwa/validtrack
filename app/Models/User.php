@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laratrust\Traits\HasRolesAndPermissions;
+use Laravel\Paddle\Billable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasSlug, HasRolesAndPermissions, LogsActivity;
+    use HasFactory, Notifiable, HasSlug, HasRolesAndPermissions, LogsActivity, Billable;
 
     /**
      * The attributes that are mass assignable.

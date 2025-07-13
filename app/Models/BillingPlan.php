@@ -24,6 +24,9 @@ class BillingPlan extends Model
         'is_active',
         'is_featured',
         'sort_order',
+        'paddle_product_id',
+        'paddle_monthly_price_id',
+        'paddle_yearly_price_id',
     ];
 
     /**

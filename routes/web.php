@@ -56,3 +56,4 @@ require __DIR__.'/document-uploads.php';
 require __DIR__.'/settings.php';
 require __DIR__.'/billing.php';
 require __DIR__.'/auth.php';
+require __DIR__.'/paddle-billing.php';

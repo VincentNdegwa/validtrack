@@ -100,14 +100,25 @@ const mainNavItems = computed(() => {
     return items.filter((item) => item.show === true);
 });
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Billing',
-        href: '/billing',
-        icon: FileBadge2Icon,
-        show: hasPermission('manage-billing'),
-    },
-];
+const footerNavItems = computed(() => {
+
+    if (isSuperAdmin.value) {
+        return [
+            
+        ];
+    }
+    const items: NavItem[] = [
+        {
+            title: 'Billing',
+            href: '/billing',
+            icon: FileBadge2Icon,
+            show: hasPermission('manage-billing'),
+        },
+        
+    ]
+    return items.filter((item) => item.show === true);
+})
+
 </script>
 
 <template>

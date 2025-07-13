@@ -13,7 +13,16 @@ test('reset password link screen can be rendered', function () {
 test('reset password link can be requested', function () {
     Notification::fake();
 
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
+
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
 
     $this->post('/forgot-password', ['email' => $user->email]);
 
@@ -23,8 +32,16 @@ test('reset password link can be requested', function () {
 test('reset password screen can be rendered', function () {
     Notification::fake();
 
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $this->post('/forgot-password', ['email' => $user->email]);
 
     Notification::assertSentTo($user, ResetPassword::class, function ($notification) {
@@ -39,8 +56,16 @@ test('reset password screen can be rendered', function () {
 test('password can be reset with valid token', function () {
     Notification::fake();
 
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $this->post('/forgot-password', ['email' => $user->email]);
 
     Notification::assertSentTo($user, ResetPassword::class, function ($notification) use ($user) {

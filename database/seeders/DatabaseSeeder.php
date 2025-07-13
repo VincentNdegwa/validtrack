@@ -40,6 +40,7 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => $name,
                 'location' => $isAdmin ? 'System Administration HQ' : 'Client Location',
+                'owner_id' => null,
             ]
         );
     }
@@ -50,38 +51,46 @@ class DatabaseSeeder extends Seeder
         $superAdminUser = User::where('email', 'superadmin@validtrack.com')->first();
         
         if (!$superAdminUser) {
-            $superAdminUser = User::factory()->create([
-                'name' => 'Super Admin',
-                'email' => 'superadmin@validtrack.com',
-                'company_id' => $adminCompany->id,
-                'role'=> 'super-admin',
-            ]);
+            $superAdminUser = User::factory()
+                ->forCompany($adminCompany)
+                ->create([
+                    'name' => 'Super Admin',
+                    'email' => 'superadmin@validtrack.com',
+                    'role' => 'super-admin',
+                ]);
+
+            $adminCompany->owner_id = $superAdminUser->id;
+            $adminCompany->save();
         }
 
         // Check for existing admin user
         $adminUser = User::where('email', 'admin@example.com')->first();
         
         if (!$adminUser) {
-            $adminUser = User::factory()->create([
-                'name' => 'Admin User',
-                'email' => 'admin@example.com',
-                'company_id' => $regularCompany->id,
-                'role'=>'admin',
-            ]);
+            $adminUser = User::factory()
+                ->forCompany($regularCompany)
+                ->create([
+                    'name' => 'Admin User',
+                    'email' => 'admin@example.com',
+                    'role'=>'admin',
+                ]);
+            $regularCompany->owner_id = $adminUser->id;
+            $regularCompany->save();
         }
         
         // Only create regular users if we don't have enough
         $existingRegularUsers = User::where('company_id', $regularCompany->id)
             ->where('role', 'user')
             ->count();
-            
+
         if ($existingRegularUsers < 2) {
             $neededUsers = 2 - $existingRegularUsers;
             if ($neededUsers > 0) {
-                User::factory($neededUsers)->create([
-                    'company_id' => $regularCompany->id,
-                    'role' => 'user',
-                ]);
+                User::factory($neededUsers)
+                    ->forCompany($regularCompany)
+                    ->create([
+                        'role' => 'user',
+                    ]);
             }
         }
 

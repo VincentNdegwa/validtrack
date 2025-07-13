@@ -13,10 +13,5 @@ defineProps<Props>();
 </script>
 
 <template>
-   <img
-        src="/logo.svg"
-        alt="ValidTrack Logo"
-        class="size-5 fill-current text-white dark:text-black"
-        v-bind="$attrs"
-    />
+    <img src="/logo.svg" alt="ValidTrack Logo" class="size-5 fill-current text-white dark:text-black" v-bind="$attrs" />
 </template>

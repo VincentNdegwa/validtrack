@@ -24,16 +24,19 @@ class DocumentExpiryReminderTest extends TestCase
         Carbon::setTestNow(Carbon::create(2025, 1, 1)->startOfDay());
         \Illuminate\Support\Facades\Log::info('Test date set to:', ['now' => Carbon::now()->toDateTimeString()]);
         
-        // Create test data
         $company = Company::factory()->create([
             'name' => 'Test Company',
             'email' => 'admin@testcompany.com',
+            'owner_id' => null,
         ]);
-        
-        $user = User::factory()->create([
-            'company_id' => $company->id,
-        ]);
-        
+
+        $user = User::factory()
+            ->forCompany($company)
+            ->create();
+
+        $company->owner_id = $user->id;
+        $company->save();
+
         // Create a subject
         $subject = Subject::factory()->create([
             'company_id' => $company->id,
@@ -41,7 +44,7 @@ class DocumentExpiryReminderTest extends TestCase
             'email' => 'subject@example.com',
             'user_id' => $user->id
         ]);
-        
+
         // Create a document type
         $documentType = DocumentType::factory()->create([
             'company_id' => $company->id,

@@ -19,11 +19,16 @@ class SubjectFactory extends Factory
      */
     public function definition(): array
     {
-        $company = Company::factory()->create();
-        
-        $user = User::factory()->create([
-            'company_id' => $company->id
+        $company = Company::factory()->create([
+            'owner_id' => null,
         ]);
+
+        $user = User::factory()
+            ->forCompany($company)
+            ->create();
+
+        $company->owner_id = $user->id;
+        $company->save();
         
         return [
             'name' => $this->faker->name(),

@@ -4,8 +4,16 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 test('password can be updated', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $response = $this
         ->actingAs($user)
         ->from('/settings/password')
@@ -23,8 +31,16 @@ test('password can be updated', function () {
 });
 
 test('correct password must be provided to update password', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $response = $this
         ->actingAs($user)
         ->from('/settings/password')

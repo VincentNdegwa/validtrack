@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import Can from '@/components/auth/Can.vue';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -9,7 +10,6 @@ import { type BillingFeature } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Edit, Plus, Trash } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-import Can from '@/components/auth/Can.vue';
 
 interface Props {
     features: BillingFeature[];
@@ -25,7 +25,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Billing Features',
         href: '/billing/features',
-    }
+    },
 ];
 
 const search = ref('');
@@ -70,7 +70,7 @@ const closeDeleteModal = () => {
 
 const deleteFeature = () => {
     if (!featureToDelete.value) return;
-    
+
     router.delete(`/billing/features/${featureToDelete.value.id}`, {
         preserveScroll: true,
         onSuccess: () => {
@@ -97,7 +97,7 @@ const handleMenuAction = (action: string, featureId: string | number) => {
 
 <template>
     <Head title="Billing Features" />
-    
+
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
             <div class="flex items-center justify-between">
@@ -130,11 +130,10 @@ const handleMenuAction = (action: string, featureId: string | number) => {
                 </div>
             </div>
 
-            <div v-if="!props.features || props.features.length === 0" 
-                class="flex items-center justify-center p-8 rounded-lg border">
+            <div v-if="!props.features || props.features.length === 0" class="flex items-center justify-center rounded-lg border p-8">
                 <div class="text-center">
                     <p class="text-muted-foreground">No billing features found. Create your first feature to get started.</p>
-                    <Link href="/billing/features/create" class="inline-block mt-4">
+                    <Link href="/billing/features/create" class="mt-4 inline-block">
                         <Button class="bg-primary text-primary-foreground">
                             <Plus class="mr-1 h-4 w-4" />
                             Create Feature
@@ -144,18 +143,16 @@ const handleMenuAction = (action: string, featureId: string | number) => {
             </div>
 
             <div v-else class="overflow-hidden rounded-lg border">
-                <DataTable
-                    :data="props.features"
-                    :columns="columns"
-                    empty-message="No billing features found"
-                >
+                <DataTable :data="props.features" :columns="columns" empty-message="No billing features found">
                     <template #type="{ item: feature }">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+                        <span
+                            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize"
                             :class="{
                                 'bg-blue-100 text-blue-800': feature.type === 'boolean',
                                 'bg-green-100 text-green-800': feature.type === 'number',
-                                'bg-purple-100 text-purple-800': feature.type === 'string'
-                            }">
+                                'bg-purple-100 text-purple-800': feature.type === 'string',
+                            }"
+                        >
                             {{ feature.type }}
                         </span>
                     </template>
@@ -179,7 +176,10 @@ const handleMenuAction = (action: string, featureId: string | number) => {
                     <DialogTitle>Delete Feature</DialogTitle>
                 </DialogHeader>
                 <div class="py-4">
-                    <p>Are you sure you want to delete the feature <span class="font-semibold">{{ featureToDelete?.name }}</span>?</p>
+                    <p>
+                        Are you sure you want to delete the feature <span class="font-semibold">{{ featureToDelete?.name }}</span
+                        >?
+                    </p>
                     <p class="mt-2 text-sm text-destructive">This action cannot be undone.</p>
                 </div>
                 <DialogFooter>

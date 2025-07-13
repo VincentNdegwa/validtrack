@@ -15,7 +15,11 @@ defineProps<Props>();
         <SidebarGroupContent>
             <SidebarMenu>
                 <SidebarMenuItem v-for="item in items" :key="item.title">
-                    <SidebarMenuButton v-if="item.show != false" class="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100" as-child>
+                    <SidebarMenuButton
+                        v-if="item.show != false"
+                        class="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
+                        as-child
+                    >
                         <a :href="item.href" rel="noopener noreferrer">
                             <component :is="item.icon" />
                             <span>{{ item.title }}</span>

@@ -33,14 +33,20 @@ class DocumentUploadRequestFlowTest extends TestCase
         Mail::fake();
         Storage::fake('public');
 
-        // Create company
-        $this->company = Company::factory()->create();
-        
-        // Create admin
-        $this->admin = User::factory()->create([
-            'company_id' => $this->company->id,
-            'role' => 'admin'
+        $this->company = Company::factory()->create([
+            'name' => 'Test Company',
+            'email' => 'admin@testcompany.com',
+            'owner_id' => null,
         ]);
+
+        $this->admin = User::factory()
+            ->forCompany($this->company)
+            ->create([
+            'role' => 'admin',
+        ]);
+
+        $this->company->owner_id = $this->admin->id;
+        $this->company->save();
         
         // Create subject
         $this->subject = Subject::factory()->create([

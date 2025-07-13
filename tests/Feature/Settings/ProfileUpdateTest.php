@@ -3,8 +3,16 @@
 use App\Models\User;
 
 test('profile page is displayed', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $response = $this
         ->actingAs($user)
         ->get('/settings/profile');
@@ -13,8 +21,16 @@ test('profile page is displayed', function () {
 });
 
 test('profile information can be updated', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $response = $this
         ->actingAs($user)
         ->patch('/settings/profile', [
@@ -34,8 +50,16 @@ test('profile information can be updated', function () {
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $response = $this
         ->actingAs($user)
         ->patch('/settings/profile', [
@@ -51,8 +75,16 @@ test('email verification status is unchanged when the email address is unchanged
 });
 
 test('user can delete their account', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $response = $this
         ->actingAs($user)
         ->delete('/settings/profile', [
@@ -68,8 +100,16 @@ test('user can delete their account', function () {
 });
 
 test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $response = $this
         ->actingAs($user)
         ->from('/settings/profile')

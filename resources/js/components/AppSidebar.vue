@@ -41,9 +41,7 @@ const mainNavItems = computed(() => {
                 href: '/billing/plans',
                 icon: FileBadge2Icon,
                 show: hasPermission('manage-billing'),
-            }
-
-        
+            },
         ];
     }
 
@@ -108,7 +106,7 @@ const footerNavItems: NavItem[] = [
         href: '/billing',
         icon: FileBadge2Icon,
         show: hasPermission('manage-billing'),
-    }
+    },
 ];
 </script>
 

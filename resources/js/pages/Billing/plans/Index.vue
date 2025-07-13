@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
@@ -85,7 +85,7 @@ const cancelDelete = () => {
 
 const deletePlan = () => {
     if (!planToDelete.value) return;
-    
+
     router.delete(`/billing/plans/${planToDelete.value.id}`, {
         preserveScroll: true,
         onSuccess: () => {
@@ -130,7 +130,7 @@ const handleMenuAction = (action: string, planId: string | number) => {
                             class="rounded-md border px-4 py-2 focus:ring-2 focus:ring-primary focus:outline-none"
                         />
                     </div>
-                    
+
                     <Link href="/billing/features">
                         <Button variant="outline" class="mr-2">Features</Button>
                     </Link>
@@ -143,10 +143,10 @@ const handleMenuAction = (action: string, planId: string | number) => {
                 </div>
             </div>
 
-            <div v-if="props.plans.length === 0" class="flex items-center justify-center p-8 rounded-lg border">
+            <div v-if="props.plans.length === 0" class="flex items-center justify-center rounded-lg border p-8">
                 <div class="text-center">
                     <p class="text-muted-foreground">No billing plans found. Create your first plan to get started.</p>
-                    <Link href="/billing/plans/create" class="inline-block mt-4">
+                    <Link href="/billing/plans/create" class="mt-4 inline-block">
                         <Button class="bg-primary text-primary-foreground">
                             <Plus class="mr-1 h-4 w-4" />
                             Create Plan
@@ -156,28 +156,27 @@ const handleMenuAction = (action: string, planId: string | number) => {
             </div>
 
             <div v-else class="overflow-hidden rounded-lg border">
-                <DataTable
-                    :data="props.plans"
-                    :columns="columns"
-                    :search="search"
-                    empty-message="No billing plans found"
-                >
+                <DataTable :data="props.plans" :columns="columns" :search="search" empty-message="No billing plans found">
                     <template #is_active="{ item: plan }">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        <span
+                            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
                             :class="{
                                 'bg-green-100 text-green-800': plan.is_active,
-                                'bg-gray-100 text-gray-800': !plan.is_active
-                            }">
+                                'bg-gray-100 text-gray-800': !plan.is_active,
+                            }"
+                        >
                             {{ plan.is_active ? 'Active' : 'Inactive' }}
                         </span>
                     </template>
-                    
+
                     <template #is_featured="{ item: plan }">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        <span
+                            class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
                             :class="{
                                 'bg-yellow-100 text-yellow-800': plan.is_featured,
-                                'bg-gray-100 text-gray-800': !plan.is_featured
-                            }">
+                                'bg-gray-100 text-gray-800': !plan.is_featured,
+                            }"
+                        >
                             {{ plan.is_featured ? 'Featured' : 'Standard' }}
                         </span>
                     </template>
@@ -205,7 +204,10 @@ const handleMenuAction = (action: string, planId: string | number) => {
                     <DialogTitle>Delete Plan</DialogTitle>
                 </DialogHeader>
                 <div class="py-4">
-                    <p>Are you sure you want to delete the plan <span class="font-semibold">{{ planToDelete?.name }}</span>?</p>
+                    <p>
+                        Are you sure you want to delete the plan <span class="font-semibold">{{ planToDelete?.name }}</span
+                        >?
+                    </p>
                     <p class="mt-2 text-sm text-destructive">This action cannot be undone.</p>
                 </div>
                 <DialogFooter>

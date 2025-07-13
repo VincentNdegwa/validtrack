@@ -18,26 +18,30 @@ class DocumentTypeCRUDTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->company = Company::factory()->create();
-        $this->admin = User::factory()->create([
-            'company_id' => $this->company->id,
-            'role' => 'admin'
+        $this->company = Company::factory()->create([
+            'name' => 'Test Company',
+            'email' => 'admin@testcompany.com',
+            'owner_id' => null,
         ]);
+
+        $this->admin = User::factory()
+            ->forCompany($this->company)
+            ->create([
+            'role' => 'admin',
+        ]);
+
+        $this->company->owner_id = $this->admin->id;
+        $this->company->save();
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
     public function it_can_list_document_types()
     {
-        // Create multiple document types
         DocumentType::factory()->count(5)->create([
             'company_id' => $this->company->id
         ]);
         
-        // Acting as admin
         $this->actingAs($this->admin);
-        
-        // Test listing document types
         $response = $this->get('/document-types');
         
         $response->assertStatus(200);

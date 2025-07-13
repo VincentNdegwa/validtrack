@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -20,6 +21,7 @@ class CompanyFactory extends Factory
         return [
             'name' => fake()->company(),
             'email' => fake()->unique()->companyEmail(),
+            'owner_id' => null,
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'website' => fake()->url(),
@@ -33,6 +35,13 @@ class CompanyFactory extends Factory
     {
         return $this->afterCreating(function ($company) {
             try {
+                $owner = User::factory()->create([
+                    'company_id' => $company->id,
+                    'role' => 'admin',
+                ]);
+                $company->owner_id = $owner->id;
+                $company->save();
+                
                 // First, check if the permissions table exists
                 if (!\Illuminate\Support\Facades\Schema::hasTable('permissions')) {
                     \Illuminate\Support\Facades\Log::warning('Permissions table does not exist. Skipping permission creation.');

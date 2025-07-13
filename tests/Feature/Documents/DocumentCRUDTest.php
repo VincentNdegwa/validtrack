@@ -8,6 +8,7 @@ use App\Models\DocumentType;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -23,11 +24,24 @@ class DocumentCRUDTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->company = Company::factory()->create();
-        $this->admin = User::factory()->create([
-            'company_id' => $this->company->id,
-            'role' => 'admin'
+        $this->company = Company::factory()->create([
+            'owner_id' => null,
         ]);
+
+        $this->admin = User::factory()
+            ->forCompany($this->company)
+            ->create([
+            'role' => 'admin',
+        ]);
+
+        $this->company->owner_id = $this->admin->id;
+        $this->company->save();
+
+        Log::info('Test company created:', [
+            'company' => $this->company->toArray(),
+            'admin' => $this->admin->toArray()
+        ]);
+
         $this->subject = Subject::factory()->create(['company_id' => $this->company->id]);
         $this->documentType = DocumentType::factory()->create(['company_id' => $this->company->id]);
         Storage::fake('public');

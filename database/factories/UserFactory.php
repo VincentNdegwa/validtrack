@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Permission;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -26,7 +27,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id' => Company::factory(),
+            'company_id' => null,
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
@@ -43,7 +44,10 @@ class UserFactory extends Factory
     {
         return $this->afterCreating(function ($user) {
             try {
-                // First check if the company exists
+            //    Log::info('Creating user role for:', [
+            //        'user' => $user
+            //     ]); 
+
                 if (!$user->company_id) {
                     \Illuminate\Support\Facades\Log::warning("User #{$user->id} has no company ID. Skipping role assignment.");
                     return;
@@ -83,8 +87,7 @@ class UserFactory extends Factory
                             \Illuminate\Support\Facades\DB::table('permission_role')->insert([
                                 'permission_id' => $permissionId,
                                 'role_id' => $role->id,
-                                'created_at' => now(),
-                                'updated_at' => now(),
+                                'company_id' => $user->company_id,
                             ]);
                         }
                     }
@@ -101,7 +104,6 @@ class UserFactory extends Factory
                     ]);
                 }
             } catch (\Exception $e) {
-                // Log error but continue - prevent tests from failing if roles can't be created
                 \Illuminate\Support\Facades\Log::error('Error creating/attaching role for user: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
         });

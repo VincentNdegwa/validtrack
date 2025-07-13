@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -67,34 +67,28 @@ const submit = () => {
                 <CardHeader>
                     <CardTitle>Feature Information</CardTitle>
                 </CardHeader>
-                
+
                 <CardContent>
                     <form @submit.prevent="submit" class="space-y-6">
                         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div class="space-y-2">
                                 <Label for="name">Feature Name</Label>
-                                <Input 
-                                    id="name" 
-                                    v-model="form.name" 
-                                    type="text" 
+                                <Input
+                                    id="name"
+                                    v-model="form.name"
+                                    type="text"
                                     @input="nameChanged"
-                                    placeholder="Example: Max Storage Space" 
-                                    required 
+                                    placeholder="Example: Max Storage Space"
+                                    required
                                 />
                                 <p v-if="form.errors.name" class="text-sm text-red-500">
                                     {{ form.errors.name }}
                                 </p>
                             </div>
-                            
+
                             <div class="space-y-2">
                                 <Label for="key">Feature Key</Label>
-                                <Input 
-                                    id="key" 
-                                    v-model="form.key" 
-                                    type="text"
-                                    placeholder="Example: max_storage_space" 
-                                    required 
-                                />
+                                <Input id="key" v-model="form.key" type="text" placeholder="Example: max_storage_space" required />
                                 <p v-if="form.errors.key" class="text-sm text-red-500">
                                     {{ form.errors.key }}
                                 </p>
@@ -102,7 +96,7 @@ const submit = () => {
                                     A unique identifier used in code. Use lowercase letters, numbers and underscores only.
                                 </p>
                             </div>
-                            
+
                             <div class="space-y-2">
                                 <Label for="type">Feature Type</Label>
                                 <Select v-model="form.type" class="w-full">
@@ -114,17 +108,15 @@ const submit = () => {
                                 <p v-if="form.errors.type" class="text-sm text-red-500">
                                     {{ form.errors.type }}
                                 </p>
-                                <p class="text-sm text-muted-foreground">
-                                    Determines how this feature is configured in plans.
-                                </p>
+                                <p class="text-sm text-muted-foreground">Determines how this feature is configured in plans.</p>
                             </div>
-                            
+
                             <div class="space-y-2 md:col-span-2">
                                 <Label for="description">Description</Label>
-                                <Textarea 
-                                    id="description" 
-                                    v-model="form.description" 
-                                    rows="3" 
+                                <Textarea
+                                    id="description"
+                                    v-model="form.description"
+                                    rows="3"
                                     placeholder="Explain what this feature provides to users"
                                 />
                                 <p v-if="form.errors.description" class="text-sm text-red-500">
@@ -134,11 +126,9 @@ const submit = () => {
                         </div>
                     </form>
                 </CardContent>
-                
+
                 <CardFooter class="flex justify-end space-x-2">
-                    <Button variant="outline" href="/billing/features">
-                        Cancel
-                    </Button>
+                    <Button variant="outline" href="/billing/features"> Cancel </Button>
                     <Button type="submit" class="bg-primary text-primary-foreground" @click="submit" :disabled="form.processing">
                         Create Feature
                     </Button>

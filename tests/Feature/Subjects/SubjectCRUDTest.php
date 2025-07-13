@@ -21,14 +21,20 @@ class SubjectCRUDTest extends TestCase
     {
         parent::setUp();
 
-        // Create a company
-        $this->company = Company::factory()->create();
-        
-        // Create an admin user for the company
-        $this->admin = User::factory()->create([
-            'company_id' => $this->company->id,
-            'role' => 'admin'
+        $this->company = Company::factory()->create([
+            'name' => 'Test Company',
+            'email' => 'admin@testcompany.com',
+            'owner_id' => null,
         ]);
+
+        $this->admin = User::factory()
+            ->forCompany($this->company)
+            ->create([
+            'role' => 'admin',
+        ]);
+
+        $this->company->owner_id = $this->admin->id;
+        $this->company->save();
         
         // Create a subject type
         $this->subjectType = SubjectType::factory()->create([

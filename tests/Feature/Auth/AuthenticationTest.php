@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Company;
 
 test('login screen can be rendered', function () {
     $response = $this->get('/login');
@@ -9,8 +10,17 @@ test('login screen can be rendered', function () {
 });
 
 test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
+    
     $response = $this->post('/login', [
         'email' => $user->email,
         'password' => 'password',
@@ -21,8 +31,16 @@ test('users can authenticate using the login screen', function () {
 });
 
 test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $this->post('/login', [
         'email' => $user->email,
         'password' => 'wrong-password',
@@ -32,8 +50,16 @@ test('users can not authenticate with invalid password', function () {
 });
 
 test('users can logout', function () {
-    $user = User::factory()->create();
+    $company = \App\Models\Company::factory()->create([
+        'owner_id' => null,
+    ]);
 
+    $user = User::factory()
+        ->forCompany($company)
+        ->create();
+
+    $company->owner_id = $user->id;
+    $company->save();
     $response = $this->actingAs($user)->post('/logout');
 
     $this->assertGuest();

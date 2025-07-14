@@ -211,4 +211,56 @@ class CompanyHelper
         return $company->owner;
 
     }
+
+    public static function checkIfCompanyHasFeature($company, $featuresKeys)
+    {
+        $user = self::getCompanyOwner($company);
+        if (!$user || !$user->subscribed() || !$user->subscribed('default')) {
+            return false;
+        }
+
+        $paddleSubscription = $user->subscriptions()->where('status', 'active')->first();
+        if (!$paddleSubscription) {
+            return false;
+        }
+        $subItem = $paddleSubscription->items()->first();
+        if (!$subItem) {
+            return false;
+        }
+        $billingPlan = \App\Models\BillingPlan::with('features')->where('paddle_product_id', $subItem->product_id)->first();
+        if (!$billingPlan) {
+            return false;
+        }
+        $features = $billingPlan->features;
+        $results = [];
+        foreach ((array) $featuresKeys as $key) {
+            $feature = $features->firstWhere('key', $key);
+            if (!$feature) {
+                $results[$key] = false;
+                continue;
+            }
+            $value = $feature->pivot->value ?? null;
+            // Boolean feature
+            if ($feature->type === 'boolean') {
+                $results[$key] = ($value === 'true' || $value === true || $value === 1 || $value === '1');
+            }
+            // Numeric feature (e.g., max_users)
+            elseif ($feature->type === 'number' || $feature->type === 'integer') {
+                if (\App\Models\BillingFeature::isUnlimited($value)) {
+                    $results[$key] = -1; // unlimited
+                } else {
+                    $results[$key] = (int) $value;
+                }
+            }
+            // Fallback: return raw value
+            else {
+                $results[$key] = $value;
+            }
+        }
+        // If only one key, return its value directly
+        if (is_string($featuresKeys)) {
+            return $results[$featuresKeys] ?? false;
+        }
+        return $results;
+    }
 }

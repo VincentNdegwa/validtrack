@@ -115,7 +115,7 @@ class DocumentUploadRequestController extends Controller
     public function processUpload(Request $request, string $token)
     {
         try {
-            $hasVerification = check_if_company_has_feature(Auth::user()->company_id, 'verification_codes');
+            $hasVerification = true ;//check_if_company_has_feature(Auth::user()->company_id, 'verification_codes');
             $request->validate([
                 'verification_code' => ($hasVerification ? 'required' : 'nullable') . '|string|size:6',
                 'upload_request_item_id' => 'required|exists:document_upload_request_items,id',
@@ -210,7 +210,7 @@ class DocumentUploadRequestController extends Controller
             
         } catch (\Exception $e) {
             Log::error('Document upload request error: ' . $e->getMessage());
-            return back()->with('error', 'An unexpected error occurred. Please try again or contact support.');
+            return back()->with('error', $e->getMessage());
         }
     }
 }

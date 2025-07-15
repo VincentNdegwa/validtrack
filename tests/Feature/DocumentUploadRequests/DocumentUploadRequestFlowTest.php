@@ -12,6 +12,7 @@ use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -197,6 +198,11 @@ class DocumentUploadRequestFlowTest extends TestCase
             'issue_date' => '2025-01-01',
             'expiry_date' => '2026-01-01',
             'notes' => 'Test upload notes'
+        ]);
+
+        Log::info('Response after document upload: ', [
+            'response' => $response,
+            'session' => session()->all(),
         ]);
         
         $response->assertInertia(fn ($page) => $page

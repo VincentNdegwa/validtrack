@@ -99,6 +99,17 @@ class DocumentController extends Controller
         if (!Auth::user()->hasPermission('documents-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
+
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_documents');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'You have reached the maximum number of documents allowed for your plan.');
+        }
+
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'manual_document_upload');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'You do not have permission to upload documents manually.');
+        }
+
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'document_type_id' => 'nullable|exists:document_types,id',

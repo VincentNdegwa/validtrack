@@ -93,6 +93,11 @@ class UserController extends Controller
         if (!Auth::user()->hasPermission('users-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
+        //max_users
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_users');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'You have reached the maximum number of users allowed for your plan.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users',

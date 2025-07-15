@@ -15,11 +15,14 @@ To upload the document, please use the link below:
 Upload Document
 @endcomponent
 
+
+@if(!empty($uploadRequest->verification_code)|| $uploadRequest->verification_code !='0000')
 You will need this verification code to complete your upload:
 
 @component('mail::panel')
 **{{ $uploadRequest->verification_code }}**
 @endcomponent
+@endif
 
 This link will expire {{ $expiryTime }}.
 

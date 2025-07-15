@@ -104,6 +104,11 @@ class RoleController extends Controller
         if (!Auth::user()->hasPermission('roles-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
+        // role_based_access
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'role_based_access');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'Your plan does not allow role based access.');
+        }
         $validated = $request->validate([
             'name' => [
                 'required', 

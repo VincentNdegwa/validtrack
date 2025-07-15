@@ -68,6 +68,10 @@ class DocumentTypeController extends Controller
         if (!Auth::user()->hasPermission('document-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_document_types');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'You have reached the maximum number of document types allowed for your plan.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',

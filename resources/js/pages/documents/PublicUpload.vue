@@ -251,7 +251,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <div class="space-y-2">
+                <div v-if="form.verification_code != '0000'" class="space-y-2">
                     <label for="verification_code" class="block text-sm font-medium">
                         Verification Code <span class="text-destructive">*</span>
                     </label>
@@ -263,7 +263,7 @@ onBeforeUnmount(() => {
                             placeholder="Enter the 6-digit code"
                             class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none"
                             :class="{ 'border-destructive ring-1 ring-destructive': form.errors.verification_code }"
-                            required
+                            :required="form.verification_code != '0000'"
                         />
                         <div v-if="form.errors.verification_code" class="absolute top-1/2 right-2 -translate-y-1/2 text-destructive">
                             <svg

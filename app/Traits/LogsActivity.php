@@ -51,6 +51,11 @@ trait LogsActivity
         $user = Auth::user();
         $company_id = $user->company_id;
 
+        //activity_logging
+        $hasAccess = check_if_company_has_feature($company_id, 'activity_logging');
+        if (!$hasAccess) {
+            return;
+        }
         // Create the payload based on the action
         $payload = static::createPayload($model, $action);
         

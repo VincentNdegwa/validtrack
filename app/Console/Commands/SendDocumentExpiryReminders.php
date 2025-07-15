@@ -37,7 +37,11 @@ class SendDocumentExpiryReminders extends Command
         $companies = Company::all();
         
         foreach ($companies as $company) {
-            $this->processCompanyReminders($company);
+            //document_expiry_alerts
+            $hasAccess = check_if_company_has_feature($company, 'document_expiry_alerts');
+            if ($hasAccess) {
+                $this->processCompanyReminders($company);
+            }            
         }
         
         $this->info('Document expiry reminder check completed.');

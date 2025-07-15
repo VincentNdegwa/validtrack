@@ -71,6 +71,11 @@ class SubjectTypeController extends Controller
         if (!Auth::user()->hasPermission('subject-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
+        //max_subject_types
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subject_types');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'You have reached the maximum number of subject types allowed for your plan.');
+        }
         $validated = $request->validate([
             'name' => 'required|string|max:255',
         ]);

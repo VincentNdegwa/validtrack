@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 
 
+use Inertia\Inertia;
+use App\Models\Subject;
 use App\Models\Document;
 use App\Models\DocumentType;
-use App\Models\DocumentUploadRequest;
-use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Models\DocumentUploadRequest;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DocumentUploadRequestController extends Controller
 {
@@ -22,6 +23,11 @@ class DocumentUploadRequestController extends Controller
   
     public function store(Request $request)
     {
+        //document_upload_requests
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'document_upload_requests');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'Your plan does not allow creating document upload requests.');
+        }
         $validated = $request->validate([
             'subject_id' => 'required|exists:subjects,id',
             'document_types' => 'required|array|min:1',
@@ -32,11 +38,16 @@ class DocumentUploadRequestController extends Controller
         ]);
 
         $subject = Subject::findOrFail($validated['subject_id']);
-        
+        $hasVerification = check_if_company_has_feature(Auth::user()->company_id, 'verification_codes');
+        if(!$hasVerification) {
+            $validated['verification_code'] = '0000'; 
+        } else {
+            $validated['verification_code'] = DocumentUploadRequest::generateVerificationCode();
+        }
         $uploadRequest = DocumentUploadRequest::create([
             'subject_id' => $subject->id,
             'token' => DocumentUploadRequest::generateToken(),
-            'verification_code' => DocumentUploadRequest::generateVerificationCode(),
+            'verification_code' => $validated['verification_code'], //DocumentUploadRequest::generateVerificationCode(),
             'email' => $validated['email'],
             'expires_at' => now()->addHours($validated['expiry_hours'] ?? 24),
             'status' => 'pending',
@@ -104,8 +115,9 @@ class DocumentUploadRequestController extends Controller
     public function processUpload(Request $request, string $token)
     {
         try {
+            $hasVerification = check_if_company_has_feature(Auth::user()->company_id, 'verification_codes');
             $request->validate([
-                'verification_code' => 'required|string|size:6',
+                'verification_code' => ($hasVerification ? 'required' : 'nullable') . '|string|size:6',
                 'upload_request_item_id' => 'required|exists:document_upload_request_items,id',
                 'file' => 'required|file|max:10240', // 10MB max
                 'issue_date' => 'required|date',

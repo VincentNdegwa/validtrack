@@ -32,24 +32,34 @@ class BillingFeatureSeeder extends Seeder
             
             // Document types features
             [
-                'name' => 'Custom Document Types',
+                'name' => 'Document Types Management',
                 'key' => 'max_document_types',
                 'type' => 'number',
                 'description' => 'Maximum number of custom document types allowed',
             ],
-            
-            // Subject management features
+
+            // Document management features
+            [
+                'name' => 'Document Management',
+                'key' => 'max_documents',
+                'type' => 'number',
+                'description' => 'Maximum number of documents allowed',
+            ],
+
+            // Subject types features
+            [
+                'name' => 'Subject Types Management',
+                'key' => 'max_subject_types',
+                'type' => 'number',
+                'description' => 'Maximum number of custom subject types allowed',
+            ],
+
+            // Subjects
             [
                 'name' => 'Subject Management',
-                'key' => 'subject_management',
+                'key' => 'max_subjects',
                 'type' => 'number',
-                'description' => 'Subject tracking capabilities',
-            ],
-            [
-                'name' => 'Custom Subject Fields',
-                'key' => 'custom_subject_fields',
-                'type' => 'boolean',
-                'description' => 'Ability to add custom fields to subjects',
+                'description' => 'Maximum number of custom subject allowed',
             ],
             
             // Document features
@@ -101,12 +111,12 @@ class BillingFeatureSeeder extends Seeder
             ],
             
             // Advanced features
-            [
-                'name' => 'Advanced Search & Filter',
-                'key' => 'advanced_search',
-                'type' => 'boolean',
-                'description' => 'Advanced search and filtering capabilities',
-            ],
+            // [
+            //     'name' => 'Advanced Search & Filter',
+            //     'key' => 'advanced_search',
+            //     'type' => 'boolean',
+            //     'description' => 'Advanced search and filtering capabilities',
+            // ],
             [
                 'name' => 'Bulk Operations',
                 'key' => 'bulk_operations',

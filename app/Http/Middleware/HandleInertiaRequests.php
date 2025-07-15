@@ -46,7 +46,9 @@ class HandleInertiaRequests extends Middleware
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => function() {
                 $user = Auth::user();
-                
+                $company_user = $user;
+                $company = $company_user->company ?? null;
+                $features = $this->getFeatures($company);
                 if (!$user) {
                     return [
                         'user' => null,
@@ -65,6 +67,7 @@ class HandleInertiaRequests extends Middleware
                         'roles' => $user->roles,
                         'permissions' => $permissionNames,
                     ]),
+                    'features' => $features,
                 ];
             },
             'ziggy' => [
@@ -73,5 +76,36 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+    }
+
+    public function getFeatures($company)
+    {
+        if ($company) {
+            $companyOwner = get_company_owner($company);
+            // $actualCompany = \App\Models\Company::find($company);
+            if (!$companyOwner) {
+                return [];
+            }
+
+            if (!$companyOwner || !$companyOwner->subscribed() || !$companyOwner->subscribed('default')) {
+                return [];
+            }
+
+            $paddleSubscription = $companyOwner->subscriptions()->where('status', 'active')->first();
+            if (!$paddleSubscription) {
+                return [];
+            }
+            $subItem = $paddleSubscription->items()->first();
+            if (!$subItem) {
+                return [];
+            }
+            $billingPlan = \App\Models\BillingPlan::with('features')->where('paddle_product_id', $subItem->product_id)->first();
+            if (!$billingPlan) {
+                return [];
+            }
+            $features = $billingPlan->features;
+            return $features;
+        }
+        return [];
     }
 }

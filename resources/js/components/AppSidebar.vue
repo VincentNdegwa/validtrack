@@ -101,11 +101,8 @@ const mainNavItems = computed(() => {
 });
 
 const footerNavItems = computed(() => {
-
     if (isSuperAdmin.value) {
-        return [
-            
-        ];
+        return [];
     }
     const items: NavItem[] = [
         {
@@ -114,11 +111,9 @@ const footerNavItems = computed(() => {
             icon: FileBadge2Icon,
             show: hasPermission('manage-billing'),
         },
-        
-    ]
+    ];
     return items.filter((item) => item.show === true);
-})
-
+});
 </script>
 
 <template>

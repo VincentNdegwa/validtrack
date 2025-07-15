@@ -1,5 +1,4 @@
 <template>
-
     <Head title="Company Details" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -11,10 +10,9 @@
                 </div>
                 <div class="flex space-x-2">
                     <Link :href="`/companies/${company.slug}/edit`">
-                    <Button variant="outline">Edit Company</Button>
+                        <Button variant="outline">Edit Company</Button>
                     </Link>
-                    <Button @click="confirmSwitch(company)" class="bg-primary text-primary-foreground"> Impersonate User
-                    </Button>
+                    <Button @click="confirmSwitch(company)" class="bg-primary text-primary-foreground"> Impersonate User </Button>
                 </div>
             </div>
 
@@ -30,11 +28,14 @@
                                 <div>
                                     <dt class="text-sm font-medium text-muted-foreground">Status</dt>
                                     <dd>
-                                        <span class="inline-flex items-center rounded-full px-2 py-1 text-xs" :class="
+                                        <span
+                                            class="inline-flex items-center rounded-full px-2 py-1 text-xs"
+                                            :class="
                                                 company.is_active
                                                     ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                                     : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                            ">
+                                            "
+                                        >
                                             {{ company.is_active ? 'Active' : 'Inactive' }}
                                         </span>
                                     </dd>
@@ -53,8 +54,13 @@
                                 <div>
                                     <dt class="text-sm font-medium text-muted-foreground">Website</dt>
                                     <dd>
-                                        <a v-if="company.website" :href="company.website" target="_blank"
-                                            rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                                        <a
+                                            v-if="company.website"
+                                            :href="company.website"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="text-blue-600 hover:underline"
+                                        >
                                             {{ company.website }}
                                         </a>
                                         <span v-else>N/A</span>
@@ -86,7 +92,7 @@
                     <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle>Users</CardTitle>
                         <Link :href="route('users.create')">
-                        <Button size="sm">Add User</Button>
+                            <Button size="sm">Add User</Button>
                         </Link>
                     </CardHeader>
                     <CardContent>
@@ -104,12 +110,9 @@
 
                             <template #actions="{ item: user }">
                                 <div class="flex items-center space-x-2">
-                                    <Link :href="`/users/${user.slug}`" class="text-blue-600 hover:underline">View
-                                    </Link>
-                                    <Link :href="`/users/${user.slug}/edit`" class="text-amber-600 hover:underline">Edit
-                                    </Link>
-                                    <button @click="impersonateSpecificUser(user.id)"
-                                        class="text-indigo-600 hover:underline">Impersonate</button>
+                                    <Link :href="`/users/${user.slug}`" class="text-blue-600 hover:underline">View </Link>
+                                    <Link :href="`/users/${user.slug}/edit`" class="text-amber-600 hover:underline">Edit </Link>
+                                    <button @click="impersonateSpecificUser(user.id)" class="text-indigo-600 hover:underline">Impersonate</button>
                                 </div>
                             </template>
                         </DataTable>
@@ -126,8 +129,8 @@
                 </DialogHeader>
                 <div class="py-4">
                     <p>
-                        Switch to view the system as a user from <span class="font-semibold">{{ companyToSwitch?.name
-                            }}</span>?
+                        Switch to view the system as a user from <span class="font-semibold">{{ companyToSwitch?.name }}</span
+                        >?
                     </p>
                     <p class="mt-2 text-sm text-muted-foreground">
                         This will take you to a page where you can select a specific user to impersonate.

@@ -64,3 +64,10 @@ if(!function_exists('get_company_owner')){
         return CompanyHelper::getCompanyOwner($company);
     }
 }
+
+if (!function_exists('check_if_company_has_feature')) {
+    function check_if_company_has_feature($company, $featuresKeys)
+    {
+        return CompanyHelper::checkIfCompanyHasFeature($company, $featuresKeys);
+    }
+}

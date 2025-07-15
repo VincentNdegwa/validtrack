@@ -104,6 +104,19 @@ class Company extends Model
         return $this->hasMany(CompanySetting::class, 'company_id');
     }
 
+    public static function getUserCount($company)
+    {
+        $company = Company::find($company);
+        if (!$company) {
+            return 0;
+        }
+        return $company->users()->count();
+    }
+
+    public static function getCompanyStorage($company){
+        return 0;
+    }
+
     public function getSetting($key, $default = null)
     {
         $setting = $this->settings()->where('key', $key)->first();

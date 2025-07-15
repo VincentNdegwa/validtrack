@@ -215,6 +215,11 @@ class CompanyHelper
     public static function checkIfCompanyHasFeature($company, $featuresKeys)
     {
         $user = self::getCompanyOwner($company);
+        $actualCompany = \App\Models\Company::find($company);
+        if (!$user || !$actualCompany) {
+            return false;
+        }
+
         if (!$user || !$user->subscribed() || !$user->subscribed('default')) {
             return false;
         }
@@ -244,11 +249,22 @@ class CompanyHelper
             if ($feature->type === 'boolean') {
                 $results[$key] = ($value === 'true' || $value === true || $value === 1 || $value === '1');
             }
-            // Numeric feature (e.g., max_users)
             elseif ($feature->type === 'number' || $feature->type === 'integer') {
                 if (\App\Models\BillingFeature::isUnlimited($value)) {
                     $results[$key] = -1; // unlimited
                 } else {
+                    if($key== 'max_users'){
+                        $v = $actualCompany->getUserCount($company);
+                    }
+                    if($key == 'document_storage'){
+                        $v = $actualCompany->documents()->count();
+                    }
+                    if($key == 'max_document_types'){
+                        $v = $actualCompany->documentTypes()->count();
+                    }
+                    if($key == 'subject_management'){
+                        $v = $actualCompany->documents()->count();
+                    }
                     $results[$key] = (int) $value;
                 }
             }

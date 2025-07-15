@@ -212,7 +212,7 @@ class CompanyHelper
 
     }
 
-    public static function checkIfCompanyHasFeature($company, $featuresKeys)
+    public static function checkIfCompanyHasFeature($company, $featuresKeys):bool
     {
         $user = self::getCompanyOwner($company);
         $actualCompany = \App\Models\Company::find($company);
@@ -237,46 +237,44 @@ class CompanyHelper
             return false;
         }
         $features = $billingPlan->features;
-        $results = [];
+        $allPassed = true;
         foreach ((array) $featuresKeys as $key) {
             $feature = $features->firstWhere('key', $key);
-            if (!$feature) {
-                $results[$key] = false;
-                continue;
-            }
-            $value = $feature->pivot->value ?? null;
-            // Boolean feature
-            if ($feature->type === 'boolean') {
-                $results[$key] = ($value === 'true' || $value === true || $value === 1 || $value === '1');
-            }
-            elseif ($feature->type === 'number' || $feature->type === 'integer') {
-                if (\App\Models\BillingFeature::isUnlimited($value)) {
-                    $results[$key] = -1; // unlimited
+            $hasAccess = false;
+            if ($feature) {
+                $value = $feature->pivot->value ?? null;
+                if ($feature->type === 'boolean') {
+                    $hasAccess = ($value === 'true' || $value === true || $value === 1 || $value === '1');
+                } elseif ($feature->type === 'number' || $feature->type === 'integer') {
+                    if (\App\Models\BillingFeature::isUnlimited($value)) {
+                        $hasAccess = true;
+                    } else {
+                        $limit = (int) $value;
+                        $used = 0;
+                        if($key == 'max_users'){
+                            $used = $actualCompany->getUserCount($company);
+                        }
+                        if($key == 'document_storage'){
+                            $used = $actualCompany->documents()->count();
+                        }
+                        if($key == 'max_document_types'){
+                            $used = $actualCompany->documentTypes()->count();
+                        }
+                        if($key == 'subject_management'){
+                            $used = $actualCompany->documents()->count();
+                        }
+                        $hasAccess = ($used < $limit);
+                    }
                 } else {
-                    if($key== 'max_users'){
-                        $v = $actualCompany->getUserCount($company);
-                    }
-                    if($key == 'document_storage'){
-                        $v = $actualCompany->documents()->count();
-                    }
-                    if($key == 'max_document_types'){
-                        $v = $actualCompany->documentTypes()->count();
-                    }
-                    if($key == 'subject_management'){
-                        $v = $actualCompany->documents()->count();
-                    }
-                    $results[$key] = (int) $value;
+                    $hasAccess = (bool) $value;
                 }
             }
-            // Fallback: return raw value
-            else {
-                $results[$key] = $value;
+            // If any feature fails, set allPassed to false
+            if (!$hasAccess) {
+                $allPassed = false;
+                break;
             }
         }
-        // If only one key, return its value directly
-        if (is_string($featuresKeys)) {
-            return $results[$featuresKeys] ?? false;
-        }
-        return $results;
+        return $allPassed;
     }
 }

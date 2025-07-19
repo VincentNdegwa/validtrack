@@ -257,7 +257,7 @@ class CompanyHelper
                         if($key == 'max_users'){
                             $used = $actualCompany->getUserCount($company);
                         }
-                        if($key == 'document_storage'){
+                        if($key == 'max_documents'){
                             $used = $actualCompany->documents()->count();
                         }
                         if($key == 'max_document_types'){

@@ -18,12 +18,12 @@ return new class extends Migration
                 ->constrained('companies')
                 ->onDelete('cascade');
             $table->foreignId('subject_type_id')
-                ->constrained('subject_types')
                 ->nullable()
+                ->constrained('subject_types')
                 ->onDelete('set null');
             $table->foreignId('user_id')
-                ->constrained('users')
                 ->nullable()
+                ->constrained('users')
                 ->onDelete('set null');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();

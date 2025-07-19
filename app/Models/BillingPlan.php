@@ -73,4 +73,33 @@ class BillingPlan extends Model
             ])
             ->withTimestamps();
     }
+
+    public function getFriendlyFeatures(): array
+    {
+        $featureLabels = [
+            'max_documents' => 'documents',
+            'max_document_types' => 'document types',
+            'max_subjects' => 'subjects',
+            'max_subject_types' => 'subject types',
+            'max_users' => 'users',
+        ];
+
+        $features = [];
+        foreach ($this->features as $feature) {
+            $value = $feature->pivot->value;
+            if ($feature->type === 'number') {
+                $label = $featureLabels[$feature->key] ?? $feature->name;
+                if ($value == -1) {
+                    $features[] = "Unlimited " . ucfirst($label);
+                } else {
+                    $features[] = "Up to {$value} " . $label;
+                }
+            } elseif ($feature->type === 'boolean') {
+                $icon = $value ? '✅' : '❌';
+                $features[] = "{$icon} {$feature->name}";
+            }
+        }
+        return $features;
+    }
+
 }

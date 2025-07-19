@@ -11,10 +11,7 @@ use Inertia\Inertia;
 
 class CompanyController extends Controller
 {
-    
-    /**
-     * Display a listing of all companies.
-     */
+
     public function index(Request $request)
     {
         if (!Auth::user()->hasRole('super-admin')) {

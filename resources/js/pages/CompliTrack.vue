@@ -2,6 +2,26 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { onMounted, onUnmounted, ref } from 'vue';
 
+export interface BillingPlan {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    monthly_price: number;
+    yearly_price: number;
+    is_active: boolean;
+    is_featured: boolean;
+    sort_order: number;
+    paddle_product_id?: string;
+    paddle_monthly_price_id?: string;
+    paddle_yearly_price_id?: string;
+    created_at: string;
+    updated_at: string;
+    friendly_features?: string[];
+}
+const props = defineProps<{
+    plans: BillingPlan[];
+}>();
 // Animation state
 const loaded = ref(false);
 const scrollY = ref(0);
@@ -757,8 +777,8 @@ onMounted(() => {
                         Interactive Demo
                     </span>
                     <h2 class="mb-4 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
-                        Experience <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Next-Gen</span> Compliance
-                        Management
+                        Experience <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Next-Gen</span>
+                        Compliance Management
                     </h2>
                     <p class="mx-auto max-w-2xl text-lg text-muted-foreground">
                         Our intuitive interface turns complex compliance processes into simple, visual workflows. See it in action.
@@ -1285,19 +1305,27 @@ onMounted(() => {
 
                 <div class="mx-auto grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
                     <!-- Free Plan -->
-                    <div class="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
+                    <div
+                        v-for="plan in props.plans"
+                        :key="plan.id"
+                        class="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md"
+                    >
                         <div class="mb-5">
-                            <h3 class="text-2xl font-bold">Free</h3>
-                            <p class="mt-2 text-muted-foreground">Perfect for getting started</p>
+                            <h3 class="text-2xl font-bold">{{ plan.name }}</h3>
+                            <p class="mt-2 text-muted-foreground">{{ plan.description }}</p>
                         </div>
 
                         <div class="mb-5">
-                            <span class="text-3xl font-bold">$0</span>
+                            <span class="text-3xl font-bold">${{ plan.monthly_price }}</span>
                             <span class="text-muted-foreground">/month</span>
                         </div>
+                        <!-- <div class="mb-5">
+                            <span class="text-3xl font-bold">${{ plan.yearly_price }}</span>
+                            <span class="text-muted-foreground">/year</span>
+                        </div> -->
 
                         <ul class="mb-8 space-y-3">
-                            <li class="flex items-center">
+                            <li v-for="feature in plan.friendly_features" :key="feature" class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
                                     <path
                                         fill-rule="evenodd"
@@ -1305,37 +1333,7 @@ onMounted(() => {
                                         clip-rule="evenodd"
                                     />
                                 </svg>
-                                <span>Up to 3 subjects</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Up to 10 documents</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>1 Admin user</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Core features only</span>
+                                <span>{{ feature }}</span>
                             </li>
                         </ul>
 
@@ -1346,162 +1344,6 @@ onMounted(() => {
                                 class="inline-flex w-full items-center justify-center rounded-md border border-primary bg-transparent px-5 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
                             >
                                 Start Free
-                            </Link>
-                        </div>
-                    </div>
-
-                    <!-- Pro Plan -->
-                    <div class="flex flex-col rounded-xl border border-primary bg-card p-6 shadow-md transition-all hover:shadow-lg">
-                        <div class="mb-2">
-                            <span class="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">Most Popular</span>
-                        </div>
-
-                        <div class="mb-5">
-                            <h3 class="text-2xl font-bold">Pro</h3>
-                            <p class="mt-2 text-muted-foreground">For growing organizations</p>
-                        </div>
-
-                        <div class="mb-5">
-                            <span class="text-3xl font-bold">$49</span>
-                            <span class="text-muted-foreground">/month</span>
-                        </div>
-
-                        <ul class="mb-8 space-y-3">
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Up to 100 subjects</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Up to 500 documents</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>5 team members</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>+ Reports & Reminders</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Email notifications</span>
-                            </li>
-                        </ul>
-
-                        <div class="mt-auto">
-                            <Link
-                                v-if="!$page.props.auth.user"
-                                :href="route('register')"
-                                class="inline-flex w-full items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                            >
-                                Upgrade Now
-                            </Link>
-                        </div>
-                    </div>
-
-                    <!-- Business Plan -->
-                    <div class="flex flex-col rounded-xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md">
-                        <div class="mb-5">
-                            <h3 class="text-2xl font-bold">Business</h3>
-                            <p class="mt-2 text-muted-foreground">For larger organizations</p>
-                        </div>
-
-                        <div class="mb-5">
-                            <span class="text-3xl font-bold">$149</span>
-                            <span class="text-muted-foreground">/month</span>
-                        </div>
-
-                        <ul class="mb-8 space-y-3">
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Unlimited subjects</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Unlimited documents</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Unlimited team members</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>All features</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <span>Priority support</span>
-                            </li>
-                        </ul>
-
-                        <div class="mt-auto">
-                            <Link
-                                v-if="!$page.props.auth.user"
-                                :href="route('register')"
-                                class="inline-flex w-full items-center justify-center rounded-md border border-primary bg-transparent px-5 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/5"
-                            >
-                                Contact Sales
                             </Link>
                         </div>
                     </div>

@@ -14,22 +14,13 @@ class BillingFeatureSeeder extends Seeder
     {
         // Define all features from pricing tiers
         $features = [
-            // Storage features
+            // Document features
             [
-                'name' => 'Document Storage',
-                'key' => 'document_storage',
+                'name' => 'Document Management',
+                'key' => 'max_documents',
                 'type' => 'number',
-                'description' => 'Amount of storage space available for documents',
+                'description' => 'Maximum number of documents allowed',
             ],
-            
-            // User management features
-            [
-                'name' => 'User Management',
-                'key' => 'max_users',
-                'type' => 'number',
-                'description' => 'Maximum number of users allowed',
-            ],
-            
             // Document types features
             [
                 'name' => 'Document Types Management',
@@ -38,12 +29,12 @@ class BillingFeatureSeeder extends Seeder
                 'description' => 'Maximum number of custom document types allowed',
             ],
 
-            // Document management features
+            // Subjects
             [
-                'name' => 'Document Management',
-                'key' => 'max_documents',
+                'name' => 'Subject Management',
+                'key' => 'max_subjects',
                 'type' => 'number',
-                'description' => 'Maximum number of documents allowed',
+                'description' => 'Maximum number of custom subject allowed',
             ],
 
             // Subject types features
@@ -54,12 +45,12 @@ class BillingFeatureSeeder extends Seeder
                 'description' => 'Maximum number of custom subject types allowed',
             ],
 
-            // Subjects
+            // User management features
             [
-                'name' => 'Subject Management',
-                'key' => 'max_subjects',
+                'name' => 'User Management',
+                'key' => 'max_users',
                 'type' => 'number',
-                'description' => 'Maximum number of custom subject allowed',
+                'description' => 'Maximum number of users allowed',
             ],
             
             // Document features
@@ -110,13 +101,6 @@ class BillingFeatureSeeder extends Seeder
                 'description' => 'Customizable email notifications',
             ],
             
-            // Advanced features
-            // [
-            //     'name' => 'Advanced Search & Filter',
-            //     'key' => 'advanced_search',
-            //     'type' => 'boolean',
-            //     'description' => 'Advanced search and filtering capabilities',
-            // ],
             [
                 'name' => 'Bulk Operations',
                 'key' => 'bulk_operations',

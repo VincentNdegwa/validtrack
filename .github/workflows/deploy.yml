@@ -1,0 +1,43 @@
+name: Deploy Laravel App
+
+on:
+  workflow_run:
+    workflows: ["linter", "tests"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: >
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event == 'push' &&
+          github.ref == 'refs/heads/main' }}
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, bcmath, xml, ctype, json, tokenizer, zip, pdo, curl
+          tools: composer
+
+      - name: Install Deployer
+        run: |
+          composer global require deployer/deployer
+          echo "${HOME}/.composer/vendor/bin" >> $GITHUB_PATH
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 164.92.89.75 >> ~/.ssh/known_hosts
+
+      - name: Deploy using Deployer
+        run: |
+          ~/.composer/vendor/bin/dep deploy validtrack --branch=main

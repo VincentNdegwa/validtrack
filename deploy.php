@@ -13,14 +13,11 @@ add('shared_files', ['.env']);
 add('shared_dirs', ['storage']);
 add('writable_dirs', ['storage', 'bootstrap/cache']);
 
-host('validtrack')
-    ->set('remote_user', 'root')
-    ->set('deploy_path', '/var/www/validtrack')
-    ->set('ssh_multiplexing', false)
-    ->set('ssh_arguments', [
-        '-o IdentityFile=C:/Users/DELL/.ssh/droplet',
-        '-o IdentitiesOnly=yes'
-    ]);
+host('validtrack') 
+    ->set('hostname', '164.92.89.75') 
+    ->set('remote_user', 'root')     
+    ->set('deploy_path', '/var/www/validtrack');
+
 
 // Hooks (after deploy tasks)
 after('deploy:failed', 'deploy:unlock');

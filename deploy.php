@@ -18,13 +18,6 @@ host('validtrack')
     ->set('remote_user', 'root')     
     ->set('deploy_path', '/var/www/validtrack');
 
-task('build:assets', function () {
-    cd('{{release_path}}');
-    run('npm install');
-    run('npm run build');
-});
-before('deploy:symlink', 'build:assets');
-
 // Hooks (after deploy tasks)
 after('deploy:failed', 'deploy:unlock');
 
@@ -46,6 +39,16 @@ task('deploy:permissions', function () {
 });
 
 after('artisan:config:cache', 'artisan:config:clear');
+
+task('build:assets', function () {
+    run('cd {{release_path}} && npm install && npm run build');
+
+    // cd('{{release_path}}');
+    // run('npm install');
+    // run('npm run build');
+});
+
+before('deploy:symlink', 'build:assets');
 
 // Run when deploy is successful
 after('deploy:symlink', 'deploy:permissions');

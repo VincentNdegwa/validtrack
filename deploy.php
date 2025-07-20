@@ -42,6 +42,7 @@ after('artisan:config:cache', 'artisan:config:clear');
 
 task('build:assets', function () {
     writeln('<info>Checking Node & NPM versions...</info>');
+    
     run('node -v');
     run('npm -v');
 

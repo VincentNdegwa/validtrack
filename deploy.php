@@ -46,7 +46,7 @@ task('build:assets', function () {
     run('pnpm -v');
 
     writeln('<info>Installing dependencies with pnpm...</info>');
-    run('cd {{release_path}} && pnpm install --frozen-lockfile >> build.log 2>&1');
+    run('cd {{release_path}} && pnpm install >> build.log 2>&1');
 
     writeln('<info>Building assets with pnpm...</info>');
     run('cd {{release_path}} && NODE_OPTIONS="--max-old-space-size=2048" pnpm build >> build.log 2>&1');

@@ -44,8 +44,7 @@ after('artisan:config:cache', 'artisan:config:clear');
 before('deploy:symlink', 'build:assets');
 
 task('build:assets', function () {
-    $npmPath = run('which npm');
-    run("cd {{release_path}} && $npmPath ci && $npmPath run build");
+    run("cd {{release_path}} && npm ci && npm run build");
 });
 
 // Run when deploy is successful

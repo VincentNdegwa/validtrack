@@ -41,11 +41,9 @@ task('deploy:permissions', function () {
 after('artisan:config:cache', 'artisan:config:clear');
 
 task('build:assets', function () {
+    run('npm -v');
+    run('node -v');
     run('cd {{release_path}} && npm install && npm run build');
-
-    // cd('{{release_path}}');
-    // run('npm install');
-    // run('npm run build');
 });
 
 before('deploy:symlink', 'build:assets');

@@ -41,10 +41,17 @@ task('deploy:permissions', function () {
 after('artisan:config:cache', 'artisan:config:clear');
 
 task('build:assets', function () {
-    run('npm -v');
+    writeln('<info>Checking Node & NPM versions...</info>');
     run('node -v');
-    run('cd {{release_path}} && npm install && npm run build');
+    run('npm -v');
+
+    writeln('<info>Running npm install...</info>');
+    run('cd {{release_path}} && npm install >> build.log 2>&1');
+
+    writeln('<info>Running npm run build...</info>');
+    run('cd {{release_path}} && npm run build >> build.log 2>&1');
 });
+
 
 before('deploy:symlink', 'build:assets');
 

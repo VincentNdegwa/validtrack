@@ -3,9 +3,6 @@ name: linter
 on:
   workflow_call:
 
-permissions:
-  contents: write
-
 jobs:
   quality:
     runs-on: ubuntu-latest

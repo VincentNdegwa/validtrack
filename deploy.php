@@ -41,6 +41,12 @@ task('deploy:permissions', function () {
 
 after('artisan:config:cache', 'artisan:config:clear');
 
+before('deploy:symlink', 'build:assets');
+
+task('build:assets', function () {
+    run('cd {{release_path}} && npm ci && npm run build');
+});
+
 // Run when deploy is successful
 after('deploy:symlink', 'deploy:permissions');
 after('deploy:symlink', 'deploy:migrate');

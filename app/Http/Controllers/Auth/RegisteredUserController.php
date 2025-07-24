@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,11 +55,29 @@ class RegisteredUserController extends Controller
             'company_id' => $company->id,
             'role' => 'admin',
         ]);
+        $company->owner_id = $user->id;
+        $company->save();
 
         event(new Registered($user));
-
+        $this->giveCompanyPermissions($company);
         Auth::login($user);
 
         return to_route('dashboard');
+    }
+
+    public function giveCompanyPermissions(Company $company): void
+    {
+        $permissions = PermissionSeeder::getDefaultPermissions();
+        $adminRole = $company->roles()->firstOrCreate([
+            'name' => 'admin',
+            'display_name' => 'Administrator',
+            'description' => 'Administrator with full access to all company features',
+            'company_id' => $company->id,
+        ]);
+        $adminUser = $company->users()->where('role', 'admin')->first();
+        if ($adminUser) {
+            $adminUser->roles()->syncWithoutDetaching([$adminRole->id => ['company_id' => $company->id]]);
+        }
+        $company->syncPermissions($permissions, $adminRole);
     }
 }

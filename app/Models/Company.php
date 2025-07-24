@@ -155,4 +155,28 @@ class Company extends Model
             ['value' => $value]
         );
     }
+    public function roles()
+    {
+        return $this->hasMany(Role::class);
+    }
+
+    public function syncPermissions($permissions, $adminRole)
+    {
+        foreach ($permissions as $permission) {
+            $newPermission = Permission::firstOrCreate(
+                ['name' => $permission['name'], 'company_id' => $this->id],
+                [
+                    'display_name' => $permission['display_name'],
+                    'description' => $permission['description'],
+                ]
+            );
+            try {
+                $adminRole->permissions()->attach($newPermission->id, [
+                    'company_id' => $this->id
+                ]);
+            } catch (\Exception $e) {
+                Log::error("Error attaching permission {$newPermission->id} to role {$adminRole->id} for company {$this->id}: " . $e->getMessage());
+            }
+        }
+    }
 }

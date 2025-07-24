@@ -59,7 +59,7 @@ class RegisteredUserController extends Controller
         $company->save();
         $this->giveCompanyPermissions($company);
 
-        // event(new Registered($user));
+        event(new Registered($user));
         Auth::login($user);
 
         return to_route('dashboard');

@@ -130,6 +130,7 @@ class CompanyController extends Controller
         $company->syncPermissions($permissions, $adminRole);
         $user->roles()->syncWithoutDetaching([$adminRole->id => ['company_id' => $company->id]]);
 
+        event(new \App\Events\CompanyCreated($company, $user, $request->user_password ));
         return redirect()->route('companies.index')
             ->with('success', 'Company and owner created successfully');
     }

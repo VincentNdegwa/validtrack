@@ -57,9 +57,9 @@ class RegisteredUserController extends Controller
         ]);
         $company->owner_id = $user->id;
         $company->save();
+        $this->giveCompanyPermissions($company);
 
         event(new Registered($user));
-        $this->giveCompanyPermissions($company);
         Auth::login($user);
 
         return to_route('dashboard');

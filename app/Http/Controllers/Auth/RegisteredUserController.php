@@ -57,7 +57,7 @@ class RegisteredUserController extends Controller
         ]);
         $company->owner_id = $user->id;
         $company->save();
-        $this->giveCompanyPermissions($company);
+        // $this->giveCompanyPermissions($company);
 
         event(new Registered($user));
         Auth::login($user);

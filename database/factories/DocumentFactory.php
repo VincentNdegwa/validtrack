@@ -32,7 +32,7 @@ class DocumentFactory extends Factory
             'expiry_date' => $this->faker->dateTimeBetween('+1 month', '+2 years'),
             'status' => 1, // Active
             'uploaded_by' => null,
-            'notes' => $this->faker->paragraph(),
+            'notes' => $this->faker->paragraph(1),
             'company_id' => $company->id,
         ];
     }

@@ -39,7 +39,7 @@ class SubjectFactory extends Factory
             'phone' => $this->faker->phoneNumber(),
             'address' => $this->faker->address(),
             'category' => $this->faker->randomElement(['individual', 'organization', 'asset']),
-            'notes' => $this->faker->paragraph(),
+            'notes' => $this->faker->paragraph(1),
             'status' => 1, // Active
         ];
     }

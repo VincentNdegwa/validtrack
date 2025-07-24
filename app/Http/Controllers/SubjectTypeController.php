@@ -23,8 +23,7 @@ class SubjectTypeController extends Controller
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
             $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%");
+                $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
         

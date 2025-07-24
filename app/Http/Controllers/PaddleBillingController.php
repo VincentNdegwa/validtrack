@@ -40,7 +40,7 @@ class PaddleBillingController extends Controller
             ->orderBy('sort_order')
             ->get();
         $user = $this->getUser();
-        $paddleSubscription = $user->subscriptions()->where('status', 'active')->first();
+        $paddleSubscription = $user->subscription();
         $currentPlan = null;
         if ($paddleSubscription) {
             $subItem = $paddleSubscription->items()->first();
@@ -77,7 +77,7 @@ class PaddleBillingController extends Controller
                 ];
 
                 if ($paddleSubscription->trial_ends_at) {
-                    $currentPlan['trial_ends_at'] = $paddleSubscription->trial_ends_at;
+                    $currentPlan['trial_ends_at'] = company_datetime($paddleSubscription->trial_ends_at, $user->company_id);
                 }
             }
         }

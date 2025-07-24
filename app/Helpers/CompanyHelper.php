@@ -227,7 +227,7 @@ class CompanyHelper
             return false;
         }
 
-        $paddleSubscription = $user->subscriptions()->where('status', 'active')->first();
+        $paddleSubscription = $user->subscriptions()->whereIn('status', ['active', 'trialing', 'past_due'])->first();
         if (!$paddleSubscription) {
             return false;
         }

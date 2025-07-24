@@ -1,7 +1,15 @@
 name: linter
 
 on:
-  workflow_call:
+  pull_request:
+    branches-ignore:
+      - main
+  workflow_run:
+    workflows: ["linter"]
+    types:
+      - completed
+    branches:
+      - main
 
 jobs:
   quality:

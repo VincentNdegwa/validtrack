@@ -75,26 +75,63 @@ class CompanyController extends Controller
         if (!Auth::user()->hasRole('super-admin')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
+
         $validated = $request->validate([
+            // Company fields
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'required|email|max:255|unique:companies,email',
             'phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:255',
             'website' => 'nullable|url|max:255',
             'is_active' => 'boolean',
+            'description' => 'nullable|string|max:255',
+            // User fields
+            'user_name' => 'required|string|max:255',
+            'user_email' => 'required|email|max:255|unique:users,email',
+            'user_password' => 'required|string|min:8',
+            'user_phone' => 'nullable|string|max:50',
+            'user_address' => 'nullable|string|max:255',
         ]);
-        
-        $company = Company::create($validated);
-        
-        // Run the permission and role seeders for this new company
-        $permissionSeeder = new \Database\Seeders\PermissionSeeder();
-        $permissionSeeder->run();
-        
-        $roleSeeder = new \Database\Seeders\RoleSeeder();
-        $roleSeeder->run();
-        
+
+        // Create company
+        $company = Company::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'address' => $validated['address'],
+            'website' => $validated['website'],
+            'is_active' => $validated['is_active'] ?? true,
+        ]);
+
+        // Create user (owner/admin)
+        $user = \App\Models\User::create([
+            'name' => $validated['user_name'],
+            'email' => $validated['user_email'],
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['user_password']),
+            'company_id' => $company->id,
+            'role' => 'admin',
+            'phone' => $validated['user_phone'],
+            'address' => $validated['user_address'],
+            'is_active' => true,
+        ]);
+
+        // Set company owner
+        $company->owner_id = $user->id;
+        $company->save();
+
+        // Assign admin role and permissions
+        $adminRole = $company->roles()->firstOrCreate([
+            'name' => 'admin',
+            'display_name' => 'Administrator',
+            'description' => 'Administrator with full access to all company features',
+            'company_id' => $company->id,
+        ]);
+        $permissions = \Database\Seeders\PermissionSeeder::getDefaultPermissions();
+        $company->syncPermissions($permissions, $adminRole);
+        $user->roles()->syncWithoutDetaching([$adminRole->id => ['company_id' => $company->id]]);
+
         return redirect()->route('companies.index')
-            ->with('success', 'Company created successfully');
+            ->with('success', 'Company and owner created successfully');
     }
     
     /**

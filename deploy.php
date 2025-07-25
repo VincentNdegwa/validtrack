@@ -10,7 +10,7 @@ set('repository', 'https://github.com/VincentNdegwa/validtrack.git');
 // Shared files/dirs (these persist between deployments)
 add('shared_files', ['.env']);
 add('shared_dirs', ['storage']);
-add('writable_dirs', ['storage', 'bootstrap/cache']);
+add('writable_dirs', ['storage', 'bootstrap/cache', 'public/build']);
 
 host('validtrack')
     ->set('hostname', '164.92.89.75')
@@ -36,8 +36,13 @@ task('deploy:permissions', function () {
     run('cd {{release_path}} && chown -R www-data:www-data storage bootstrap/cache');
 });
 
-// Clear config cache after caching (fixes unexpected config issues)
 after('artisan:config:cache', 'artisan:config:clear');
+
+task('deploy:clear_old_build', function () {
+    run('rm -rf {{release_path}}/public/build');
+});
+
+before('build:assets', 'deploy:clear_old_build');
 
 // Build frontend assets using pnpm
 task('build:assets', function () {

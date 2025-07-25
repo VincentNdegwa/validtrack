@@ -71,6 +71,7 @@ after('deploy:symlink', 'deploy:migrate');
 after('deploy:symlink', 'supervisor:restart');
 
 task('supervisor:restart', function () {
+    run('sudo systemctl start supervisor');
     run('sudo supervisorctl reread');
     run('sudo supervisorctl update');
     run('sudo supervisorctl restart validtrack-worker:*');

@@ -17,9 +17,25 @@ host('validtrack')
     ->set('remote_user', 'root')
     ->set('deploy_path', '/var/www/validtrack');
 
-// Hooks (after deploy tasks)
-after('deploy:failed', 'deploy:unlock');
+// Tasks
 
+// Clear previous build
+task('deploy:clear_old_build', function () {
+    run('rm -rf {{release_path}}/public/build');
+});
+
+// Build frontend assets using pnpm
+task('build:assets', function () {
+    writeln('<info>Checking Node, PNPM versions...</info>');
+    run('node -v');
+    run('pnpm -v');
+
+    writeln('<info>Installing dependencies with pnpm...</info>');
+    run('cd {{release_path}} && pnpm install >> build.log 2>&1');
+
+    writeln('<info>Building assets with pnpm...</info>');
+    run('cd {{release_path}} && NODE_OPTIONS="--max-old-space-size=2048" pnpm build >> build.log 2>&1');
+});
 
 // Install Composer dependencies
 task('deploy:composer', function () {
@@ -36,28 +52,14 @@ task('deploy:permissions', function () {
     run('cd {{release_path}} && chown -R www-data:www-data storage bootstrap/cache');
 });
 
+// Fix Laravel config cache issue
 after('artisan:config:cache', 'artisan:config:clear');
 
-task('deploy:clear_old_build', function () {
-    run('rm -rf {{release_path}}/public/build');
-});
-
-before('build:assets', 'deploy:clear_old_build');
-
-// Build frontend assets using pnpm
-task('build:assets', function () {
-    writeln('<info>Checking Node, PNPM versions...</info>');
-    run('node -v');
-    run('pnpm -v');
-
-    writeln('<info>Installing dependencies with pnpm...</info>');
-    run('cd {{release_path}} && pnpm install >> build.log 2>&1');
-
-    writeln('<info>Building assets with pnpm...</info>');
-    run('cd {{release_path}} && NODE_OPTIONS="--max-old-space-size=2048" pnpm build >> build.log 2>&1');
-});
+// Hooks (after deploy tasks)
+after('deploy:failed', 'deploy:unlock');
 
 // Hook build task before switching symlink
+before('build:assets', 'deploy:clear_old_build');
 before('deploy:symlink', 'build:assets');
 
 // Post-deploy actions

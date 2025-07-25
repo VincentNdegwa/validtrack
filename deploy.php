@@ -6,6 +6,8 @@ require 'recipe/laravel.php';
 
 // Configurations
 set('repository', 'https://github.com/VincentNdegwa/validtrack.git');
+set('keep_releases', 3);
+
 
 // Shared files/dirs (these persist between deployments)
 add('shared_files', ['.env']);
@@ -63,3 +65,11 @@ before('deploy:symlink', 'build:assets');
 // Post-deploy actions
 after('deploy:symlink', 'deploy:permissions');
 after('deploy:symlink', 'deploy:migrate');
+
+after('deploy:symlink', 'supervisor:restart');
+
+task('supervisor:restart', function () {
+    run('sudo supervisorctl reread');
+    run('sudo supervisorctl update');
+    run('sudo supervisorctl restart validtrack-worker:*');
+});

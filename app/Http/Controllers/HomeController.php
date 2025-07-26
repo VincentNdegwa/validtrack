@@ -22,4 +22,22 @@ class HomeController extends Controller
             'plans' => $plans,
         ]);
     }
+
+    public function acceptableUse()
+    {
+        return Inertia::render('AcceptableUse');
+    }
+
+    public function security()
+    {
+        return Inertia::render('Security');
+    }
+
+    public function legal(Request $request)
+    {
+        $tab = $request->query('tab', 'terms');
+        return Inertia::render('Legal', [
+            'activeTab' => $tab,
+        ]);
+    }
 }

@@ -17,6 +17,12 @@ use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+Route::get('/acceptable-use', [HomeController::class, 'acceptableUse'])->name('acceptable-use');
+
+Route::get('/legal', [HomeController::class, 'legal'])->name('legal');
+
+Route::get('/security', [HomeController::class, 'security'])->name('security');
+
 Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');

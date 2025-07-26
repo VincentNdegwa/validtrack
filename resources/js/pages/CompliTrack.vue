@@ -220,6 +220,41 @@ onMounted(() => {
         loaded.value = true;
     }, 100);
 });
+
+onMounted(() => {
+    const productScript = document.createElement('script')
+    productScript.type = 'application/ld+json'
+    productScript.text = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": "ValidTrack",
+        "image": ["/logo-blue.svg"],
+        "description": "Track, manage, and ensure compliance for all your documents easily with ValidTrack. Upload, get expiry reminders, and automate compliance for any subject type.",
+        "brand": { "@type": "Brand", "name": "ValidTrack" },
+        "offers": {
+            "@type": "Offer",
+            "url": "http://validtrack.tech360.systems/",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+        }
+    })
+    document.head.appendChild(productScript)
+
+    const faqScript = document.createElement('script')
+    faqScript.type = 'application/ld+json'
+    faqScript.text = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Can I track documents for employees and vendors?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Yes! ValidTrack is designed to manage documents for any entity type. You can create custom subject types like 'Employee', 'Vendor', 'Asset', or any other category specific to your organization's needs." }
+            },
+        ]
+    })
+    document.head.appendChild(faqScript)
+})
 </script>
 
 <template>
@@ -1438,12 +1473,8 @@ onMounted(() => {
                     <div>
                         <h3 class="mb-3 font-semibold">Features</h3>
                         <ul class="space-y-2 text-sm">
-                            <li>
-                                <a href="#features" class="text-muted-foreground transition-colors hover:text-primary">Universal Document Tracking</a>
-                            </li>
-                            <li>
-                                <a href="#features" class="text-muted-foreground transition-colors hover:text-primary">Automated Expiry Reminders</a>
-                            </li>
+                            <li><a href="#features" class="text-muted-foreground transition-colors hover:text-primary">Universal Document Tracking</a></li>
+                            <li><a href="#features" class="text-muted-foreground transition-colors hover:text-primary">Automated Expiry Reminders</a></li>
                             <li><a href="#features" class="text-muted-foreground transition-colors hover:text-primary">Compliance Dashboard</a></li>
                             <li><a href="#features" class="text-muted-foreground transition-colors hover:text-primary">Full Audit Logs</a></li>
                             <li><a href="#features" class="text-muted-foreground transition-colors hover:text-primary">Team Management</a></li>
@@ -1461,32 +1492,13 @@ onMounted(() => {
                     </div>
 
                     <div>
-                        <h3 class="mb-3 font-semibold">Company</h3>
+                        <h3 class="mb-3 font-semibold">Legal & Policies</h3>
                         <ul class="space-y-2 text-sm">
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">About Us</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Contact</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Privacy Policy</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Terms of Service</a></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 class="mb-3 font-semibold">Resources</h3>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Documentation</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">API Reference</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Help Center</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Blog</a></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 class="mb-3 font-semibold">Company</h3>
-                        <ul class="space-y-2 text-sm">
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">About Us</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Contact</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Privacy Policy</a></li>
-                            <li><a href="#" class="text-muted-foreground transition-colors hover:text-primary">Terms of Service</a></li>
+                            <li><a :href="route('legal')" class="text-muted-foreground transition-colors hover:text-primary">Terms & Conditions</a></li>
+                            <li><a :href="route('legal', { tab: 'privacy' })" class="text-muted-foreground transition-colors hover:text-primary">Privacy Policy</a></li>
+                            <li><a :href="route('legal', { tab: 'refund' })" class="text-muted-foreground transition-colors hover:text-primary">Refund Policy</a></li>
+                            <li><a :href="route('security')" class="text-muted-foreground transition-colors hover:text-primary">Security</a></li>
+                            <li><a :href="route('acceptable-use')" class="text-muted-foreground transition-colors hover:text-primary">Acceptable Use Policy</a></li>
                         </ul>
                     </div>
                 </div>

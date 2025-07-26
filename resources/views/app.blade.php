@@ -4,6 +4,19 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <meta name="description" content="Track, manage, and ensure compliance for all your documents easily with ValidTrack.">
+        <meta name="keywords" content="document tracking, compliance, management, ValidTrack, audit, security">
+        <meta property="og:title" content="Document Track & Compliance System | ValidTrack">
+        <meta property="og:description" content="Track, manage, and ensure compliance for all your documents easily with ValidTrack.">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="http://validtrack.tech360.systems/">
+        <meta property="og:image" content="/logo-blue.svg">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Document Track & Compliance System | ValidTrack">
+        <meta name="twitter:description" content="Track, manage, and ensure compliance for all your documents easily with ValidTrack.">
+        <meta name="twitter:image" content="/logo-blue.svg">
+        <link rel="canonical" href="http://validtrack.tech360.systems/">
+
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {
@@ -31,6 +44,12 @@
         </style>
 
         <title inertia>{{ config('app.name', 'ValidTrack') }}</title>
+
+        @inertiaHead
+        {{-- Placeholder for dynamic JSON-LD structured data injected by Vue pages --}}
+        @if (isset($jsonLd))
+            <script type="application/ld+json">{!! $jsonLd !!}</script>
+        @endif
 
         {{-- <link rel="icon" href="/favicon.ico" sizes="any"> --}}
         <link rel="icon" href="/logo-round.svg" type="image/svg+xml">

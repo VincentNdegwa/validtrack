@@ -1,2 +1,3 @@
 User-agent: *
-Disallow:
+Allow: /
+Sitemap: http://validtrack.tech360.systems/sitemap.xml

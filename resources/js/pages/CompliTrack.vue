@@ -1504,7 +1504,7 @@ onMounted(() => {
                 </div>
 
                 <div class="mt-8 flex flex-col items-center justify-between border-t border-border pt-8 md:flex-row">
-                    <div class="text-sm text-muted-foreground">&copy; {{ new Date().getFullYear() }} ValidTrack. All rights reserved.</div>
+                    <div class="text-sm text-muted-foreground">&copy; {{ new Date().getFullYear() }} Tech360 Systems. All rights reserved.</div>
                     <div class="mt-4 flex space-x-4 md:mt-0">
                         <a href="#" class="text-muted-foreground transition-colors hover:text-primary">
                             <svg

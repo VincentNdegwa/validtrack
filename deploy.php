@@ -6,7 +6,7 @@ require 'recipe/laravel.php';
 
 // Configurations
 set('repository', 'https://github.com/VincentNdegwa/validtrack.git');
-set('keep_releases', 3);
+set('keep_releases', 2);
 
 
 // Shared files/dirs (these persist between deployments)

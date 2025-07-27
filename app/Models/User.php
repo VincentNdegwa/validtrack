@@ -100,6 +100,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(ActivityLog::class);
     }
+
+    public function tokens()
+    {
+        return $this->hasOne(UserToken::class);
+    }
     
     /**
      * Check if the user has a specific permission.

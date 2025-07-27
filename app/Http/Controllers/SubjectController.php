@@ -116,7 +116,7 @@ class SubjectController extends Controller
 
         $subject = Subject::create($validated);
 
-        return redirect()->route('subjects.show', $subject->id)
+        return redirect()->route('subjects.show', Crypt::encrypt($subject->id) )
             ->with('success', 'Subject created successfully.');
     }
 

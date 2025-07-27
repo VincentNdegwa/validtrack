@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Company;
 use App\Models\User;
-use Database\Seeders\PermissionSeeder;
+use App\Helpers\UserCompanyHelper;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,45 +39,15 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
         
-        // Create a company for the user
-        $companyName = $request->name . "'s Workspace";
-        $companyEmail = 'company_' . Str::slug($request->name) . '@' . explode('@', $request->email)[1];
-        
-        $company = Company::create([
-            'name' => $companyName,
-            'email' => $companyEmail,
-        ]);
-
-        $user = User::create([
+        $user = UserCompanyHelper::createUserWithCompanyAndPermissions([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'company_id' => $company->id,
             'role' => 'admin',
         ]);
-        $company->owner_id = $user->id;
-        $company->save();
-        $this->giveCompanyPermissions($company);
-
         event(new Registered($user));
         Auth::login($user);
-
         return to_route('dashboard');
     }
 
-    public function giveCompanyPermissions(Company $company): void
-    {
-        $permissions = PermissionSeeder::getDefaultPermissions();
-        $adminRole = $company->roles()->firstOrCreate([
-            'name' => 'admin',
-            'display_name' => 'Administrator',
-            'description' => 'Administrator with full access to all company features',
-            'company_id' => $company->id,
-        ]);
-        $adminUser = $company->users()->where('role', 'admin')->first();
-        if ($adminUser) {
-            $adminUser->roles()->syncWithoutDetaching([$adminRole->id => ['company_id' => $company->id]]);
-        }
-        $company->syncPermissions($permissions, $adminRole);
-    }
 }

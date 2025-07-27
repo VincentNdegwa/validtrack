@@ -104,8 +104,8 @@ task('apache:reload', function () {
 // ----------------------------------------------
 
 before('deploy:symlink', 'deploy:clear_old_build');
-before('deploy:symlink', 'build:assets');
 
+after('deploy:symlink', 'build:assets');
 after('deploy:symlink', 'deploy:composer');
 after('deploy:symlink', 'deploy:permissions');
 after('deploy:symlink', 'deploy:migrate');

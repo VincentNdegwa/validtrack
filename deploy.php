@@ -25,23 +25,25 @@ host('validtrack')
     ->setDeployPath('/var/www/validtrack');
 
 // ----------------------------------------------
-// Override default Laravel tasks to prevent early caching
+// Disable built-in Laravel tasks that run too early
 // ----------------------------------------------
 
-set('laravel', [
-    'storage:link',
-    // Don't run these early; we'll handle manually later
-    // 'config:cache',
-    // 'route:cache',
-    // 'view:cache',
-    // 'event:cache',
-]);
+// This completely unregisters the default Laravel recipe’s cache tasks
+after('artisan:config:cache', 'noop');
+after('artisan:route:cache', 'noop');
+after('artisan:view:cache', 'noop');
+after('artisan:event:cache', 'noop');
+after('artisan:migrate', 'noop');
 
 // ----------------------------------------------
 // Tasks
 // ----------------------------------------------
 
-// Clear old build
+task('noop', function () {
+    writeln('<comment>Skipping default Laravel artisan:* task</comment>');
+});
+
+// Clear old Vite assets
 task('deploy:clear_old_build', function () {
     run('rm -rf {{release_path}}/public/build');
 });
@@ -63,7 +65,7 @@ task('deploy:migrate', function () {
     run('cd {{release_path}} && php artisan migrate --force');
 });
 
-// Laravel cache clearing (safe for view/manifest rebuilds)
+// Laravel clear caches (run after asset build)
 task('laravel:clear_caches', function () {
     run('cd {{release_path}} && php artisan config:clear');
     run('cd {{release_path}} && php artisan route:clear');
@@ -71,7 +73,7 @@ task('laravel:clear_caches', function () {
     run('cd {{release_path}} && php artisan optimize:clear');
 });
 
-// Laravel cache (run after build)
+// Laravel rebuild caches (now safe)
 task('laravel:rebuild_caches', function () {
     run('cd {{release_path}} && php artisan config:cache');
     run('cd {{release_path}} && php artisan route:cache');
@@ -79,12 +81,12 @@ task('laravel:rebuild_caches', function () {
     run('cd {{release_path}} && php artisan event:cache');
 });
 
-// Fix permissions
+// Set permissions
 task('deploy:permissions', function () {
     run('cd {{release_path}} && chown -R www-data:www-data storage bootstrap/cache');
 });
 
-// Supervisor
+// Restart Supervisor
 task('supervisor:restart', function () {
     run('sudo systemctl start supervisor');
     run('sudo supervisorctl reread');
@@ -92,7 +94,7 @@ task('supervisor:restart', function () {
     run('sudo supervisorctl restart validtrack-worker:*');
 });
 
-// Apache reload
+// Reload Apache
 task('apache:reload', function () {
     run('sudo systemctl reload apache2');
 });
@@ -101,11 +103,9 @@ task('apache:reload', function () {
 // Hooks
 // ----------------------------------------------
 
-// BEFORE linking the new release:
 before('deploy:symlink', 'deploy:clear_old_build');
 before('deploy:symlink', 'build:assets');
 
-// AFTER linking the new release:
 after('deploy:symlink', 'deploy:composer');
 after('deploy:symlink', 'deploy:permissions');
 after('deploy:symlink', 'deploy:migrate');

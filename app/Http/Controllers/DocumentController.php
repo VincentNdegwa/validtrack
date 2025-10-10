@@ -24,29 +24,33 @@ class DocumentController extends Controller
         }
         $query = Document::with(['subject', 'documentType'])
             ->where('company_id', Auth::user()->company_id);
-            
-        // Handle search if provided
-        if ($request->has('search')) {
+
+        if ($request->filled('search')) {
             $searchTerm = $request->get('search');
-            $query->where(function($q) use ($searchTerm) {
-                $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%")
-                  ->orWhere('file_name', 'like', "%{$searchTerm}%");
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('notes', 'like', "%{$searchTerm}%")
+                    ->orWhere('file_url', 'like', "%{$searchTerm}%");
+
+                $q->orWhereHas('subject', function ($sq) use ($searchTerm) {
+                    $sq->where('name', 'like', "%{$searchTerm}%");
+                });
+
+                $q->orWhereHas('documentType', function ($sq) use ($searchTerm) {
+                    $sq->where('name', 'like', "%{$searchTerm}%");
+                });
             });
         }
-        
-        // Handle sorting
+
         $sortField = $request->get('sort', 'created_at');
         $sortDirection = $request->get('direction', 'desc');
-        
-        // Validate sort field to prevent SQL injection
-        $allowedSortFields = ['name', 'created_at', 'updated_at', 'expiry_date', 'file_name', 'file_size'];
+
+        $allowedSortFields = ['issue_date', 'expiry_date', 'created_at', 'updated_at', 'status'];
         if (!in_array($sortField, $allowedSortFields)) {
             $sortField = 'created_at';
         }
-        
+
         $query->orderBy($sortField, $sortDirection);
-        
+
         // Paginate the results
         $perPage = $request->get('per_page', 10);
         $documents = $query->paginate($perPage);
@@ -73,12 +77,12 @@ class DocumentController extends Controller
         $subjects = Subject::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
-            
+
         $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
-            
+
         $selectedSubject = null;
         if ($request->has('subject_id')) {
             $selectedSubject = Subject::findOrFail($request->subject_id);
@@ -128,7 +132,7 @@ class DocumentController extends Controller
 
         // Store the file
         $path = $request->file('file')->store('documents/' . $subject->id, 'public');
-        
+
         $document = new Document();
         $document->subject_id = $validated['subject_id'];
         $document->document_type_id = $validated['document_type_id'] ?? null;
@@ -153,7 +157,7 @@ class DocumentController extends Controller
         if (!Auth::user()->hasPermission('documents-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);        
+        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
         if ($document->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
@@ -175,7 +179,7 @@ class DocumentController extends Controller
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
-        
+
         // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -184,7 +188,7 @@ class DocumentController extends Controller
         $subjects = Subject::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
-            
+
         $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
@@ -206,7 +210,7 @@ class DocumentController extends Controller
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
-        
+
         // Make sure the document belongs to the user's company
         if ($document->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -230,7 +234,7 @@ class DocumentController extends Controller
 
         if ($request->hasFile('file')) {
             $exists = check_file_exists($document->file_url);
-            if($exists){
+            if ($exists) {
                 $deleteResult = delete_file($document->file_url);
                 if (!$deleteResult['success']) {
                     Log::warning('Failed to delete old document: ' . $deleteResult['message']);
@@ -265,7 +269,7 @@ class DocumentController extends Controller
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
-        
+
         if ($document->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }

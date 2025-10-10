@@ -3,7 +3,7 @@
 use App\Http\Controllers\DocumentUploadRequestController;
 use Illuminate\Support\Facades\Route;
 
-// Public document upload routes (no auth required)
+// Public document uplods 
 Route::get('/document-upload/{token}', [DocumentUploadRequestController::class, 'showUploadForm'])
     ->name('public.document-upload');
 

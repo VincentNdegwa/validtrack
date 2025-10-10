@@ -189,7 +189,8 @@ onMounted(() => {
     border: 1px solid var(--border);
 }
 .fc .fc-daygrid-day.fc-day-today {
-    background-color: var(--sidebar-accent);
+    /** background-color: var(--sidebar-accent); **/
+    background-color: var(--popover);
 }
 .fc-daygrid-day.fc-day-future:has(.fc-event) {
     background-color: var(--popover) !important;

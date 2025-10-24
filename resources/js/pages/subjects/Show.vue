@@ -85,7 +85,6 @@ const columns = computed(() => [
     { key: '_actions', label: 'Actions' },
 ]);
 
-
 const handlePageChange = (page: number) => {
     router.get(
         `/subjects/${props.subject.slug}`,
@@ -127,7 +126,6 @@ const handleSort = (field: string) => {
         },
     );
 };
-
 
 const handlePerPageChange = (value: number) => {
     perPage.value = value;
@@ -200,7 +198,7 @@ const missingDocuments = computed(() => {
 
 const formatDate = (dateString: string | undefined) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString).toLocaleDateString();  
+    const date = new Date(dateString).toLocaleDateString();
     console.log(date);
     return date;
 };
@@ -265,9 +263,7 @@ const getStatusText = (status: number) => {
     }
 };
 
-const isDocumentExpired = (document: Document) => {
-    return document.status === 3;
-};
+
 
 const compliance = computed(() => {
     if (!props.requiredDocumentTypes || props.requiredDocumentTypes.length === 0) {
@@ -310,23 +306,23 @@ const getDocumentStatusClasses = (status: string) => {
         case 'Submitted':
             return {
                 containerClass: 'border-green-200 bg-green-50 dark:border-green-900/20 dark:bg-green-900/10',
-                dotClass: 'bg-green-500'
+                dotClass: 'bg-green-500',
             };
         case 'Pending':
             return {
                 containerClass: 'border-yellow-200 bg-yellow-50 dark:border-yellow-900/20 dark:bg-yellow-900/10',
-                dotClass: 'bg-yellow-500'
+                dotClass: 'bg-yellow-500',
             };
         case 'Expired':
             return {
                 containerClass: 'border-red-200 bg-red-50 dark:border-red-900/20 dark:bg-red-900/10',
-                dotClass: 'bg-red-500'
+                dotClass: 'bg-red-500',
             };
         case 'Missing':
         default:
             return {
                 containerClass: 'border-red-200 bg-red-50 dark:border-red-900/20 dark:bg-red-900/10',
-                dotClass: 'bg-red-500'
+                dotClass: 'bg-red-500',
             };
     }
 };
@@ -477,9 +473,7 @@ const getDocumentStatusClasses = (status: string) => {
                                 v-for="requiredDoc in requiredDocumentTypes"
                                 :key="requiredDoc.id"
                                 class="rounded-lg border p-2"
-                                :class="[
-                                    getDocumentStatusClasses(requiredDoc.computed_status).containerClass
-                                ]"
+                                :class="[getDocumentStatusClasses(requiredDoc.computed_status).containerClass]"
                             >
                                 <div class="flex items-start justify-between">
                                     <div>
@@ -560,9 +554,9 @@ const getDocumentStatusClasses = (status: string) => {
                         </div>
                     </template>
 
-                    <template #issue_date="{item:document}" >
+                    <template #issue_date="{ item: document }">
                         <div>
-                            {{ document.issue_date? formatDate(document.issue_date): 'N/A' }}
+                            {{ document.issue_date ? formatDate(document.issue_date) : 'N/A' }}
                         </div>
                     </template>
 

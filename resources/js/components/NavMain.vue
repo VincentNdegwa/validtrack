@@ -37,7 +37,6 @@ const isItemActive = (item: NavItem): boolean => {
     return false;
 };
 
-
 const getVisibleChildren = (item: NavItem): NavItem[] => {
     if (!item.children) return [];
     return item.children.filter((child) => child.show === true);

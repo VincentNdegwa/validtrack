@@ -101,7 +101,7 @@ const getFileType = (url: string) => {
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <!-- Document Preview -->
                 <div class="rounded-xl border border-border bg-card p-6 lg:col-span-2">
-                    <div class="flex justify-between items-center ">
+                    <div class="flex items-center justify-between">
                         <h2 class="mb-4 text-xl font-semibold">Document Preview</h2>
                         <div class="mb-4">
                             <a
@@ -110,7 +110,7 @@ const getFileType = (url: string) => {
                                 download
                                 class="inline-flex items-center rounded-md bg-primary px-2 py-2 text-primary-foreground hover:bg-primary/90"
                             >
-                                <Download class=" w-5 h-5" />
+                                <Download class="h-5 w-5" />
                             </a>
                         </div>
                     </div>

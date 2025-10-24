@@ -173,7 +173,8 @@
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
-    a,button{
+    a,
+    button {
         cursor: pointer;
     }
 

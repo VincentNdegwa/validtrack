@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
-import { ref, provide } from 'vue';
+import { provide, ref } from 'vue';
 
 // Create a single active menu state for the entire app
 const activeMenuId = ref<string | number | null>(null);
@@ -14,7 +14,6 @@ interface Props {
 withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
 });
-
 </script>
 
 <template>

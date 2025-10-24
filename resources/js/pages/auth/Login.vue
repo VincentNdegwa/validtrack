@@ -31,20 +31,21 @@ const submit = () => {
 
 const facebookLogin = () => {
     window.location.href = route('facebook.login');
-}
+};
 
 const googleLogin = () => {
     window.location.href = route('google.login');
-}
+};
 </script>
 
 <template>
     <AuthBase title="Welcome Back" description="Enter your credentials to access your account">
-
         <Head title="Log in" />
 
-        <div v-if="status"
-            class="mb-6 rounded-md bg-green-50 p-3 text-center text-sm font-medium text-green-600 dark:bg-green-900/30 dark:text-green-400">
+        <div
+            v-if="status"
+            class="mb-6 rounded-md bg-green-50 p-3 text-center text-sm font-medium text-green-600 dark:bg-green-900/30 dark:text-green-400"
+        >
             {{ status }}
         </div>
 
@@ -56,8 +57,17 @@ const googleLogin = () => {
                         <span>Email address</span>
                     </Label>
                     <div class="relative">
-                        <Input id="email" type="email" required autofocus :tabindex="1" autocomplete="email"
-                            v-model="form.email" placeholder="name@company.com" class="pr-10" />
+                        <Input
+                            id="email"
+                            type="email"
+                            required
+                            autofocus
+                            :tabindex="1"
+                            autocomplete="email"
+                            v-model="form.email"
+                            placeholder="name@company.com"
+                            class="pr-10"
+                        />
                     </div>
                     <InputError :message="form.errors.email" />
                 </div>
@@ -68,15 +78,26 @@ const googleLogin = () => {
                             <Lock class="h-4 w-4 text-muted-foreground" />
                             <span>Password</span>
                         </Label>
-                        <TextLink v-if="canResetPassword" :href="route('password.request')"
+                        <TextLink
+                            v-if="canResetPassword"
+                            :href="route('password.request')"
                             class="text-sm font-medium text-primary transition-colors hover:text-primary/80"
-                            :tabindex="5">
+                            :tabindex="5"
+                        >
                             Forgot password?
                         </TextLink>
                     </div>
                     <div class="relative">
-                        <Input id="password" type="password" required :tabindex="2" autocomplete="current-password"
-                            v-model="form.password" placeholder="••••••••" class="pr-10" />
+                        <Input
+                            id="password"
+                            type="password"
+                            required
+                            :tabindex="2"
+                            autocomplete="current-password"
+                            v-model="form.password"
+                            placeholder="••••••••"
+                            class="pr-10"
+                        />
                     </div>
                     <InputError :message="form.errors.password" />
                 </div>
@@ -88,8 +109,13 @@ const googleLogin = () => {
                     </Label>
                 </div>
 
-                <Button type="submit" class="mt-2 w-full transition-all hover:shadow-md"
-                    :class="{ 'opacity-90': form.processing }" :tabindex="4" :disabled="form.processing">
+                <Button
+                    type="submit"
+                    class="mt-2 w-full transition-all hover:shadow-md"
+                    :class="{ 'opacity-90': form.processing }"
+                    :tabindex="4"
+                    :disabled="form.processing"
+                >
                     <LoaderCircle v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
                     <span>Sign in to account</span>
                 </Button>
@@ -105,19 +131,27 @@ const googleLogin = () => {
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <Button @click="facebookLogin" :disabled="loading" variant="outline" type="button"
-                    class="transition-colors hover:bg-secondary/20">
-                    <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <Button @click="facebookLogin" :disabled="loading" variant="outline" type="button" class="transition-colors hover:bg-secondary/20">
+                    <svg
+                        class="mr-2 h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
                         <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
                     </svg>
                     Facebook
                 </Button>
-                <Button @click="googleLogin" :disabled="loading" variant="outline" type="button"
-                    class="transition-colors hover:bg-secondary/20">
+                <Button @click="googleLogin" :disabled="loading" variant="outline" type="button" class="transition-colors hover:bg-secondary/20">
                     <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <path fill="currentColor"
-                            d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z" />
+                        <path
+                            fill="currentColor"
+                            d="M21.35,11.1H12.18V13.83H18.69C18.36,17.64 15.19,19.27 12.19,19.27C8.36,19.27 5,16.25 5,12C5,7.9 8.2,4.73 12.2,4.73C15.29,4.73 17.1,6.7 17.1,6.7L19,4.72C19,4.72 16.56,2 12.1,2C6.42,2 2.03,6.8 2.03,12C2.03,17.05 6.16,22 12.25,22C17.6,22 21.5,18.33 21.5,12.91C21.5,11.76 21.35,11.1 21.35,11.1V11.1Z"
+                        />
                     </svg>
                     Google
                 </Button>
@@ -125,8 +159,7 @@ const googleLogin = () => {
 
             <div class="mt-2 text-center text-sm text-muted-foreground">
                 Don't have an account?
-                <TextLink :href="route('register')" :tabindex="5"
-                    class="font-medium text-primary transition-colors hover:text-primary/80">
+                <TextLink :href="route('register')" :tabindex="5" class="font-medium text-primary transition-colors hover:text-primary/80">
                     Create account
                 </TextLink>
             </div>

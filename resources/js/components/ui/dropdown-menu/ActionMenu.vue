@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, inject, type Ref } from 'vue';
 import { MoreVertical } from 'lucide-vue-next';
-
-// Static state to track active menu
-const activeMenu = ref<string | number | null>(null);
 
 const props = defineProps<{
   itemId: string | number;
@@ -12,6 +9,11 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'select', action: string, itemId: string | number): void;
 }>();
+
+const activeMenu = inject<Ref<string | number | null>>('activeMenuId');
+if (!activeMenu) {
+  throw new Error('ActionMenu must be used within AppLayout');
+}
 
 const dropdownRef = ref<HTMLElement | null>(null);
 const triggerRef = ref<HTMLElement | null>(null);

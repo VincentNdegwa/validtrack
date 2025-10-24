@@ -10,11 +10,22 @@ defineProps<{
 }>();
 
 const page = usePage();
-const expandedItems = ref<Record<string, boolean>>({});
+
+const expandedMenu = ref(localStorage.getItem('nav-expanded') || '');
 
 const toggleExpanded = (title: string) => {
-    expandedItems.value[title] = !expandedItems.value[title];
+    if (expandedMenu.value === title) {
+        expandedMenu.value = '';
+        localStorage.removeItem('nav-expanded');
+    } else {
+        expandedMenu.value = title;
+        localStorage.setItem('nav-expanded', title);
+    }
 };
+
+const isExpanded = computed(() => (title: string) => {
+    return expandedMenu.value === title;
+});
 
 const isItemActive = (item: NavItem): boolean => {
     if (item.href && item.href === (page.url as string)) return true;
@@ -26,9 +37,6 @@ const isItemActive = (item: NavItem): boolean => {
     return false;
 };
 
-const isExpanded = computed(() => (title: string) => {
-    return expandedItems.value[title] ?? false;
-});
 
 const getVisibleChildren = (item: NavItem): NavItem[] => {
     if (!item.children) return [];
@@ -47,8 +55,8 @@ const hasVisibleChildren = (item: NavItem): boolean => {
         <SidebarMenu>
             <template v-for="item in items" :key="item.title">
                 <!-- Standard menu item - only show if show property is true or undefined -->
-                <SidebarMenuItem v-if="!item.children && item.show !== false">
-                    <SidebarMenuButton as-child :is-active="item.href === (page.url as string)" :tooltip="item.title">
+                <SidebarMenuItem v-if="!item.children && item.show !== false && item.href">
+                    <SidebarMenuButton as-child :is-active="item.href === page.url" :tooltip="item.title">
                         <Link :href="item.href">
                             <component :is="item.icon" />
                             <span>{{ item.title }}</span>
@@ -69,7 +77,7 @@ const hasVisibleChildren = (item: NavItem): boolean => {
                     <!-- Submenu items -->
                     <div v-if="isExpanded(item.title)" class="ml-4 space-y-1 border-l border-border pl-2">
                         <SidebarMenuItem v-for="child in getVisibleChildren(item)" :key="child.title">
-                            <SidebarMenuButton as-child :is-active="child.href === (page.url as string)" :tooltip="child.title">
+                            <SidebarMenuButton as-child :is-active="child.href === page.url" :tooltip="child.title" v-if="child.href">
                                 <Link :href="child.href">
                                     <component :is="child.icon" class="h-4 w-4" />
                                     <span>{{ child.title }}</span>

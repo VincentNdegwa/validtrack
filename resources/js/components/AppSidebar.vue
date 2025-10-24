@@ -77,18 +77,47 @@ const mainNavItems = computed(() => {
                 },
             ],
         },
+
         {
             title: 'Subjects',
-            href: '/subjects',
             icon: Dock,
-            show: hasPermission('subjects-view'),
+            show: hasPermission('subjects-view') || hasPermission('subject-types-view'),
+            children: [
+                {
+                    title: 'Subject Types',
+                    href: '/subject-types',
+                    icon: Dock,
+                    show: hasPermission('subject-types-view'),
+                },
+                {
+                    title: 'Subjects',
+                    href: '/subjects',
+                    icon: Dock,
+                    show: hasPermission('subjects-view'),
+                },
+            ],
         },
+
         {
             title: 'Documents',
-            href: '/documents',
             icon: FileBadge2Icon,
-            show: hasPermission('documents-view'),
+            show: hasPermission('documents-view') || hasPermission('document-types-view'),
+            children: [
+                {
+                    title: 'Document Types',
+                    href: '/document-types',
+                    icon: FileBadge2Icon,
+                    show: hasPermission('document-types-view'),
+                },
+                {
+                    title: 'Documents',
+                    href: '/documents',
+                    icon: FileBadge2Icon,
+                    show: hasPermission('documents-view'),
+                },
+            ],
         },
+
         {
             title: 'Activity Logs',
             href: '/activity-logs',

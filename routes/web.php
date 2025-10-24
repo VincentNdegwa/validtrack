@@ -32,6 +32,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('subjects', SubjectController::class);
     Route::resource('subject-types', SubjectTypeController::class);
     Route::resource('documents', DocumentController::class);
+    Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
     Route::resource('document-types', DocumentTypeController::class);
     Route::resource('required-documents', RequiredDocumentTypeController::class)->only(['store', 'destroy']);
     Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show']);

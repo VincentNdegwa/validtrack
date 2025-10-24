@@ -287,4 +287,22 @@ class DocumentController extends Controller
         return redirect()->route('documents.index')
             ->with('success', 'Document deleted successfully.');
     }
+
+    public function download($id)
+    {
+        if (!Auth::user()->hasPermission('documents-view')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+        $document = is_numeric($id) ? Document::findOrFail($id) : Document::findBySlugOrFail($id);
+        if ($document->company_id !== Auth::user()->company_id) {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        $exists = check_file_exists($document->file_url);
+        if (!$exists) {
+            return redirect()->back()->with('error', 'File not found.');
+        }
+
+        return Storage::disk('public')->download($document->file_url);
+    }
 }

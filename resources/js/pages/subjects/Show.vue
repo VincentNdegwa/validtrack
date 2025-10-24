@@ -304,6 +304,32 @@ const requiredDocumentTypeIds = computed(() => {
 const isDocumentLinked = (documentTypeId: number) => {
     return requiredDocumentTypeIds.value.includes(documentTypeId);
 };
+
+const getDocumentStatusClasses = (status: string) => {
+    switch (status) {
+        case 'Submitted':
+            return {
+                containerClass: 'border-green-200 bg-green-50 dark:border-green-900/20 dark:bg-green-900/10',
+                dotClass: 'bg-green-500'
+            };
+        case 'Pending':
+            return {
+                containerClass: 'border-yellow-200 bg-yellow-50 dark:border-yellow-900/20 dark:bg-yellow-900/10',
+                dotClass: 'bg-yellow-500'
+            };
+        case 'Expired':
+            return {
+                containerClass: 'border-red-200 bg-red-50 dark:border-red-900/20 dark:bg-red-900/10',
+                dotClass: 'bg-red-500'
+            };
+        case 'Missing':
+        default:
+            return {
+                containerClass: 'border-red-200 bg-red-50 dark:border-red-900/20 dark:bg-red-900/10',
+                dotClass: 'bg-red-500'
+            };
+    }
+};
 </script>
 
 <template>
@@ -452,10 +478,7 @@ const isDocumentLinked = (documentTypeId: number) => {
                                 :key="requiredDoc.id"
                                 class="rounded-lg border p-2"
                                 :class="[
-                                    documents &&
-                                    documents.data.some((doc) => doc.document_type_id === requiredDoc.document_type_id && !isDocumentExpired(doc))
-                                        ? 'border-green-200 bg-green-50 dark:border-green-900/20 dark:bg-green-900/10'
-                                        : 'border-red-200 bg-red-50 dark:border-red-900/20 dark:bg-red-900/10',
+                                    getDocumentStatusClasses(requiredDoc.computed_status).containerClass
                                 ]"
                             >
                                 <div class="flex items-start justify-between">
@@ -463,30 +486,17 @@ const isDocumentLinked = (documentTypeId: number) => {
                                         <p class="flex items-center font-medium">
                                             <span
                                                 class="mr-2 h-2 w-2 rounded-full"
-                                                :class="[
-                                                    documents &&
-                                                    documents.data.some(
-                                                        (doc) => doc.document_type_id === requiredDoc.document_type_id && !isDocumentExpired(doc),
-                                                    )
-                                                        ? 'bg-green-500'
-                                                        : 'bg-red-500',
-                                                ]"
+                                                :class="[getDocumentStatusClasses(requiredDoc.computed_status).dotClass]"
                                             >
                                             </span>
                                             {{ requiredDoc.document_type.name }}
                                         </p>
                                         <p class="mt-1 text-xs text-muted-foreground">
-                                            {{
-                                                documents && documents.data.some((doc) => doc.document_type_id === requiredDoc.document_type_id)
-                                                    ? documents.data.find((dc) => dc.document_type_id === requiredDoc.document_type_id)?.status === 3
-                                                        ? 'Expired'
-                                                        : 'Submitted'
-                                                    : 'Missing'
-                                            }}
+                                            {{ requiredDoc.computed_status }}
                                         </p>
                                     </div>
 
-                                    <div v-if="!documents || !documents.data.some((doc) => doc.document_type_id === requiredDoc.document_type_id)">
+                                    <div v-if="requiredDoc.computed_status === 'Missing'">
                                         <Can permission="documents-create">
                                             <Button
                                                 size="sm"

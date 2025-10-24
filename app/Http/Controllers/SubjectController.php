@@ -162,11 +162,54 @@ class SubjectController extends Controller
         $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
-            
+
         $requiredDocumentTypes = RequiredDocumentType::where('subject_type_id', $subject->subject_type_id)
             ->where('company_id', Auth::user()->company_id)
             ->with('documentType')
             ->get();
+
+        $subjectDocs = $subject->documents()
+            ->where('company_id', Auth::user()->company_id)
+            ->select('document_type_id', 'status')
+            ->get();
+
+        $docStatusMap = [];
+        foreach ($subjectDocs as $d) {
+            $docTypeId = $d->document_type_id;
+            if (!isset($docStatusMap[$docTypeId])) {
+                $docStatusMap[$docTypeId] = [];
+            }
+            $docStatusMap[$docTypeId][] = (int) $d->status;
+        }
+
+     
+        $requiredDocumentTypes = $requiredDocumentTypes->map(function ($req) use ($docStatusMap) {
+            $docTypeId = $req->document_type_id;
+            if (empty($docStatusMap[$docTypeId])) {
+                $req->computed_status = 'Missing';
+            } else {
+                $statuses = $docStatusMap[$docTypeId];
+
+                // Check if all statuses are expired (3)
+                $allExpired = true;
+                foreach ($statuses as $s) {
+                    if ($s !== 3) {
+                        $allExpired = false;
+                        break;
+                    }
+                }
+
+                if ($allExpired) {
+                    $req->computed_status = 'Expired';
+                } elseif (in_array(2, $statuses, true)) {
+                    $req->computed_status = 'Pending';
+                } else {
+                    $req->computed_status = 'Submitted';
+                }
+            }
+
+            return $req;
+        });
 
         return Inertia::render('subjects/Show', [
             'subject' => $subject,

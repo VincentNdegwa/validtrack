@@ -3,13 +3,17 @@ import Can from '@/components/auth/Can.vue';
 import RequestUploadModal from '@/components/documents/RequestUploadModal.vue';
 import { Button } from '@/components/ui/button';
 import Checkbox from '@/components/ui/checkbox/Checkbox.vue';
+import { DataTable } from '@/components/ui/data-table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ActionMenu, ActionMenuButton } from '@/components/ui/dropdown-menu';
 import { Select } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Document, SubjectType, type DocumentType } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { Download, Edit, Eye, Trash } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
+import { route } from 'ziggy-js';
 
 interface CustomSubject {
     id: number;
@@ -31,22 +35,142 @@ interface CustomSubject {
     subject_type?: SubjectType;
 }
 
-// Update the Props interface to use our custom Subject type
+interface DocumentData {
+    data: Document[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+}
+
 interface Props {
     subject: CustomSubject;
-    documents?: Document[];
+    documents?: DocumentData;
     documentTypes?: DocumentType[];
     requiredDocumentTypes?: any[];
 }
 
 interface Props {
     subject: CustomSubject;
-    documents?: Document[];
+    documents?: DocumentData;
     documentTypes?: DocumentType[];
     requiredDocumentTypes?: any[];
 }
 
 const props = defineProps<Props>();
+// docs table state
+const search = ref('');
+const sortField = ref('created_at');
+const sortDirection = ref<'asc' | 'desc'>('desc');
+const perPage = ref(10);
+
+const pagination = computed(() => {
+    if (!props.documents) return null;
+    // handle two shapes: direct array (no pagination) or paginated object
+    if (Array.isArray(props.documents)) return null;
+    return {
+        currentPage: props.documents.current_page,
+        lastPage: props.documents.last_page,
+        perPage: props.documents.per_page,
+        total: props.documents.total,
+    };
+});
+
+const columns = computed(() => [
+    { key: 'document_type', label: 'Type', sortable: false },
+    { key: 'expiry_date', label: 'Expiry Date', sortable: true },
+    { key: 'issue_date', label: 'Issued', sortable: true },
+    { key: 'created_at', label: 'Date Added', sortable: true, sortDirection: sortField.value === 'created_at' ? sortDirection.value : null },
+    { key: 'status', label: 'Status', sortable: false },
+    { key: '_actions', label: 'Actions' },
+]);
+
+
+const handlePageChange = (page: number) => {
+    router.get(
+        `/subjects/${props.subject.slug}`,
+        {
+            page: page,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['documents'],
+        },
+    );
+};
+
+const handleSort = (field: string) => {
+    if (field === sortField.value) {
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        sortField.value = field;
+        sortDirection.value = 'asc';
+    }
+
+    router.get(
+        `/subjects/${props.subject.id}`,
+        {
+            sort: sortField.value,
+            direction: sortDirection.value,
+            search: search.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['documents'],
+        },
+    );
+};
+
+
+const handlePerPageChange = (value: number) => {
+    perPage.value = value;
+    router.get(
+        `/subjects/${props.subject.id}`,
+        {
+            search: search.value,
+            sort: sortField.value,
+            direction: sortDirection.value,
+            per_page: perPage.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['documents'],
+        },
+    );
+};
+
+const handleMenuAction = (action: string, documentId: string | number) => {
+    const document =
+        props.documents && !Array.isArray(props.documents)
+            ? props.documents.data.find((d) => d.id === documentId)
+            : Array.isArray(props.documents)
+              ? props.documents.find((d: Document) => d.id === documentId)
+              : undefined;
+    if (!document) return;
+    switch (action) {
+        case 'view':
+            router.visit(`/documents/${document.slug}`);
+            break;
+        case 'edit':
+            router.visit(`/documents/${document.slug}/edit`);
+            break;
+        case 'download':
+            window.open(route('documents.download', document.id), '_blank');
+            break;
+        case 'delete':
+            router.delete(`/documents/${document.slug}`);
+            break;
+    }
+};
+
 const isDialogOpen = ref(false);
 const selectedDocumentId = ref<number | string>('');
 const isRequired = ref(true);
@@ -73,6 +197,13 @@ const missingDocuments = computed(() => {
 
     return missingDocs;
 });
+
+const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString).toLocaleDateString();  
+    console.log(date);
+    return date;
+};
 
 const saveDocumentRequirement = () => {
     if (selectedDocumentId.value && selectedDocumentId.value !== '') {
@@ -321,7 +452,8 @@ const isDocumentLinked = (documentTypeId: number) => {
                                 :key="requiredDoc.id"
                                 class="rounded-lg border p-2"
                                 :class="[
-                                    documents && documents.some((doc) => (doc.document_type_id === requiredDoc.document_type_id) && !isDocumentExpired(doc))
+                                    documents &&
+                                    documents.data.some((doc) => doc.document_type_id === requiredDoc.document_type_id && !isDocumentExpired(doc))
                                         ? 'border-green-200 bg-green-50 dark:border-green-900/20 dark:bg-green-900/10'
                                         : 'border-red-200 bg-red-50 dark:border-red-900/20 dark:bg-red-900/10',
                                 ]"
@@ -332,7 +464,10 @@ const isDocumentLinked = (documentTypeId: number) => {
                                             <span
                                                 class="mr-2 h-2 w-2 rounded-full"
                                                 :class="[
-                                                    documents && documents.some((doc) => (doc.document_type_id === requiredDoc.document_type_id ) && !isDocumentExpired(doc))
+                                                    documents &&
+                                                    documents.data.some(
+                                                        (doc) => doc.document_type_id === requiredDoc.document_type_id && !isDocumentExpired(doc),
+                                                    )
                                                         ? 'bg-green-500'
                                                         : 'bg-red-500',
                                                 ]"
@@ -342,8 +477,8 @@ const isDocumentLinked = (documentTypeId: number) => {
                                         </p>
                                         <p class="mt-1 text-xs text-muted-foreground">
                                             {{
-                                                documents && documents.some((doc) => (doc.document_type_id === requiredDoc.document_type_id))
-                                                    ? documents.find((dc)=> dc.document_type_id === requiredDoc.document_type_id)?.status === 3
+                                                documents && documents.data.some((doc) => doc.document_type_id === requiredDoc.document_type_id)
+                                                    ? documents.data.find((dc) => dc.document_type_id === requiredDoc.document_type_id)?.status === 3
                                                         ? 'Expired'
                                                         : 'Submitted'
                                                     : 'Missing'
@@ -351,7 +486,7 @@ const isDocumentLinked = (documentTypeId: number) => {
                                         </p>
                                     </div>
 
-                                    <div v-if="!documents || !documents.some((doc) => doc.document_type_id === requiredDoc.document_type_id)">
+                                    <div v-if="!documents || !documents.data.some((doc) => doc.document_type_id === requiredDoc.document_type_id)">
                                         <Can permission="documents-create">
                                             <Button
                                                 size="sm"
@@ -376,7 +511,6 @@ const isDocumentLinked = (documentTypeId: number) => {
                         </div>
                     </div>
                 </div>
-                
             </div>
 
             <!-- Associated Documents Card -->
@@ -392,38 +526,66 @@ const isDocumentLinked = (documentTypeId: number) => {
                     </div>
                 </div>
 
-                <div v-if="documents && documents.length > 0" class="space-y-3">
-                    <div
-                        v-for="document in documents"
-                        :key="document.id"
-                        class="rounded-lg border border-border p-3 hover:bg-muted/30"
-                        :class="{ 'border-red-200': isDocumentExpired(document) }"
-                    >
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <p class="font-medium">{{ document.document_type?.name || 'Document' }}</p>
-                                <p class="text-sm text-muted-foreground">Issued: {{ new Date(document.issue_date).toLocaleDateString() }}</p>
-                                <p
-                                    v-if="document.expiry_date"
-                                    class="text-sm"
-                                    :class="isDocumentExpired(document) ? 'text-red-500' : 'text-muted-foreground'"
-                                >
-                                    Expires: {{ new Date(document.expiry_date).toLocaleDateString() }}
-                                    <span
-                                        v-if="isDocumentExpired(document)"
-                                        class="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700"
-                                    >
-                                        Expired
-                                    </span>
-                                </p>
-                            </div>
-                            <Can permission="documents-view">
-                                <Link :href="`/documents/${document.slug}`" class="text-sm text-primary hover:underline">View</Link>
-                            </Can>
+                <DataTable
+                    :data="props.documents?.data || []"
+                    :columns="columns"
+                    :pagination="pagination || undefined"
+                    :show-pagination="!!pagination"
+                    empty-message="No documents found"
+                    @page-change="handlePageChange"
+                    @sort="handleSort"
+                    @per-page-change="handlePerPageChange"
+                >
+                    <template #subject="{ item: document }">
+                        <div>{{ document.subject?.name || 'N/A' }}</div>
+                    </template>
+
+                    <template #document_type="{ item: document }">
+                        <div>{{ document.document_type?.name || 'N/A' }}</div>
+                    </template>
+
+                    <template #expiry_date="{ item: document }">
+                        <div>
+                            {{ document.expiry_date ? formatDate(document.expiry_date) : 'N/A' }}
                         </div>
-                    </div>
-                </div>
-                <div v-else class="p-4 text-center text-muted-foreground">No documents available</div>
+                    </template>
+
+                    <template #issue_date="{item:document}" >
+                        <div>
+                            {{ document.issue_date? formatDate(document.issue_date): 'N/A' }}
+                        </div>
+                    </template>
+
+                    <template #created_at="{ item: document }">
+                        <div>{{ formatDate(document.created_at) }}</div>
+                    </template>
+
+                    <template #status="{ item: document }">
+                        <span class="inline-flex items-center">
+                            <span :class="[getStatusColor(document.status), 'mr-2 h-2 w-2 rounded-full']"></span>
+                            {{ getStatusText(document.status) }}
+                        </span>
+                    </template>
+
+                    <template #actions="{ item: document }">
+                        <ActionMenu :item-id="document.id" @select="handleMenuAction">
+                            <template #menu-items="{ handleAction }">
+                                <Can permission="documents-view">
+                                    <ActionMenuButton :icon="Eye" text="View" @click="(e) => handleAction('view', e)" />
+                                </Can>
+                                <Can permission="documents-edit">
+                                    <ActionMenuButton :icon="Edit" text="Edit" @click="(e) => handleAction('edit', e)" />
+                                </Can>
+                                <Can permission="documents-view">
+                                    <ActionMenuButton :icon="Download" text="Download" @click="(e) => handleAction('download', e)" />
+                                </Can>
+                                <Can permission="documents-delete">
+                                    <ActionMenuButton :icon="Trash" text="Delete" variant="destructive" @click="(e) => handleAction('delete', e)" />
+                                </Can>
+                            </template>
+                        </ActionMenu>
+                    </template>
+                </DataTable>
             </div>
         </div>
 

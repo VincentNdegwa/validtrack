@@ -34,11 +34,9 @@ class SubjectController extends Controller
             });
         }
         
-        // Handle sorting
         $sortField = $request->get('sort', 'name');
         $sortDirection = $request->get('direction', 'asc');
         
-        // Validate sort field to prevent SQL injection
         $allowedSortFields = ['name', 'email', 'phone', 'created_at'];
         if (!in_array($sortField, $allowedSortFields)) {
             $sortField = 'name';
@@ -123,19 +121,43 @@ class SubjectController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         if (!Auth::user()->hasPermission('subjects-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
         
-        // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
-        $subject->load(['subjectType', 'documents', 'documents.documentType']);
+        $subject->load(['subjectType']);
+
+        $documentsQuery = $subject->documents()->with('documentType', 'uploader')
+            ->where('company_id', Auth::user()->company_id);
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $documentsQuery->where(function ($q) use ($search) {
+                $q->where('notes', 'like', "%{$search}%")
+                  ->orWhere('file_url', 'like', "%{$search}%")
+                  ->orWhereHas('documentType', function ($sq) use ($search) {
+                      $sq->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $sortField = $request->get('sort', 'created_at');
+        $sortDirection = $request->get('direction', 'desc');
+        $allowedSortFields = ['issue_date', 'expiry_date', 'created_at', 'updated_at', 'status'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'created_at';
+        }
+        $documentsQuery->orderBy($sortField, $sortDirection);
+
+        $perPage = (int) $request->get('per_page', 10);
+        $documents = $documentsQuery->paginate($perPage)->appends($request->only(['search', 'sort', 'direction', 'per_page']));
         
         $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
@@ -148,7 +170,7 @@ class SubjectController extends Controller
 
         return Inertia::render('subjects/Show', [
             'subject' => $subject,
-            'documents' => $subject->documents,
+            'documents' => $documents,
             'documentTypes' => $documentTypes,
             'requiredDocumentTypes' => $requiredDocumentTypes,
         ]);

@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { MoreVertical } from 'lucide-vue-next';
+
+// Static state to track active menu
+const activeMenu = ref<string | number | null>(null);
 
 const props = defineProps<{
   itemId: string | number;
@@ -10,59 +13,48 @@ const emit = defineEmits<{
   (e: 'select', action: string, itemId: string | number): void;
 }>();
 
-const isOpen = ref(false);
 const dropdownRef = ref<HTMLElement | null>(null);
 const triggerRef = ref<HTMLElement | null>(null);
 const dropdownPosition = ref({ top: '0px', left: '0px' });
 
+const isOpen = computed(() => activeMenu.value === props.itemId);
+
 const toggleMenu = (event: Event) => {
   event.stopPropagation();
-  isOpen.value = !isOpen.value;
-  
-  // Update dropdown position when opening
   if (isOpen.value) {
+    activeMenu.value = null;
+  } else {
+    activeMenu.value = props.itemId;
     updateDropdownPosition();
   }
 };
 
-// Calculate dropdown position based on trigger button
 const updateDropdownPosition = () => {
   if (!triggerRef.value) return;
   
   const rect = triggerRef.value.getBoundingClientRect();
-  const windowWidth = window.innerWidth;
-  const menuWidth = 192; 
-  let left = rect.right;
+  const menuWidth = 192;
   
-  // Check if the menu would overflow to the right
-  if (left + menuWidth > windowWidth) {
-    // If it would overflow, position to the left side instead
-    left = rect.left - menuWidth;
-    
-    // If it would still overflow to the left, center it under the trigger
-    if (left < 0) {
-      left = rect.left - (menuWidth - rect.width) / 2;
-      
-      // Ensure it doesn't overflow either side
-      if (left < 5) left = 5;
-      if (left + menuWidth > windowWidth - 5) left = windowWidth - menuWidth - 5;
-    }
+  let left = rect.right + 4; // Small gap
+  
+  if (left + menuWidth > window.innerWidth) {
+    left = rect.left - menuWidth - 4;
   }
   
-  // Calculate final position
+  const buttonCenter = rect.top + (rect.height / 2);
+  
   dropdownPosition.value = {
-    top: `${rect.bottom + window.scrollY + 4}px`, // Add small gap
-    left: `${left + window.scrollX}px`,
+    top: `${buttonCenter}px`,
+    left: `${left}px`,
   };
 };
 
-// Function to return position styles for the dropdown
 const getDropdownPosition = () => {
   return dropdownPosition.value;
 };
 
 const closeMenu = () => {
-  isOpen.value = false;
+  activeMenu.value = null;
 };
 
 const handleAction = (action: string, event: Event) => {
@@ -124,7 +116,7 @@ onUnmounted(() => {
       >
         <div 
           v-if="isOpen"
-          class="dropdown-menu fixed z-50 w-48 overflow-hidden rounded-md border border-border bg-card shadow-md origin-top-right"
+          class="dropdown-menu fixed z-50 w-48 overflow-hidden rounded-md border border-border bg-card shadow-md transform -translate-y-1/2"
           :style="getDropdownPosition()"
         >
           <div class="flex flex-col py-1">

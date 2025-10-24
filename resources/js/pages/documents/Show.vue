@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Document } from '@/types/models';
 import { Head, Link } from '@inertiajs/vue3';
+import { Download } from 'lucide-vue-next';
 
 interface Props {
     document: Document;
@@ -100,9 +101,21 @@ const getFileType = (url: string) => {
             <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <!-- Document Preview -->
                 <div class="rounded-xl border border-border bg-card p-6 lg:col-span-2">
-                    <h2 class="mb-4 text-xl font-semibold">Document Preview</h2>
+                    <div class="flex justify-between items-center ">
+                        <h2 class="mb-4 text-xl font-semibold">Document Preview</h2>
+                        <div class="mb-4">
+                            <a
+                                :href="fileUrl"
+                                target="_blank"
+                                download
+                                class="inline-flex items-center rounded-md bg-primary px-2 py-2 text-primary-foreground hover:bg-primary/90"
+                            >
+                                <Download class=" w-5 h-5" />
+                            </a>
+                        </div>
+                    </div>
 
-                    <div class="h-[500px] w-full overflow-hidden rounded-md border border-border">
+                    <div class="h-[70vh] w-full overflow-hidden rounded-md border border-border">
                         <!-- PDF Preview -->
                         <template v-if="getFileType(fileUrl) === 'pdf'">
                             <iframe :src="fileUrl" class="h-full w-full" frameborder="0"></iframe>
@@ -121,17 +134,6 @@ const getFileType = (url: string) => {
                                 <a :href="fileUrl" target="_blank" class="mt-4 text-primary hover:underline">Download File</a>
                             </div>
                         </template>
-                    </div>
-
-                    <div class="mt-4">
-                        <a
-                            :href="fileUrl"
-                            target="_blank"
-                            download
-                            class="inline-flex items-center rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
-                        >
-                            Download Document
-                        </a>
                     </div>
                 </div>
 

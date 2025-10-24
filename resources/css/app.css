@@ -173,6 +173,9 @@
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
+    a,button{
+        cursor: pointer;
+    }
 
     /* Hide scrollbar for IE, Edge and Firefox */
     .no-scrollbar {

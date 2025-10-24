@@ -135,8 +135,7 @@ const getStatusText = (status: number) => {
 };
 
 const isDocumentExpired = (document: Document) => {
-    if (!document.expiry_date) return false;
-    return new Date(document.expiry_date) < new Date();
+    return document.status === 3;
 };
 
 const compliance = computed(() => {
@@ -322,7 +321,7 @@ const isDocumentLinked = (documentTypeId: number) => {
                                 :key="requiredDoc.id"
                                 class="rounded-lg border p-2"
                                 :class="[
-                                    documents && documents.some((doc) => doc.document_type_id === requiredDoc.document_type_id)
+                                    documents && documents.some((doc) => (doc.document_type_id === requiredDoc.document_type_id) && !isDocumentExpired(doc))
                                         ? 'border-green-200 bg-green-50 dark:border-green-900/20 dark:bg-green-900/10'
                                         : 'border-red-200 bg-red-50 dark:border-red-900/20 dark:bg-red-900/10',
                                 ]"
@@ -333,7 +332,7 @@ const isDocumentLinked = (documentTypeId: number) => {
                                             <span
                                                 class="mr-2 h-2 w-2 rounded-full"
                                                 :class="[
-                                                    documents && documents.some((doc) => doc.document_type_id === requiredDoc.document_type_id)
+                                                    documents && documents.some((doc) => (doc.document_type_id === requiredDoc.document_type_id ) && !isDocumentExpired(doc))
                                                         ? 'bg-green-500'
                                                         : 'bg-red-500',
                                                 ]"
@@ -343,8 +342,10 @@ const isDocumentLinked = (documentTypeId: number) => {
                                         </p>
                                         <p class="mt-1 text-xs text-muted-foreground">
                                             {{
-                                                documents && documents.some((doc) => doc.document_type_id === requiredDoc.document_type_id)
-                                                    ? 'Submitted'
+                                                documents && documents.some((doc) => (doc.document_type_id === requiredDoc.document_type_id))
+                                                    ? documents.find((dc)=> dc.document_type_id === requiredDoc.document_type_id)?.status === 3
+                                                        ? 'Expired'
+                                                        : 'Submitted'
                                                     : 'Missing'
                                             }}
                                         </p>
@@ -375,6 +376,7 @@ const isDocumentLinked = (documentTypeId: number) => {
                         </div>
                     </div>
                 </div>
+                
             </div>
 
             <!-- Associated Documents Card -->

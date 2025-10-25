@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\CompanySetting;
 use App\Models\Document;
 use App\Models\Subject;
+use App\Notifications\Slack\DocumentExpiryNotification;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -64,6 +65,7 @@ class SendDocumentExpiryReminders extends Command
             $this->info("Notifications disabled for company: {$company->name}");
             return;
         }
+
         
         $reminderDays = $this->getCompanySetting(
             $company->id,
@@ -149,16 +151,33 @@ class SendDocumentExpiryReminders extends Command
             ];
         })->toArray();
         
-        // Send admin notification
+        // Send admin notifications (email and Slack)
         try {
+
             Mail::to($company->email)
                 ->queue(new DocumentExpiryReminderMail(
                     $adminDocuments, 
                     $days, 
                     'admin'
                 ));
+
+            if ($company->has_slack_integration && $company->slackIntegration) {
+                foreach ($expiringDocuments as $document) {
+                    try {
+                        $company->notify(new DocumentExpiryNotification(
+                            $document,
+                            $days,
+                            $company->slackIntegration->webhook_url,
+                            $company->slackIntegration->access_token
+                        ));
+                    } catch (\Exception $slackError) {
+                        Log::error("Failed to send Slack notification for document {$document->id}: " . $slackError->getMessage());
+                    }
+                }
+            }
+            
         } catch (\Exception $e) {
-            Log::error("Failed to send admin reminder email for company {$company->id}: " . $e->getMessage());
+            Log::error("Failed to send admin notifications for company {$company->id}: " . $e->getMessage());
         }
         
         // Send subject notifications

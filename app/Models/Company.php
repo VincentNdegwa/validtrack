@@ -6,11 +6,14 @@ use App\Traits\HasSlug;
 use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Slack\SlackRoute;
 use Illuminate\Support\Facades\Log;
 
 class Company extends Model
 {
-    use HasFactory, HasSlug, LogsActivity;
+    use HasFactory, HasSlug, LogsActivity, Notifiable;
 
     /**
      * The accessors to append to the model's array form.
@@ -164,6 +167,25 @@ class Company extends Model
     public function slackIntegration()
     {
         return $this->hasOne(SlackIntegration::class);
+    }
+
+    /**
+     * Route notifications for the Slack channel.
+     */
+    public function routeNotificationForSlack(Notification $notification): mixed
+    {
+        $slackIntegration = $this->slackIntegration;
+        
+        if (!$slackIntegration) {
+            return null;
+        }
+
+        Log::info('Company Slack Route', [
+            'channel' => $slackIntegration->webhook_channel,
+            'token' => $slackIntegration->access_token
+        ]);
+
+        return SlackRoute::make($slackIntegration->webhook_channel, $slackIntegration->access_token);
     }
 
     public function syncPermissions($permissions, $adminRole)

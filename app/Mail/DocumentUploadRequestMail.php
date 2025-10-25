@@ -29,14 +29,14 @@ class DocumentUploadRequestMail extends Mailable implements ShouldQueue
             $url = route('public.document-upload', ['token' => $this->uploadRequest->token]);
             $expiryTime = $this->uploadRequest->expires_at->diffForHumans();
 
-            return $this->subject('Document Upload Request for ' . $this->uploadRequest->subject->name)
+            return $this->subject('Document Upload Request for '.$this->uploadRequest->subject->name)
                 ->markdown('emails.document-upload-request', [
                     'uploadRequest' => $this->uploadRequest,
                     'url' => $url,
                     'expiryTime' => $expiryTime,
                 ]);
         } catch (\Throwable $e) {
-            Log::error('Failed to build DocumentUploadRequestMail: ' . $e->getMessage(), [
+            Log::error('Failed to build DocumentUploadRequestMail: '.$e->getMessage(), [
                 'exception' => $e,
                 'upload_request_id' => $this->uploadRequest->id ?? null,
             ]);

@@ -9,15 +9,13 @@ trait RespectsCompanyContext
 {
     /**
      * Get the current company context.
-     * 
-     * @return int|null
      */
     protected function getCompanyContext(): ?int
     {
         // Check if user is super admin
         $user = Auth::user();
         $isSuperAdmin = false;
-        
+
         if ($user) {
             foreach ($user->roles as $role) {
                 if ($role->name === 'super-admin') {
@@ -26,7 +24,7 @@ trait RespectsCompanyContext
                 }
             }
         }
-        
+
         if ($isSuperAdmin && Session::has('active_company_id')) {
             // If super admin has active context, use that
             return Session::get('active_company_id');
@@ -34,24 +32,24 @@ trait RespectsCompanyContext
             // Otherwise use user's own company
             return $user->company_id;
         }
-        
+
         return null;
     }
-    
+
     /**
      * Scope a query to the current company context.
-     * 
-     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function scopeToCompany($query)
     {
         $companyId = $this->getCompanyContext();
-        
+
         if ($companyId) {
             return $query->where('company_id', $companyId);
         }
-        
+
         return $query;
     }
 }

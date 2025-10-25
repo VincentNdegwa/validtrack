@@ -16,16 +16,16 @@ class CheckPermission
      */
     public function handle(Request $request, Closure $next, string $permission): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
         $user = Auth::user();
 
-        if (!$user->hasPermission($permission)) {
+        if (! $user->hasPermission($permission)) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'You do not have permission to access this resource.'
+                    'message' => 'You do not have permission to access this resource.',
                 ], 403);
             }
 

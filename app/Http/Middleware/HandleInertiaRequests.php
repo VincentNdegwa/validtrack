@@ -44,24 +44,24 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
-            'auth' => function() {
+            'auth' => function () {
                 $user = Auth::user();
                 $company_user = $user;
                 $company = $company_user->company ?? null;
                 $features = $this->getFeatures($company);
-                if (!$user) {
+                if (! $user) {
                     return [
                         'user' => null,
                     ];
                 }
-                
+
                 $permissionsCollection = $user->getAllPermissions();
-                
+
                 $permissionNames = [];
                 foreach ($permissionsCollection as $permission) {
                     $permissionNames[] = $permission->name;
                 }
-                
+
                 return [
                     'user' => array_merge($user->only('id', 'name', 'email', 'company_id', 'slug'), [
                         'roles' => $user->roles,
@@ -83,29 +83,31 @@ class HandleInertiaRequests extends Middleware
         if ($company) {
             $companyOwner = get_company_owner($company);
             // $actualCompany = \App\Models\Company::find($company);
-            if (!$companyOwner) {
+            if (! $companyOwner) {
                 return [];
             }
 
-            if (!$companyOwner || !$companyOwner->subscribed() || !$companyOwner->subscribed('default')) {
+            if (! $companyOwner || ! $companyOwner->subscribed() || ! $companyOwner->subscribed('default')) {
                 return [];
             }
 
             $paddleSubscription = $companyOwner->subscriptions()->where('status', 'active')->first();
-            if (!$paddleSubscription) {
+            if (! $paddleSubscription) {
                 return [];
             }
             $subItem = $paddleSubscription->items()->first();
-            if (!$subItem) {
+            if (! $subItem) {
                 return [];
             }
             $billingPlan = \App\Models\BillingPlan::with('features')->where('paddle_product_id', $subItem->product_id)->first();
-            if (!$billingPlan) {
+            if (! $billingPlan) {
                 return [];
             }
             $features = $billingPlan->features;
+
             return $features;
         }
+
         return [];
     }
 }

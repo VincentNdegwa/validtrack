@@ -17,7 +17,7 @@ class PermissionSeeder extends Seeder
 
         // Get all companies
         $companies = Company::all();
-        
+
         // Create global permissions (not tied to any company)
         $globalPermissions = [
             [
@@ -36,7 +36,7 @@ class PermissionSeeder extends Seeder
                 'description' => 'Can view all companies in the system',
             ],
         ];
-        
+
         foreach ($globalPermissions as $permission) {
             Permission::firstOrCreate(
                 ['name' => $permission['name'], 'company_id' => null],
@@ -46,7 +46,7 @@ class PermissionSeeder extends Seeder
                 ]
             );
         }
-        
+
         // Create company-specific permissions for each company
         foreach ($companies as $company) {
             foreach ($defaultPermissions as $permission) {
@@ -60,12 +60,10 @@ class PermissionSeeder extends Seeder
             }
         }
     }
-    
+
     /**
      * Get the default permissions list.
      * These will be created for each company.
-     *
-     * @return array
      */
     public static function getDefaultPermissions(): array
     {
@@ -91,7 +89,7 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Delete Users',
                 'description' => 'Can delete users from the company',
             ],
-            
+
             // Role permissions
             [
                 'name' => 'roles-view',
@@ -113,7 +111,7 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Delete Roles',
                 'description' => 'Can delete roles from the company',
             ],
-            
+
             // Subject permissions
             [
                 'name' => 'subjects-view',
@@ -135,7 +133,7 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Delete Subjects',
                 'description' => 'Can delete subjects from the company',
             ],
-            
+
             // Subject Type permissions
             [
                 'name' => 'subject-types-view',
@@ -157,7 +155,7 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Delete Subject Types',
                 'description' => 'Can delete subject types from the company',
             ],
-            
+
             // Document permissions
             [
                 'name' => 'documents-view',
@@ -179,7 +177,7 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Delete Documents',
                 'description' => 'Can delete documents from the company',
             ],
-            
+
             // Document Type permissions
             [
                 'name' => 'document-types-view',
@@ -201,14 +199,14 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Delete Document Types',
                 'description' => 'Can delete document types from the company',
             ],
-            
+
             // Dashboard permissions
             [
                 'name' => 'dashboard-view',
                 'display_name' => 'View Dashboard',
                 'description' => 'Can view the company dashboard',
             ],
-            
+
             // Reports permissions
             [
                 'name' => 'reports-view',
@@ -246,7 +244,7 @@ class PermissionSeeder extends Seeder
                 'display_name' => 'Manage Billing',
                 'description' => 'Can manage billing plans and features',
             ],
-      
+
         ];
     }
 }

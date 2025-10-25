@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\User;
-use App\Models\Company;
 
 test('login screen can be rendered', function () {
     $response = $this->get('/login');
@@ -20,7 +19,7 @@ test('users can authenticate using the login screen', function () {
 
     $company->owner_id = $user->id;
     $company->save();
-    
+
     $response = $this->post('/login', [
         'email' => $user->email,
         'password' => 'password',

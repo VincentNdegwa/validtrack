@@ -18,10 +18,10 @@ return new class extends Migration
             $table->boolean('is_required')->default(false);
             $table->enum('status', ['pending', 'completed'])->default('pending');
             $table->timestamps();
-            
+
             $table->unique(['document_upload_request_id', 'document_type_id'], 'unique_document_type_per_request');
         });
-        
+
         // Add a column to documents to track which request item they fulfill
         Schema::table('documents', function (Blueprint $table) {
             $table->foreignId('upload_request_item_id')->nullable()->constrained('document_upload_request_items')->onDelete('set null');
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->dropForeign(['upload_request_item_id']);
             $table->dropColumn('upload_request_item_id');
         });
-        
+
         Schema::dropIfExists('document_upload_request_items');
     }
 };

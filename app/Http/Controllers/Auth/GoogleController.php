@@ -2,16 +2,15 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
-use Illuminate\Support\Str;
 use App\Helpers\UserCompanyHelper;
-use Illuminate\Http\Request;
-use App\Events\RegisteredUser;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 class GoogleController extends Controller
@@ -23,17 +22,18 @@ class GoogleController extends Controller
                 ->stateless()
                 ->with([
                     'access_type' => 'offline',
-                    'prompt' => 'select_account consent'
+                    'prompt' => 'select_account consent',
                 ])
                 ->scopes([
                     'email',
                     'profile',
                     'https://www.googleapis.com/auth/userinfo.email',
-                    'https://www.googleapis.com/auth/userinfo.profile'
+                    'https://www.googleapis.com/auth/userinfo.profile',
                 ])
                 ->redirect();
         } catch (\Exception $e) {
-            Log::error('Google login error: ' . $e->getMessage());
+            Log::error('Google login error: '.$e->getMessage());
+
             return redirect()->back()->with('error', 'Unable to connect to Google. Please try again.');
         }
     }
@@ -45,7 +45,7 @@ class GoogleController extends Controller
                 ->stateless()
                 ->user();
 
-            if (!$googleUser) {
+            if (! $googleUser) {
                 return redirect()->route('login')->with('error', 'Unable to retrieve user information from Google.');
             }
 
@@ -55,6 +55,7 @@ class GoogleController extends Controller
 
             if ($existingUser) {
                 Auth::login($existingUser);
+
                 return redirect()->route('dashboard')->with('success', 'Logged in successfully.');
             }
 
@@ -76,11 +77,13 @@ class GoogleController extends Controller
             );
             event(new Registered($user));
             Auth::login($user);
+
             return redirect()->route('dashboard')->with('success', 'Logged in successfully.');
 
         } catch (\Exception $e) {
-            Log::error('Google callback error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Google login failed: ' . $e->getMessage());
+            Log::error('Google callback error: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Google login failed: '.$e->getMessage());
         }
     }
 

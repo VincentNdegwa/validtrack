@@ -3,7 +3,7 @@
 use App\Http\Controllers\DocumentUploadRequestController;
 use Illuminate\Support\Facades\Route;
 
-// Public document uplods 
+// Public document uplods
 Route::get('/document-upload/{token}', [DocumentUploadRequestController::class, 'showUploadForm'])
     ->name('public.document-upload');
 
@@ -15,7 +15,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/document-upload-requests', [DocumentUploadRequestController::class, 'store'])
         ->name('document-upload-requests.store')
         ->middleware('permission:documents-create');
-        
+
     Route::post('/document-upload-requests/{uploadRequest}/cancel', [DocumentUploadRequestController::class, 'cancel'])
         ->name('document-upload-requests.cancel')
         ->middleware('permission:documents-delete');

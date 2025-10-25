@@ -5,15 +5,15 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\HasSlug;
 use App\Traits\LogsActivity;
-use Laravel\Paddle\Billable;
-use Illuminate\Notifications\Notifiable;
-use Laratrust\Traits\HasRolesAndPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laratrust\Traits\HasRolesAndPermissions;
+use Laravel\Paddle\Billable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasSlug, HasRolesAndPermissions, LogsActivity, Billable;
+    use Billable, HasFactory, HasRolesAndPermissions, HasSlug, LogsActivity, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -105,19 +105,16 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserToken::class);
     }
-    
+
     /**
      * Check if the user has a specific permission.
-     *
-     * @param string $permission
-     * @return bool
      */
     public function hasPermission(string $permission): bool
     {
-        if (!$this->roles) {
+        if (! $this->roles) {
             return false;
         }
-        
+
         // Check each role's permissions
         foreach ($this->roles as $role) {
             foreach ($role->permissions as $perm) {
@@ -126,31 +123,29 @@ class User extends Authenticatable
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Get all permissions for the user through their roles.
-     * 
-     * @return array
      */
     public function getAllPermissions(): array
     {
         $this->load('roles.permissions');
-        
-        if (!$this->roles) {
+
+        if (! $this->roles) {
             return [];
         }
-        
+
         $permissions = [];
-        
+
         foreach ($this->roles as $role) {
             foreach ($role->permissions as $permission) {
                 $permissions[] = $permission;
             }
         }
-        
+
         return array_unique($permissions);
     }
 
@@ -158,7 +153,7 @@ class User extends Authenticatable
     {
         return $this->morphMany(\Laravel\Paddle\Transaction::class, 'billable');
     }
-    
+
     /**
      * Get the billing plans that belong to the user.
      */
@@ -174,7 +169,7 @@ class User extends Authenticatable
                 'is_active',
                 'status',
                 'created_at',
-                'updated_at'
+                'updated_at',
             ])
             ->withTimestamps();
     }
@@ -195,7 +190,7 @@ class User extends Authenticatable
                 'is_active',
                 'status',
                 'created_at',
-                'updated_at'
+                'updated_at',
             ])
             ->withTimestamps()
             ->first();

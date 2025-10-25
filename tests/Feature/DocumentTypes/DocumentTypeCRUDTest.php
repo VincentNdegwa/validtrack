@@ -13,6 +13,7 @@ class DocumentTypeCRUDTest extends TestCase
     use RefreshDatabase;
 
     protected $company;
+
     protected $admin;
 
     protected function setUp(): void
@@ -27,8 +28,8 @@ class DocumentTypeCRUDTest extends TestCase
         $this->admin = User::factory()
             ->forCompany($this->company)
             ->create([
-            'role' => 'admin',
-        ]);
+                'role' => 'admin',
+            ]);
 
         $this->company->owner_id = $this->admin->id;
         $this->company->save();
@@ -38,12 +39,12 @@ class DocumentTypeCRUDTest extends TestCase
     public function it_can_list_document_types()
     {
         DocumentType::factory()->count(5)->create([
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
-        
+
         $this->actingAs($this->admin);
         $response = $this->get('/document-types');
-        
+
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
             ->component('documents/types/Index')
@@ -55,18 +56,18 @@ class DocumentTypeCRUDTest extends TestCase
     public function it_can_create_new_document_type()
     {
         $this->actingAs($this->admin);
-        
+
         $documentTypeData = [
             'name' => 'Passport',
             'description' => 'International passport document',
             'is_active' => true,
         ];
-        
+
         $response = $this->post('/document-types', $documentTypeData);
-        
+
         $response->assertRedirect();
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('document_types', [
             'name' => 'Passport',
             'description' => 'International passport document',
@@ -78,24 +79,24 @@ class DocumentTypeCRUDTest extends TestCase
     public function it_can_update_existing_document_type()
     {
         $this->actingAs($this->admin);
-        
+
         // Create a document type
         $documentType = DocumentType::factory()->create([
             'company_id' => $this->company->id,
             'name' => 'Original Name',
             'description' => 'Original description',
         ]);
-        
+
         // Update the document type
         $response = $this->put("/document-types/{$documentType->id}", [
             'name' => 'Updated Name',
             'description' => 'Updated description',
             'is_active' => true,
         ]);
-        
+
         $response->assertRedirect();
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('document_types', [
             'id' => $documentType->id,
             'name' => 'Updated Name',
@@ -107,18 +108,18 @@ class DocumentTypeCRUDTest extends TestCase
     public function it_can_delete_a_document_type()
     {
         $this->actingAs($this->admin);
-        
+
         // Create a document type
         $documentType = DocumentType::factory()->create([
             'company_id' => $this->company->id,
         ]);
-        
+
         // Delete the document type
         $response = $this->delete("/document-types/{$documentType->id}");
-        
+
         $response->assertRedirect();
         $response->assertSessionHas('success');
-        
+
         // Check if the document type is deleted or marked as inactive
         $this->assertDatabaseMissing('document_types', [
             'id' => $documentType->id,
@@ -130,13 +131,13 @@ class DocumentTypeCRUDTest extends TestCase
     public function it_validates_document_type_creation()
     {
         $this->actingAs($this->admin);
-        
+
         // Try to create a document type with missing required fields
         $response = $this->post('/document-types', [
             // Missing name
             'description' => 'Test description',
         ]);
-        
+
         $response->assertSessionHasErrors(['name']);
     }
 
@@ -144,19 +145,19 @@ class DocumentTypeCRUDTest extends TestCase
     public function it_validates_document_type_name_uniqueness_within_company()
     {
         $this->actingAs($this->admin);
-        
+
         // Create a document type
         $documentType = DocumentType::factory()->create([
             'company_id' => $this->company->id,
             'name' => 'Existing Name',
         ]);
-        
+
         // Try to create another document type with the same name
         $response = $this->post('/document-types', [
             'name' => 'Existing Name',
             'description' => 'Another description',
         ]);
-        
+
         $response->assertSessionHasErrors(['name']);
     }
 
@@ -167,13 +168,13 @@ class DocumentTypeCRUDTest extends TestCase
         $anotherCompany = Company::factory()->create();
         $anotherDocumentType = DocumentType::factory()->create([
             'company_id' => $anotherCompany->id,
-        ]);        
+        ]);
         $this->actingAs($this->admin);
-        
+
         $response = $this->get("/document-types/{$anotherDocumentType->id}");
-        
+
         $response->assertStatus(302);
-        
+
         $response->assertSessionHas('error', 'Unauthorized action.');
     }
 }

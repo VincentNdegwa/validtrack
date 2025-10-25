@@ -146,26 +146,27 @@
 
                     <!-- Slack Integration Section -->
                     <div class="space-y-6">
-                        <HeadingSmall 
-                            title="Slack Integration" 
-                            description="Connect your workspace with Slack to receive notifications and updates" 
+                        <HeadingSmall
+                            title="Slack Integration"
+                            description="Connect your workspace with Slack to receive notifications and updates"
                         />
-                        
+
                         <div class="space-y-4">
-                            <div class="flex items-center justify-between p-4 border rounded-lg bg-card">
+                            <div class="flex items-center justify-between rounded-lg border bg-card p-4">
                                 <div class="space-y-1">
                                     <h4 class="text-sm font-medium">
                                         {{ settings.has_slack_integration ? 'Connected to Slack' : 'Connect to Slack' }}
                                     </h4>
                                     <p class="text-sm text-muted-foreground">
-                                        {{ settings.has_slack_integration 
-                                            ? `Connected to workspace: ${settings.slack.team}`
-                                            : 'Connect your Slack workspace to receive notifications' 
+                                        {{
+                                            settings.has_slack_integration
+                                                ? `Connected to workspace: ${settings.slack.team}`
+                                                : 'Connect your Slack workspace to receive notifications'
                                         }}
                                     </p>
                                 </div>
                                 <Can permission="company-settings-edit">
-                                    <Button 
+                                    <Button
                                         type="button"
                                         :variant="settings.has_slack_integration ? 'destructive' : 'default'"
                                         @click="settings.has_slack_integration ? disconnectSlack() : connectSlack()"

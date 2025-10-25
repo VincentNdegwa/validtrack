@@ -18,12 +18,12 @@ class CompanyContext
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return $next($request);
         }
-        
+
         $user = Auth::user();
-        
+
         $isSuperAdmin = false;
         foreach ($user->roles as $role) {
             if ($role->name === 'super-admin') {
@@ -31,29 +31,29 @@ class CompanyContext
                 break;
             }
         }
-        
+
         // Check if we're impersonating someone
         $impersonationService = app(ImpersonationService::class);
         $isImpersonating = $impersonationService->isImpersonating();
-        
+
         // If we're impersonating, share that information with the frontend
         if ($isImpersonating) {
             \Inertia\Inertia::share([
                 'impersonating' => true,
                 'impersonatorId' => $impersonationService->getImpersonatorId(),
-                'impersonatedUserId' => $impersonationService->getImpersonatedId()
+                'impersonatedUserId' => $impersonationService->getImpersonatedId(),
             ]);
         }
-        
+
         // If user is super-admin and there's an active company context in session
         if ($isSuperAdmin && Session::has('active_company_id')) {
             $activeCompanyId = Session::get('active_company_id');
-            
+
             $request->attributes->add(['active_company_id' => $activeCompanyId]);
-            
+
             \Inertia\Inertia::share('activeCompanyId', $activeCompanyId);
         }
-        
+
         return $next($request);
     }
 }

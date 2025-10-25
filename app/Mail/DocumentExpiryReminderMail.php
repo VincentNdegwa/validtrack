@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Models\Document;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -28,10 +27,10 @@ class DocumentExpiryReminderMail extends Mailable implements ShouldQueue
                 ->markdown('emails.document-expiry-reminder', [
                     'documents' => $this->documents,
                     'daysUntilExpiry' => $this->daysUntilExpiry,
-                    'recipientType' => $this->recipientType
+                    'recipientType' => $this->recipientType,
                 ]);
         } catch (\Throwable $e) {
-            Log::error('Error building DocumentExpiryReminderMail: ' . $e->getMessage(), [
+            Log::error('Error building DocumentExpiryReminderMail: '.$e->getMessage(), [
                 'exception' => $e,
                 'daysUntilExpiry' => $this->daysUntilExpiry,
                 'recipientType' => $this->recipientType,

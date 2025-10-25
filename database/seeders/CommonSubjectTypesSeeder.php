@@ -23,7 +23,7 @@ class CommonSubjectTypesSeeder extends Seeder
         'Staff',
         'Remote Worker',
         'Part-time Employee',
-        
+
         // Organization-related subject types
         'Department',
         'Team',
@@ -32,7 +32,7 @@ class CommonSubjectTypesSeeder extends Seeder
         'Division',
         'Project Group',
         'Committee',
-        
+
         // Business partner-related subject types
         'Vendor',
         'Supplier',
@@ -43,7 +43,7 @@ class CommonSubjectTypesSeeder extends Seeder
         'Retailer',
         'Manufacturer',
         'Service Provider',
-        
+
         // Asset-related subject types
         'Vehicle',
         'Equipment',
@@ -53,7 +53,7 @@ class CommonSubjectTypesSeeder extends Seeder
         'Facility',
         'IT Asset',
         'Machinery',
-        
+
         // Legal entity-related subject types
         'Company',
         'Subsidiary',
@@ -71,20 +71,21 @@ class CommonSubjectTypesSeeder extends Seeder
     {
         // Get all companies
         $companies = Company::all();
-        
+
         if ($companies->isEmpty()) {
             $this->command->info('No companies found. No subject types created.');
+
             return;
         }
-        
+
         $totalCreated = 0;
-        
+
         // For each company, create the common subject types if they don't already exist
         foreach ($companies as $company) {
             $this->command->info("Adding common subject types for company: {$company->name}");
-            
+
             $created = 0;
-            
+
             // Process each subject type individually using updateOrCreate
             foreach ($this->commonSubjectTypes as $typeName) {
                 $result = SubjectType::updateOrCreate(
@@ -96,24 +97,25 @@ class CommonSubjectTypesSeeder extends Seeder
                         'updated_at' => now(),
                     ]
                 );
-                
+
                 // Check if this was a new record
                 if ($result->wasRecentlyCreated) {
                     $created++;
                 }
             }
-            
+
             // Skip the rest if no new subject types were created
             if ($created === 0) {
-                $this->command->info("Company already has all common subject types.");
+                $this->command->info('Company already has all common subject types.');
+
                 continue;
             }
-            
+
             $totalCreated += $created;
-            
+
             $this->command->info("Created {$created} new subject types for {$company->name}");
         }
-        
+
         $this->command->info("Seeding completed. Total subject types created: {$totalCreated}");
     }
 }

@@ -25,7 +25,7 @@ class DocumentTypeFactory extends Factory
             'is_active' => true,
         ];
     }
-    
+
     /**
      * Indicate that the document type is inactive.
      */

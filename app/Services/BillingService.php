@@ -10,18 +10,14 @@ class BillingService
 {
     /**
      * Check if a company has a specific feature
-     * 
-     * @param Company $company
-     * @param string $featureKey
-     * @return bool
      */
     public function companyHasFeature(Company $company, string $featureKey): bool
     {
         $value = $this->getCompanyFeatureValue($company, $featureKey);
-        
+
         // If feature is boolean, any positive value means they have it
         $feature = BillingFeature::where('key', $featureKey)->first();
-        if (!$feature) {
+        if (! $feature) {
             return false;
         }
 
@@ -35,25 +31,21 @@ class BillingService
 
     /**
      * Get the value of a feature for a company
-     * 
-     * @param Company $company
-     * @param string $featureKey
-     * @return mixed
      */
     public function getCompanyFeatureValue(Company $company, string $featureKey): mixed
     {
         $feature = BillingFeature::where('key', $featureKey)->first();
-        if (!$feature) {
+        if (! $feature) {
             return null;
         }
 
         $plan = $this->getCompanyCurrentPlan($company);
-        if (!$plan) {
+        if (! $plan) {
             return null;
         }
 
         $planFeature = $plan->features()->where('billing_feature_id', $feature->id)->first();
-        if (!$planFeature) {
+        if (! $planFeature) {
             return null;
         }
 
@@ -62,14 +54,11 @@ class BillingService
 
     /**
      * Get the current billing plan for a company
-     * 
-     * @param Company $company
-     * @return BillingPlan|null
      */
     public function getCompanyCurrentPlan(Company $company): ?BillingPlan
     {
         $companyPlan = $company->currentBillingPlan;
-        if (!$companyPlan) {
+        if (! $companyPlan) {
             // Return basic plan as default
             return BillingPlan::where('slug', 'basic')->first();
         }

@@ -4,37 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Models\DocumentType;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class DocumentTypeController extends Controller
 {
-
     public function index(Request $request)
     {
-        if (!Auth::user()->hasPermission('document-types-view')) {
+        if (! Auth::user()->hasPermission('document-types-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = DocumentType::where('company_id', Auth::user()->company_id);
-        
+
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('description', 'like', "%{$searchTerm}%");
+                    ->orWhere('description', 'like', "%{$searchTerm}%");
             });
         }
-        
+
         $sortField = $request->get('sort', 'name');
         $sortDirection = $request->get('direction', 'asc');
-        
+
         $allowedSortFields = ['name', 'created_at', 'is_active'];
-        if (!in_array($sortField, $allowedSortFields)) {
+        if (! in_array($sortField, $allowedSortFields)) {
             $sortField = 'name';
         }
-        
+
         $query->withCount('documents')->orderBy($sortField, $sortDirection);
-        
+
         $perPage = $request->get('per_page', 10);
         $documentTypes = $query->paginate($perPage);
 
@@ -54,9 +53,10 @@ class DocumentTypeController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->hasPermission('document-types-create')) {
+        if (! Auth::user()->hasPermission('document-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
+
         return Inertia::render('documents/types/Create');
     }
 
@@ -65,11 +65,11 @@ class DocumentTypeController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->hasPermission('document-types-create')) {
+        if (! Auth::user()->hasPermission('document-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_document_types');
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return redirect()->back()->with('error', 'You have reached the maximum number of document types allowed for your plan.');
         }
         $validated = $request->validate([
@@ -85,7 +85,7 @@ class DocumentTypeController extends Controller
 
         if ($exists) {
             return back()->withErrors([
-                'name' => 'A document type with this name already exists in your company.'
+                'name' => 'A document type with this name already exists in your company.',
             ]);
         }
 
@@ -103,11 +103,11 @@ class DocumentTypeController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->hasPermission('document-types-view')) {
+        if (! Auth::user()->hasPermission('document-types-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
-        
+
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -117,7 +117,7 @@ class DocumentTypeController extends Controller
 
         return Inertia::render('documents/types/Show', [
             'documentType' => $documentType,
-            'documents' => $documents
+            'documents' => $documents,
         ]);
     }
 
@@ -126,17 +126,17 @@ class DocumentTypeController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->hasPermission('document-types-edit')) {
+        if (! Auth::user()->hasPermission('document-types-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }        $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
-        
+
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         return Inertia::render('documents/types/Edit', [
-            'documentType' => $documentType
+            'documentType' => $documentType,
         ]);
     }
 
@@ -145,11 +145,11 @@ class DocumentTypeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->hasPermission('document-types-edit')) {
+        if (! Auth::user()->hasPermission('document-types-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
-        }        
+        }
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
-        
+
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -170,7 +170,7 @@ class DocumentTypeController extends Controller
 
         if ($exists) {
             return back()->withErrors([
-                'name' => 'A document type with this name already exists in your company.'
+                'name' => 'A document type with this name already exists in your company.',
             ]);
         }
 
@@ -185,11 +185,11 @@ class DocumentTypeController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->hasPermission('document-types-delete')) {
+        if (! Auth::user()->hasPermission('document-types-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $documentType = is_numeric($id) ? DocumentType::findOrFail($id) : DocumentType::findBySlugOrFail($id);
-        
+
         // Make sure the document type belongs to the user's company
         if ($documentType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -198,7 +198,7 @@ class DocumentTypeController extends Controller
         // Check if there are any documents using this type
         if ($documentType->documents()->count() > 0) {
             return back()->withErrors([
-                'delete' => 'Cannot delete this document type because it is being used by one or more documents.'
+                'delete' => 'Cannot delete this document type because it is being used by one or more documents.',
             ]);
         }
 

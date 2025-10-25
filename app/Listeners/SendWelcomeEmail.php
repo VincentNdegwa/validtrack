@@ -1,10 +1,11 @@
 <?php
+
 namespace App\Listeners;
 
+use App\Notifications\WelcomeUserNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
-use App\Notifications\WelcomeUserNotification;
 
 class SendWelcomeEmail implements ShouldQueue
 {

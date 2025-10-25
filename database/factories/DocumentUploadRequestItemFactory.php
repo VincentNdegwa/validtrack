@@ -20,7 +20,7 @@ class DocumentUploadRequestItemFactory extends Factory
     {
         $uploadRequest = DocumentUploadRequest::factory()->create();
         $subject = $uploadRequest->subject;
-        
+
         return [
             'document_upload_request_id' => $uploadRequest->id,
             'document_type_id' => DocumentType::factory()->create(['company_id' => $subject->company_id])->id,
@@ -28,7 +28,7 @@ class DocumentUploadRequestItemFactory extends Factory
             'status' => 'pending', // pending, completed
         ];
     }
-    
+
     /**
      * Configure the factory to use an existing document upload request.
      */
@@ -36,14 +36,14 @@ class DocumentUploadRequestItemFactory extends Factory
     {
         return $this->state(function (array $attributes) use ($uploadRequest) {
             $subject = $uploadRequest->subject;
-            
+
             return [
                 'document_upload_request_id' => $uploadRequest->id,
                 'document_type_id' => DocumentType::factory()->create(['company_id' => $subject->company_id])->id,
             ];
         });
     }
-    
+
     /**
      * Configure the factory to use an existing document type.
      */
@@ -51,14 +51,14 @@ class DocumentUploadRequestItemFactory extends Factory
     {
         return $this->state(function (array $attributes) use ($documentType) {
             $uploadRequest = DocumentUploadRequest::factory()->create();
-            
+
             return [
                 'document_upload_request_id' => $uploadRequest->id,
                 'document_type_id' => $documentType->id,
             ];
         });
     }
-    
+
     /**
      * Configure the factory for a required document.
      */
@@ -68,7 +68,7 @@ class DocumentUploadRequestItemFactory extends Factory
             'is_required' => true,
         ]);
     }
-    
+
     /**
      * Configure the factory for an optional document.
      */
@@ -78,7 +78,7 @@ class DocumentUploadRequestItemFactory extends Factory
             'is_required' => false,
         ]);
     }
-    
+
     /**
      * Configure the factory for a completed item.
      */

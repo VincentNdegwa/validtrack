@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\LogsActivity;
 
 class CompanySetting extends Model
 {
@@ -15,7 +15,6 @@ class CompanySetting extends Model
         'key',
         'value',
     ];
-    
 
     public function setValueAttribute($value)
     {
@@ -39,9 +38,13 @@ class CompanySetting extends Model
      * Common setting keys
      */
     const TIMEZONE = 'timezone';
+
     const REMINDER_DEFAULT_DAYS = 'reminder_default_days';
+
     const NOTIFICATION_EMAIL_ENABLED = 'notification_email_enabled';
+
     const COMPANY_LOGO = 'company_logo';
+
     const COMPANY_NAME = 'company_name';
 
     /**
@@ -49,7 +52,7 @@ class CompanySetting extends Model
      */
     const DEFAULTS = [
         self::TIMEZONE => 'UTC',
-        self::REMINDER_DEFAULT_DAYS => array(30,14,7,1), 
+        self::REMINDER_DEFAULT_DAYS => [30, 14, 7, 1],
         self::NOTIFICATION_EMAIL_ENABLED => true,
     ];
 

@@ -13,6 +13,7 @@ class SubjectTypeCRUDTest extends TestCase
     use RefreshDatabase;
 
     protected $company;
+
     protected $admin;
 
     protected function setUp(): void
@@ -27,8 +28,8 @@ class SubjectTypeCRUDTest extends TestCase
         $this->admin = User::factory()
             ->forCompany($this->company)
             ->create([
-            'role' => 'admin',
-        ]);
+                'role' => 'admin',
+            ]);
 
         $this->company->owner_id = $this->admin->id;
         $this->company->save();
@@ -38,11 +39,11 @@ class SubjectTypeCRUDTest extends TestCase
     public function it_can_list_subject_types()
     {
         SubjectType::factory()->count(5)->create([
-            'company_id' => $this->company->id
+            'company_id' => $this->company->id,
         ]);
         $this->actingAs($this->admin);
         $response = $this->get('/subject-types');
-        
+
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
             ->component('subjects/types/Index')
@@ -54,16 +55,16 @@ class SubjectTypeCRUDTest extends TestCase
     public function it_can_create_new_subject_type()
     {
         $this->actingAs($this->admin);
-        
+
         $subjectTypeData = [
             'name' => 'Employee',
         ];
-        
+
         $response = $this->post('/subject-types', $subjectTypeData);
-        
+
         $response->assertRedirect();
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('subject_types', [
             'name' => 'Employee',
             'company_id' => $this->company->id,
@@ -81,10 +82,10 @@ class SubjectTypeCRUDTest extends TestCase
         $response = $this->put("/subject-types/{$subjectType->id}", [
             'name' => 'Updated Name',
         ]);
-        
+
         $response->assertRedirect();
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('subject_types', [
             'id' => $subjectType->id,
             'name' => 'Updated Name',
@@ -95,15 +96,15 @@ class SubjectTypeCRUDTest extends TestCase
     public function it_can_delete_a_subject_type()
     {
         $this->actingAs($this->admin);
-        
+
         $subjectType = SubjectType::factory()->create([
             'company_id' => $this->company->id,
         ]);
         $response = $this->delete("/subject-types/{$subjectType->id}");
-        
+
         $response->assertRedirect();
         $response->assertSessionHas('success');
-        
+
         // Check if the subject type is deleted
         $this->assertDatabaseMissing('subject_types', [
             'id' => $subjectType->id,
@@ -117,7 +118,7 @@ class SubjectTypeCRUDTest extends TestCase
         $response = $this->post('/subject-types', [
             // Missing name
         ]);
-        
+
         $response->assertSessionHasErrors(['name']);
     }
 
@@ -132,7 +133,7 @@ class SubjectTypeCRUDTest extends TestCase
         $response = $this->post('/subject-types', [
             'name' => 'Existing Name',
         ]);
-        
+
         $response->assertSessionHasErrors(['name']);
     }
 
@@ -145,7 +146,7 @@ class SubjectTypeCRUDTest extends TestCase
         ]);
         $this->actingAs($this->admin);
         $response = $this->get("/subject-types/{$anotherSubjectType->id}");
-        
+
         $response->assertStatus(302);
         $response->assertSessionHas('error');
     }
@@ -154,7 +155,7 @@ class SubjectTypeCRUDTest extends TestCase
     public function it_can_associate_document_types_with_subject_types()
     {
         $this->actingAs($this->admin);
-        
+
         $subjectType = SubjectType::factory()->create([
             'company_id' => $this->company->id,
         ]);
@@ -164,18 +165,18 @@ class SubjectTypeCRUDTest extends TestCase
                 'company_id' => $this->company->id,
             ])->id;
         }
-        $response = $this->post("/required-documents",
+        $response = $this->post('/required-documents',
             [
                 'subject_type_id' => $subjectType->id,
                 'document_type_id' => $documentTypes[0],
                 'is_required' => 1,
             ]
-        );  
+        );
         $response->assertRedirect();
         $response->assertSessionHas('success');
 
         $response2 = $this->post(
-            "/required-documents",
+            '/required-documents',
             [
                 'subject_type_id' => $subjectType->id,
                 'document_type_id' => $documentTypes[1],
@@ -191,7 +192,7 @@ class SubjectTypeCRUDTest extends TestCase
             'document_type_id' => $documentTypes[0],
             'is_required' => 1,
         ]);
-        
+
         $this->assertDatabaseHas('required_document_types', [
             'subject_type_id' => $subjectType->id,
             'document_type_id' => $documentTypes[1],

@@ -2,17 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
-use Inertia\Inertia;
 use App\Helpers\UserCompanyHelper;
-use Illuminate\Http\Request;
-use App\Events\RegisteredUser;
-use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
-
 
 class FaceBookController extends Controller
 {
@@ -23,12 +20,13 @@ class FaceBookController extends Controller
                 ->stateless()
                 ->with([
                     'display' => 'popup',
-                    'auth_type' => 'rerequest'
+                    'auth_type' => 'rerequest',
                 ])
                 ->scopes(['email', 'public_profile'])
                 ->redirect();
         } catch (\Exception $e) {
-            Log::error('Facebook login error: ' . $e->getMessage());
+            Log::error('Facebook login error: '.$e->getMessage());
+
             return redirect()->back()->with('error', 'Unable to connect to Facebook. Please try again.');
         }
     }
@@ -39,7 +37,7 @@ class FaceBookController extends Controller
             $fbUser = Socialite::driver('facebook')
                 ->stateless()
                 ->user();
-            if(!$fbUser) {
+            if (! $fbUser) {
                 return redirect()->route('login')->with('error', 'Unable to retrieve user information from Facebook.');
             }
             $existingFbUser = User::whereHas('tokens', function ($query) use ($fbUser) {
@@ -47,6 +45,7 @@ class FaceBookController extends Controller
             })->first();
             if ($existingFbUser) {
                 Auth::login($existingFbUser);
+
                 return redirect()->route('dashboard')->with('success', 'Logged in successfully.');
             }
 
@@ -68,10 +67,12 @@ class FaceBookController extends Controller
             );
             event(new Registered($user));
             Auth::login($user);
+
             return redirect()->route('dashboard')->with('success', 'Logged in successfully.');
         } catch (\Exception $e) {
-            Log::error('Facebook callback error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Facebook login failed: ' . $e->getMessage());
+            Log::error('Facebook callback error: '.$e->getMessage());
+
+            return redirect()->back()->with('error', 'Facebook login failed: '.$e->getMessage());
         }
     }
 

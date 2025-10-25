@@ -23,17 +23,17 @@ return new class extends Migration
                 ->onDelete('set null');
             $table->string('file_url');
             $table->date('issue_date');
-            $table->date('expiry_date')->nullable(); 
+            $table->date('expiry_date')->nullable();
             $table->bigInteger('status')
                 ->default(1);
             $table->foreignId('uploaded_by')
                 ->nullable()
                 ->constrained('users')
-                ->onDelete('set null'); 
+                ->onDelete('set null');
             $table->string('notes')->nullable();
             $table->foreignId('company_id')
                 ->constrained('companies')
-                ->onDelete('cascade'); 
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

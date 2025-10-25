@@ -21,10 +21,10 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->unsignedBigInteger('company_id')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('company_id')->references('id')->on('companies')
                 ->onUpdate('cascade')->onDelete('cascade');
-                
+
             $table->unique(['name', 'company_id']);
         });
 
@@ -36,10 +36,10 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->unsignedBigInteger('company_id')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('company_id')->references('id')->on('companies')
                 ->onUpdate('cascade')->onDelete('cascade');
-                
+
             $table->unique(['name', 'company_id']);
         });
 

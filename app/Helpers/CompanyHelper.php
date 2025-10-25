@@ -28,7 +28,7 @@ class CompanyHelper
     {
         $company = self::getCompany($company);
 
-        if (!$company) {
+        if (! $company) {
             return $default;
         }
 
@@ -44,7 +44,7 @@ class CompanyHelper
     {
         $timezone = self::getCompanyTimezone($company);
 
-        if (!$time) {
+        if (! $time) {
             $time = now();
         }
 
@@ -59,7 +59,7 @@ class CompanyHelper
     {
         $timezone = self::getCompanyTimezone($company);
 
-        if (!$date) {
+        if (! $date) {
             $date = now();
         }
 
@@ -74,7 +74,7 @@ class CompanyHelper
     {
         $timezone = self::getCompanyTimezone($company);
 
-        if (!$dateTime) {
+        if (! $dateTime) {
             $dateTime = now();
         }
         if (is_string($dateTime)) {
@@ -87,25 +87,25 @@ class CompanyHelper
     public static function uploadFile(UploadedFile $file, $directory = 'uploads', $disk = 'public')
     {
         try {
-            if (!$file->isValid()) {
+            if (! $file->isValid()) {
                 return [
                     'success' => false,
                     'error' => 'Invalid file upload',
                     'message' => $file->getErrorMessage(),
                     'path' => null,
-                    'url' => null
+                    'url' => null,
                 ];
             }
 
             $path = $file->store($directory, $disk);
 
-            if (!$path) {
+            if (! $path) {
                 return [
                     'success' => false,
                     'error' => 'Storage error',
                     'message' => 'Failed to store the file',
                     'path' => null,
-                    'url' => null
+                    'url' => null,
                 ];
             }
 
@@ -117,7 +117,7 @@ class CompanyHelper
                 'url' => self::getUploadedFileUrl($path, $disk),
                 'filename' => $file->getClientOriginalName(),
                 'extension' => $file->getClientOriginalExtension(),
-                'size' => $file->getSize()
+                'size' => $file->getSize(),
             ];
         } catch (\Exception $e) {
             return [
@@ -125,7 +125,7 @@ class CompanyHelper
                 'error' => get_class($e),
                 'message' => $e->getMessage(),
                 'path' => null,
-                'url' => null
+                'url' => null,
             ];
         }
     }
@@ -160,27 +160,27 @@ class CompanyHelper
                     'success' => false,
                     'error' => 'Invalid path',
                     'message' => 'The file path is empty',
-                    'path' => $path
+                    'path' => $path,
                 ];
             }
 
-            if (!Storage::disk($disk)->exists($path)) {
+            if (! Storage::disk($disk)->exists($path)) {
                 return [
                     'success' => false,
                     'error' => 'File not found',
                     'message' => 'The file does not exist',
-                    'path' => $path
+                    'path' => $path,
                 ];
             }
 
             $deleted = Storage::disk($disk)->delete($path);
 
-            if (!$deleted) {
+            if (! $deleted) {
                 return [
                     'success' => false,
                     'error' => 'Delete failed',
                     'message' => 'Failed to delete the file',
-                    'path' => $path
+                    'path' => $path,
                 ];
             }
 
@@ -188,23 +188,23 @@ class CompanyHelper
                 'success' => true,
                 'error' => null,
                 'message' => 'File deleted successfully',
-                'path' => $path
+                'path' => $path,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
                 'error' => get_class($e),
                 'message' => $e->getMessage(),
-                'path' => $path
+                'path' => $path,
             ];
         }
     }
 
-    public static function getCompanyOwner($company): \App\Models\User|null
+    public static function getCompanyOwner($company): ?\App\Models\User
     {
         $company = self::getCompany($company);
 
-        if (!$company) {
+        if (! $company) {
             return null;
         }
 
@@ -220,24 +220,24 @@ class CompanyHelper
         }
         $user = self::getCompanyOwner($company);
         $actualCompany = \App\Models\Company::find($company);
-        if (!$user || !$actualCompany) {
+        if (! $user || ! $actualCompany) {
             return false;
         }
 
-        if (!$user || !$user->subscribed() || !$user->subscribed('default')) {
+        if (! $user || ! $user->subscribed() || ! $user->subscribed('default')) {
             return false;
         }
 
         $paddleSubscription = $user->subscriptions()->whereIn('status', ['active', 'trialing', 'past_due'])->first();
-        if (!$paddleSubscription) {
+        if (! $paddleSubscription) {
             return false;
         }
         $subItem = $paddleSubscription->items()->first();
-        if (!$subItem) {
+        if (! $subItem) {
             return false;
         }
         $billingPlan = \App\Models\BillingPlan::with('features')->where('paddle_product_id', $subItem->product_id)->first();
-        if (!$billingPlan) {
+        if (! $billingPlan) {
             return false;
         }
         $features = $billingPlan->features;
@@ -274,11 +274,12 @@ class CompanyHelper
                 }
             }
             // If any feature fails, set allPassed to false
-            if (!$hasAccess) {
+            if (! $hasAccess) {
                 $allPassed = false;
                 break;
             }
         }
+
         return $allPassed;
     }
 }

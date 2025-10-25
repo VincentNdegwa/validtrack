@@ -9,7 +9,6 @@ class Permission extends PermissionModel
 {
     use HasSlug;
 
-
     protected $appends = ['slug'];
 
     /**

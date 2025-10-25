@@ -28,7 +28,7 @@ class DocumentUploadRequestFactory extends Factory
             'used_at' => null,
         ];
     }
-    
+
     /**
      * Configure the factory to use an existing subject.
      */
@@ -41,7 +41,7 @@ class DocumentUploadRequestFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Configure the factory to create a used request.
      */
@@ -54,7 +54,7 @@ class DocumentUploadRequestFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Configure the factory to create a cancelled request.
      */
@@ -67,7 +67,7 @@ class DocumentUploadRequestFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Configure the factory to create an expired request.
      */

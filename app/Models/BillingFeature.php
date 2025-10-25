@@ -31,8 +31,8 @@ class BillingFeature extends Model
 
     /**
      * Determine if a feature value means unlimited
-     * 
-     * @param mixed $value
+     *
+     * @param  mixed  $value
      * @return bool
      */
     public static function isUnlimited($value)
@@ -42,8 +42,8 @@ class BillingFeature extends Model
 
     /**
      * Format the value for display
-     * 
-     * @param mixed $value
+     *
+     * @param  mixed  $value
      * @return string
      */
     public function formatValue($value)
@@ -55,7 +55,7 @@ class BillingFeature extends Model
         if ($this->type === 'boolean') {
             return $value ? 'Yes' : 'No';
         }
-        
+
         return $value;
     }
 }

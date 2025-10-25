@@ -15,6 +15,7 @@ class HomeController extends Controller
             ->get()
             ->map(function ($plan) {
                 $plan->friendly_features = $plan->getFriendlyFeatures();
+
                 return $plan;
             });
 
@@ -36,6 +37,7 @@ class HomeController extends Controller
     public function legal(Request $request)
     {
         $tab = $request->query('tab', 'terms');
+
         return Inertia::render('Legal', [
             'activeTab' => $tab,
         ]);

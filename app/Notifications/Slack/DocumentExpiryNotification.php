@@ -4,14 +4,11 @@ namespace App\Notifications\Slack;
 
 use App\Models\Document;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Slack\BlockKit\Blocks\ContextBlock;
 use Illuminate\Notifications\Slack\BlockKit\Blocks\SectionBlock;
 use Illuminate\Notifications\Slack\SlackMessage;
-use Illuminate\Notifications\Slack\SlackRoute;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
 
 class DocumentExpiryNotification extends Notification implements ShouldQueue
 {
@@ -20,12 +17,11 @@ class DocumentExpiryNotification extends Notification implements ShouldQueue
     public function __construct(
         protected Document $document,
         protected int $daysUntilExpiry
-    ) {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
-        return ['slack']; 
+        return ['slack'];
     }
 
     /**
@@ -35,15 +31,15 @@ class DocumentExpiryNotification extends Notification implements ShouldQueue
     {
         if ($this->daysUntilExpiry <= 7) {
             $urgencyEmoji = '🚨';
-            $mainText = "⚠️ **DOCUMENT EXPIRATION WARNING** ⚠️";
+            $mainText = '⚠️ **DOCUMENT EXPIRATION WARNING** ⚠️';
             $expiryText = "*_{$this->document->documentType->name}_* is expiring **in less than a week!**";
         } elseif ($this->daysUntilExpiry <= 14) {
             $urgencyEmoji = '⚠️';
-            $mainText = "Document Expiration Alert";
+            $mainText = 'Document Expiration Alert';
             $expiryText = "*_{$this->document->documentType->name}_* is expiring soon in *{$this->daysUntilExpiry} days*!";
         } else {
             $urgencyEmoji = '📅';
-            $mainText = "Document Expiration Notice";
+            $mainText = 'Document Expiration Notice';
             $expiryText = "*_{$this->document->documentType->name}_* will expire in *{$this->daysUntilExpiry} days*";
         }
 
@@ -51,7 +47,7 @@ class DocumentExpiryNotification extends Notification implements ShouldQueue
 
         $message = (new SlackMessage)
             ->headerBlock($mainText)
-            ->sectionBlock(function (SectionBlock $block) use ($urgencyEmoji, $expiryText, $documentUrl) {
+            ->sectionBlock(function (SectionBlock $block) use ($urgencyEmoji, $expiryText) {
                 $block->text("<!channel> {$urgencyEmoji} {$expiryText}")->markdown();
             })
 
@@ -64,20 +60,20 @@ class DocumentExpiryNotification extends Notification implements ShouldQueue
                 $block->field("*Expires:*\n:alarm_clock: **{$this->document->expiry_date->format('M d, Y')}**")->markdown();
             })
 
-            ->when($this->document->notes, function(SlackMessage $message) {
-                 $message->sectionBlock(function (SectionBlock $block) {
+            ->when($this->document->notes, function (SlackMessage $message) {
+                $message->sectionBlock(function (SectionBlock $block) {
                     $block->text(":pencil: *Notes:*\n> {$this->document->notes}")->markdown();
-                 });
-                 $message->dividerBlock();
+                });
+                $message->dividerBlock();
             })
 
             ->when($this->document->file_url, function (SlackMessage $message) use ($documentUrl) {
                 $message->actionsBlock(function ($block) use ($documentUrl) {
                     $block->button('View/Renew Document', $documentUrl)
-                          ->value('document_view_' . $this->document->id);
+                        ->value('document_view_'.$this->document->id);
                 });
             })
-            
+
             ->contextBlock(function (ContextBlock $block) {
                 $block->text("*Document ID:* #{$this->document->id} | *Company:* {$this->document->company->name}")->markdown();
                 $block->text("Uploaded by: {$this->document->uploader->name} | Last updated: {$this->document->updated_at->diffForHumans()}")->markdown();

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SlackIntegration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -12,12 +11,15 @@ use Illuminate\Support\Str;
 class SlackController extends Controller
 {
     protected string $clientId;
+
     protected string $clientSecret;
+
     protected string $redirectUri;
+
     protected array $scopes = [
         'chat:write',
         'users:read',
-        'incoming-webhook'
+        'incoming-webhook',
     ];
 
     public function __construct()
@@ -32,11 +34,11 @@ class SlackController extends Controller
         $state = Str::random(40);
         Session::put('slack_oauth_state', $state);
 
-        $url = 'https://slack.com/oauth/v2/authorize?' . http_build_query([
+        $url = 'https://slack.com/oauth/v2/authorize?'.http_build_query([
             'client_id' => $this->clientId,
             'scope' => implode(',', $this->scopes),
             'redirect_uri' => $this->redirectUri,
-            'state' => $state
+            'state' => $state,
         ]);
 
         return redirect($url);
@@ -56,31 +58,31 @@ class SlackController extends Controller
 
         if ($request->has('error')) {
             return redirect()->route('dashboard')
-                ->with('error', 'Failed to connect to Slack: ' . $request->error);
+                ->with('error', 'Failed to connect to Slack: '.$request->error);
         }
 
         $response = Http::asForm()->post('https://slack.com/api/oauth.v2.access', [
             'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
             'code' => $request->code,
-            'redirect_uri' => $this->redirectUri
+            'redirect_uri' => $this->redirectUri,
         ]);
 
         $data = $response->json();
 
-        if (!$data['ok']) {
+        if (! $data['ok']) {
             return redirect()->route('dashboard')
-                ->with('error', 'Failed to connect to Slack: ' . ($data['error'] ?? 'Unknown error'));
+                ->with('error', 'Failed to connect to Slack: '.($data['error'] ?? 'Unknown error'));
         }
 
         try {
             $this->storeSlackCredentials($data);
-            
+
             return redirect()->route('dashboard')
-                ->with('success', 'Successfully connected to Slack workspace ' . $data['team']['name']);
+                ->with('success', 'Successfully connected to Slack workspace '.$data['team']['name']);
         } catch (\Exception $e) {
             return redirect()->route('dashboard')
-                ->with('error', 'Failed to save Slack integration: ' . $e->getMessage());
+                ->with('error', 'Failed to save Slack integration: '.$e->getMessage());
         }
     }
 
@@ -90,7 +92,7 @@ class SlackController extends Controller
     protected function storeSlackCredentials(array $data)
     {
         $company = Auth::user()->company;
-        
+
         $slackData = [
             'app_id' => $data['app_id'],
             'authed_user_id' => $data['authed_user']['id'],
@@ -120,7 +122,8 @@ class SlackController extends Controller
         $company->update(['has_slack_integration' => true]);
     }
 
-    public function disconnect(){
+    public function disconnect()
+    {
         $company = Auth::user()->company;
 
         $company->slackIntegration()->delete();

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Traits\RespectsCompanyContext;
-use App\Models\User;
 use App\Models\Role;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,44 +14,43 @@ use Inertia\Inertia;
 class UserController extends Controller
 {
     use RespectsCompanyContext;
-    
-    
+
     /**
      * Display a listing of the users.
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->hasPermission('users-view')) {
+        if (! Auth::user()->hasPermission('users-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = $this->scopeToCompany(User::query())
             ->with('roles');
-        
+
         // Handle search if provided
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('email', 'like', "%{$searchTerm}%");
+                    ->orWhere('email', 'like', "%{$searchTerm}%");
             });
         }
-        
+
         // Handle sorting
         $sortField = $request->get('sort', 'name');
         $sortDirection = $request->get('direction', 'asc');
-        
+
         // Validate sort field to prevent SQL injection
         $allowedSortFields = ['name', 'email', 'is_active', 'created_at'];
-        if (!in_array($sortField, $allowedSortFields)) {
+        if (! in_array($sortField, $allowedSortFields)) {
             $sortField = 'name';
         }
-        
+
         $query->orderBy($sortField, $sortDirection);
-        
+
         // Paginate the results
         $perPage = $request->get('per_page', 10);
         $users = $query->paginate($perPage);
-        
+
         $roles = $this->scopeToCompany(Role::query())
             ->orderBy('name')
             ->get();
@@ -73,7 +72,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->hasPermission('users-create')) {
+        if (! Auth::user()->hasPermission('users-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $roles = Role::where('company_id', Auth::user()->company_id)
@@ -81,7 +80,7 @@ class UserController extends Controller
             ->get();
 
         return Inertia::render('users/Create', [
-            'roles' => $roles
+            'roles' => $roles,
         ]);
     }
 
@@ -90,12 +89,12 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->hasPermission('users-create')) {
+        if (! Auth::user()->hasPermission('users-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-        //max_users
+        // max_users
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_users');
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return redirect()->back()->with('error', 'You have reached the maximum number of users allowed for your plan.');
         }
         $validated = $request->validate([
@@ -107,7 +106,7 @@ class UserController extends Controller
             'location' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,id'
+            'roles.*' => 'exists:roles,id',
         ]);
 
         // Create user with the current company ID
@@ -123,13 +122,13 @@ class UserController extends Controller
         ]);
 
         // Attach roles if provided
-        if (!empty($validated['roles'])) {
+        if (! empty($validated['roles'])) {
             // Only attach roles that belong to the user's company
             $roleIds = Role::where('company_id', Auth::user()->company_id)
                 ->whereIn('id', $validated['roles'])
                 ->pluck('id')
                 ->toArray();
-            
+
             $user->roles()->attach($roleIds, ['company_id' => Auth::user()->company_id]);
         }
 
@@ -142,11 +141,11 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->hasPermission('users-view')) {
+        if (! Auth::user()->hasPermission('users-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
-        
+
         // Make sure the user belongs to the current company
         if ($user->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -155,7 +154,7 @@ class UserController extends Controller
         $user->load('roles');
 
         return Inertia::render('users/Show', [
-            'user' => $user
+            'user' => $user,
         ]);
     }
 
@@ -164,11 +163,11 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->hasPermission('users-edit')) {
+        if (! Auth::user()->hasPermission('users-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
-        
+
         // Make sure the user belongs to the current company
         if ($user->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -183,7 +182,7 @@ class UserController extends Controller
         return Inertia::render('users/Edit', [
             'user' => $user,
             'roles' => $roles,
-            'userRoles' => $user->roles->pluck('id')->toArray()
+            'userRoles' => $user->roles->pluck('id')->toArray(),
         ]);
     }
 
@@ -192,11 +191,11 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->hasPermission('users-edit')) {
+        if (! Auth::user()->hasPermission('users-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
-        
+
         // Make sure the user belongs to the current company
         if ($user->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -211,13 +210,13 @@ class UserController extends Controller
             'location' => 'nullable|string|max:255',
             'is_active' => 'boolean',
             'roles' => 'nullable|array',
-            'roles.*' => 'exists:roles,id'
+            'roles.*' => 'exists:roles,id',
         ]);
 
         // Update user details
         $user->name = $validated['name'];
         $user->email = $validated['email'];
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
         $user->phone = $validated['phone'] ?? null;
@@ -233,7 +232,7 @@ class UserController extends Controller
                 ->whereIn('id', $validated['roles'])
                 ->pluck('id')
                 ->toArray();
-            
+
             // Detach all existing roles for this company
             $user->roles()->detach();
             // Attach new roles with company_id
@@ -249,11 +248,11 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->hasPermission('users-delete')) {
+        if (! Auth::user()->hasPermission('users-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $user = is_numeric($id) ? User::findOrFail($id) : User::findBySlugOrFail($id);
-        
+
         // Make sure the user belongs to the current company
         if ($user->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');

@@ -41,7 +41,7 @@ return new class extends Migration
                 'address',
                 'location',
                 'logo',
-                'is_active'
+                'is_active',
             ]);
         });
     }

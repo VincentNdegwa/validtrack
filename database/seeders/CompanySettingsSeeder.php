@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Company;
 use App\Models\CompanySetting;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CompanySettingsSeeder extends Seeder
@@ -19,11 +18,11 @@ class CompanySettingsSeeder extends Seeder
         foreach ($companies as $company) {
             foreach (CompanySetting::DEFAULTS as $key => $value) {
                 $formattedValue = is_array($value) ? json_encode($value) : $value;
-                
+
                 CompanySetting::updateOrCreate([
                     'company_id' => $company->id,
                     'key' => $key,
-                ],[
+                ], [
                     'value' => $formattedValue,
                 ]);
             }

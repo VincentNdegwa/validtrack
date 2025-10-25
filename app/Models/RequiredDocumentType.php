@@ -4,12 +4,12 @@ namespace App\Models;
 
 use App\Traits\HasSlug;
 use App\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class RequiredDocumentType extends Model
 {
-    use HasFactory, LogsActivity, HasSlug;
+    use HasFactory, HasSlug, LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -20,7 +20,7 @@ class RequiredDocumentType extends Model
         'subject_type_id',
         'document_type_id',
         'company_id',
-        'is_required'
+        'is_required',
     ];
 
     /**

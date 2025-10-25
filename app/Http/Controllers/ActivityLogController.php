@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class ActivityLogController extends Controller
 {
@@ -14,37 +14,37 @@ class ActivityLogController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->hasPermission('activity-log-view')) {
+        if (! Auth::user()->hasPermission('activity-log-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = ActivityLog::with(['user', 'company'])
             ->where('company_id', Auth::user()->company_id);
-        
+
         // Handle search if provided
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('action_type', 'like', "%{$searchTerm}%")
-                  ->orWhere('target_type', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('user', function($userQuery) use ($searchTerm) {
-                      $userQuery->where('name', 'like', "%{$searchTerm}%")
-                                ->orWhere('email', 'like', "%{$searchTerm}%");
-                  });
+                    ->orWhere('target_type', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('user', function ($userQuery) use ($searchTerm) {
+                        $userQuery->where('name', 'like', "%{$searchTerm}%")
+                            ->orWhere('email', 'like', "%{$searchTerm}%");
+                    });
             });
         }
-        
+
         // Handle sorting
         $sortField = $request->get('sort', 'created_at');
         $sortDirection = $request->get('direction', 'desc');
-        
+
         // Validate sort field to prevent SQL injection
         $allowedSortFields = ['created_at', 'action_type', 'target_type'];
-        if (!in_array($sortField, $allowedSortFields)) {
+        if (! in_array($sortField, $allowedSortFields)) {
             $sortField = 'created_at';
         }
-        
+
         $query->orderBy($sortField, $sortDirection);
-        
+
         // Paginate the results
         $perPage = $request->get('per_page', 10);
         $activityLogs = $query->paginate($perPage)->through(function ($log) {
@@ -86,10 +86,10 @@ class ActivityLogController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->hasPermission('activity-log-view')) {
+        if (! Auth::user()->hasPermission('activity-log-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-        
+
         $activityLog = is_numeric($id) ? ActivityLog::findOrFail($id) : ActivityLog::findBySlugOrFail($id);
 
         if ($activityLog->company_id !== Auth::user()->company_id) {
@@ -97,7 +97,7 @@ class ActivityLogController extends Controller
         }
 
         $activityLog->load(['user', 'company']);
-        
+
         $log = [
             'id' => $activityLog->id,
             'slug' => $activityLog->slug,

@@ -19,7 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/Appearance');
     })->name('appearance');
-    
+
     Route::get('settings/company', [CompanySettingsController::class, 'index'])->name('settings.company');
     Route::put('settings/company', [CompanySettingsController::class, 'update'])->name('settings.company.update');
 });

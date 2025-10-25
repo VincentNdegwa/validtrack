@@ -16,7 +16,7 @@ class SuperAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 
@@ -31,10 +31,10 @@ class SuperAdmin
             }
         }
 
-        if (!$isSuperAdmin) {
+        if (! $isSuperAdmin) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'You do not have super administrator privileges.'
+                    'message' => 'You do not have super administrator privileges.',
                 ], 403);
             }
 

@@ -3,13 +3,11 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Slack\BlockKit\Blocks\ContextBlock;
 use Illuminate\Notifications\Slack\BlockKit\Blocks\SectionBlock;
-use Illuminate\Notifications\Slack\BlockKit\Composites\ConfirmObject;
 use Illuminate\Notifications\Slack\SlackMessage;
-use Illuminate\Notifications\Messages\MailMessage;
 
 class TestSlackNotification extends Notification
 {
@@ -43,10 +41,12 @@ class TestSlackNotification extends Notification
             ->action('Notification Action', url('/'))
             ->line('Thank you for using our application!');
     }
+
     /**
      * Get the Slack representation of the notification.
      */
-    public function toSlack(object $notifiable){
+    public function toSlack(object $notifiable)
+    {
         return (new SlackMessage)
             ->text('One of your invoices has been paid!')
             ->headerBlock('Invoice Paid')

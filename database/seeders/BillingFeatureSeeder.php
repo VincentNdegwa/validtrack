@@ -52,7 +52,7 @@ class BillingFeatureSeeder extends Seeder
                 'type' => 'number',
                 'description' => 'Maximum number of users allowed',
             ],
-            
+
             // Document features
             [
                 'name' => 'Document Expiry Alerts',
@@ -72,7 +72,7 @@ class BillingFeatureSeeder extends Seeder
                 'type' => 'boolean',
                 'description' => 'Ability to send document upload requests to external parties',
             ],
-            
+
             // Security features
             [
                 'name' => 'Role-Based Access Control',
@@ -86,7 +86,7 @@ class BillingFeatureSeeder extends Seeder
                 'type' => 'boolean',
                 'description' => 'Secure document submissions via verification codes',
             ],
-            
+
             // Audit and notification features
             [
                 'name' => 'Activity Logging',
@@ -100,7 +100,7 @@ class BillingFeatureSeeder extends Seeder
                 'type' => 'boolean',
                 'description' => 'Customizable email notifications',
             ],
-            
+
             [
                 'name' => 'Bulk Operations',
                 'key' => 'bulk_operations',
@@ -137,7 +137,7 @@ class BillingFeatureSeeder extends Seeder
                 'type' => 'boolean',
                 'description' => 'Full REST API access for custom integrations and automation',
             ],
-            
+
             // Add-on features
             [
                 'name' => 'Additional Storage',

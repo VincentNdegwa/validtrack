@@ -61,7 +61,7 @@ class BillingPlan extends Model
     {
         return $this->belongsToMany(User::class, 'user_billing_plans')
             ->withPivot([
-                'id', 
+                'id',
                 'billing_cycle',
                 'current_period_start',
                 'current_period_end',
@@ -69,7 +69,7 @@ class BillingPlan extends Model
                 'is_active',
                 'status',
                 'created_at',
-                'updated_at'
+                'updated_at',
             ])
             ->withTimestamps();
     }
@@ -90,16 +90,16 @@ class BillingPlan extends Model
             if ($feature->type === 'number') {
                 $label = $featureLabels[$feature->key] ?? $feature->name;
                 if ($value == -1) {
-                    $features[] = "Unlimited " . ucfirst($label);
+                    $features[] = 'Unlimited '.ucfirst($label);
                 } else {
-                    $features[] = "Up to {$value} " . $label;
+                    $features[] = "Up to {$value} ".$label;
                 }
             } elseif ($feature->type === 'boolean') {
                 $icon = $value ? '✅' : '❌';
                 $features[] = "{$icon} {$feature->name}";
             }
         }
+
         return $features;
     }
-
 }

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
-use App\Models\SubjectType;
 use App\Models\DocumentType;
+use App\Models\SubjectType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class SubjectTypeController extends Controller
 {
@@ -15,28 +15,28 @@ class SubjectTypeController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->hasPermission('subject-types-view')) {
+        if (! Auth::user()->hasPermission('subject-types-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = SubjectType::where('company_id', Auth::user()->company_id);
-        
+
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%");
             });
         }
-        
+
         $sortField = $request->get('sort', 'name');
         $sortDirection = $request->get('direction', 'asc');
-        
+
         $allowedSortFields = ['name', 'created_at'];
-        if (!in_array($sortField, $allowedSortFields)) {
+        if (! in_array($sortField, $allowedSortFields)) {
             $sortField = 'name';
         }
-        
+
         $query->withCount('subjects')->orderBy($sortField, $sortDirection);
-        
+
         $perPage = $request->get('per_page', 10);
         $subjectTypes = $query->paginate($perPage);
 
@@ -56,9 +56,10 @@ class SubjectTypeController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->hasPermission('subject-types-create')) {
+        if (! Auth::user()->hasPermission('subject-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
+
         return Inertia::render('subjects/types/Create');
     }
 
@@ -67,12 +68,12 @@ class SubjectTypeController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->hasPermission('subject-types-create')) {
+        if (! Auth::user()->hasPermission('subject-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-        //max_subject_types
+        // max_subject_types
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subject_types');
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return redirect()->back()->with('error', 'You have reached the maximum number of subject types allowed for your plan.');
         }
         $validated = $request->validate([
@@ -86,7 +87,7 @@ class SubjectTypeController extends Controller
 
         if ($exists) {
             return back()->withErrors([
-                'name' => 'A subject type with this name already exists in your company.'
+                'name' => 'A subject type with this name already exists in your company.',
             ]);
         }
 
@@ -103,17 +104,17 @@ class SubjectTypeController extends Controller
      */
     public function show($id)
     {
-        if (!Auth::user()->hasPermission('subject-types-view')) {
+        if (! Auth::user()->hasPermission('subject-types-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
-        
+
         if ($subjectType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
         $user = Auth::user();
         $subjects = $subjectType->subjects;
-        $documentTypes = DocumentType::where('company_id',$user->company_id)->where('is_active', 1)->get();
+        $documentTypes = DocumentType::where('company_id', $user->company_id)->where('is_active', 1)->get();
         $requiredDocumentTypes = $subjectType->requiredDocumentTypes()
             ->with('documentType', 'subjectType')
             ->where('company_id', $user->company_id)
@@ -132,18 +133,18 @@ class SubjectTypeController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->hasPermission('subject-types-edit')) {
+        if (! Auth::user()->hasPermission('subject-types-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
-        
+
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
 
         return Inertia::render('subjects/types/Edit', [
-            'subjectType' => $subjectType
+            'subjectType' => $subjectType,
         ]);
     }
 
@@ -152,11 +153,11 @@ class SubjectTypeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->hasPermission('subject-types-edit')) {
+        if (! Auth::user()->hasPermission('subject-types-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
-        
+
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -174,7 +175,7 @@ class SubjectTypeController extends Controller
 
         if ($exists) {
             return back()->withErrors([
-                'name' => 'A subject type with this name already exists in your company.'
+                'name' => 'A subject type with this name already exists in your company.',
             ]);
         }
 
@@ -189,11 +190,11 @@ class SubjectTypeController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->hasPermission('subject-types-delete')) {
+        if (! Auth::user()->hasPermission('subject-types-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectType = is_numeric($id) ? SubjectType::findOrFail($id) : SubjectType::findBySlugOrFail($id);
-        
+
         // Make sure the subject type belongs to the user's company
         if ($subjectType->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -202,7 +203,7 @@ class SubjectTypeController extends Controller
         // Check if there are any subjects using this type
         if ($subjectType->subjects()->count() > 0) {
             return back()->withErrors([
-                'delete' => 'Cannot delete this subject type because it is being used by one or more subjects.'
+                'delete' => 'Cannot delete this subject type because it is being used by one or more subjects.',
             ]);
         }
 

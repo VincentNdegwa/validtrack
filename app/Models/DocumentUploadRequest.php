@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Str;
 use App\Traits\LogsActivity;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class DocumentUploadRequest extends Model
 {
@@ -49,7 +49,7 @@ class DocumentUploadRequest extends Model
     {
         return $this->hasMany(DocumentUploadRequestItem::class, 'document_upload_request_id');
     }
-    
+
     public function documentTypes()
     {
         return $this->hasManyThrough(

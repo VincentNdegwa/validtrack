@@ -111,13 +111,15 @@ class Company extends Model
     public static function getUserCount($company)
     {
         $company = Company::find($company);
-        if (!$company) {
+        if (! $company) {
             return 0;
         }
+
         return $company->users()->count();
     }
 
-    public static function getCompanyStorage($company){
+    public static function getCompanyStorage($company)
+    {
         return 0;
     }
 
@@ -128,22 +130,22 @@ class Company extends Model
             'setting' => $setting,
         ]);
 
-        if (!$setting) {
+        if (! $setting) {
             return $default ?? CompanySetting::getDefaultValue($key);
         }
-        
+
         $value = $setting->value;
-        
+
         if ($key === CompanySetting::REMINDER_DEFAULT_DAYS && is_string($value)) {
             $decoded = json_decode($value, true);
             if (json_last_error() === JSON_ERROR_NONE) {
                 return $decoded;
             }
             if (is_numeric($value)) {
-                return [(int)$value];
+                return [(int) $value];
             }
         }
-        
+
         return $value;
     }
 
@@ -153,12 +155,13 @@ class Company extends Model
         if (is_array($value)) {
             $value = json_encode($value);
         }
-        
+
         $this->settings()->updateOrCreate(
             ['key' => $key],
             ['value' => $value]
         );
     }
+
     public function roles()
     {
         return $this->hasMany(Role::class);
@@ -175,14 +178,14 @@ class Company extends Model
     public function routeNotificationForSlack(Notification $notification): mixed
     {
         $slackIntegration = $this->slackIntegration;
-        
-        if (!$slackIntegration) {
+
+        if (! $slackIntegration) {
             return null;
         }
 
         Log::info('Company Slack Route', [
             'channel' => $slackIntegration->webhook_channel,
-            'token' => $slackIntegration->access_token
+            'token' => $slackIntegration->access_token,
         ]);
 
         return SlackRoute::make($slackIntegration->webhook_channel, $slackIntegration->access_token);
@@ -200,10 +203,10 @@ class Company extends Model
             );
             try {
                 $adminRole->permissions()->attach($newPermission->id, [
-                    'company_id' => $this->id
+                    'company_id' => $this->id,
                 ]);
             } catch (\Exception $e) {
-                Log::error("Error attaching permission {$newPermission->id} to role {$adminRole->id} for company {$this->id}: " . $e->getMessage());
+                Log::error("Error attaching permission {$newPermission->id} to role {$adminRole->id} for company {$this->id}: ".$e->getMessage());
             }
         }
     }

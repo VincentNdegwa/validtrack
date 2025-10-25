@@ -7,9 +7,9 @@ use App\Models\RequiredDocumentType;
 use App\Models\Subject;
 use App\Models\SubjectType;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Crypt;
+use Inertia\Inertia;
 
 class SubjectController extends Controller
 {
@@ -18,36 +18,36 @@ class SubjectController extends Controller
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->hasPermission('subjects-view')) {
+        if (! Auth::user()->hasPermission('subjects-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $query = Subject::with('subjectType')
             ->where('company_id', Auth::user()->company_id);
-        
+
         // Handle search if provided
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
-            $query->where(function($q) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', "%{$searchTerm}%")
-                  ->orWhere('email', 'like', "%{$searchTerm}%")
-                  ->orWhere('phone', 'like', "%{$searchTerm}%");
+                    ->orWhere('email', 'like', "%{$searchTerm}%")
+                    ->orWhere('phone', 'like', "%{$searchTerm}%");
             });
         }
-        
+
         $sortField = $request->get('sort', 'name');
         $sortDirection = $request->get('direction', 'asc');
-        
+
         $allowedSortFields = ['name', 'email', 'phone', 'created_at'];
-        if (!in_array($sortField, $allowedSortFields)) {
+        if (! in_array($sortField, $allowedSortFields)) {
             $sortField = 'name';
         }
-        
+
         $query->orderBy($sortField, $sortDirection);
-        
+
         // Paginate the results
         $perPage = $request->get('per_page', 10);
         $subjects = $query->with(['documents', 'documents.documentType'])->paginate($perPage);
-        
+
         $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
@@ -73,7 +73,7 @@ class SubjectController extends Controller
      */
     public function create()
     {
-        if (!Auth::user()->hasPermission('subjects-create')) {
+        if (! Auth::user()->hasPermission('subjects-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
@@ -81,7 +81,7 @@ class SubjectController extends Controller
             ->get();
 
         return Inertia::render('subjects/Create', [
-            'subjectTypes' => $subjectTypes
+            'subjectTypes' => $subjectTypes,
         ]);
     }
 
@@ -90,12 +90,12 @@ class SubjectController extends Controller
      */
     public function store(Request $request)
     {
-        if (!Auth::user()->hasPermission('subjects-create')) {
+        if (! Auth::user()->hasPermission('subjects-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-        //max_subjects
+        // max_subjects
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subjects');
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return redirect()->back()->with('error', 'You have reached the maximum number of subjects allowed for your plan.');
         }
         $validated = $request->validate([
@@ -114,7 +114,7 @@ class SubjectController extends Controller
 
         $subject = Subject::create($validated);
 
-        return redirect()->route('subjects.show', Crypt::encrypt($subject->id) )
+        return redirect()->route('subjects.show', Crypt::encrypt($subject->id))
             ->with('success', 'Subject created successfully.');
     }
 
@@ -123,11 +123,11 @@ class SubjectController extends Controller
      */
     public function show(Request $request, $id)
     {
-        if (!Auth::user()->hasPermission('subjects-view')) {
+        if (! Auth::user()->hasPermission('subjects-view')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
-        
+
         if ($subject->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
         }
@@ -141,24 +141,24 @@ class SubjectController extends Controller
             $search = $request->get('search');
             $documentsQuery->where(function ($q) use ($search) {
                 $q->where('notes', 'like', "%{$search}%")
-                  ->orWhere('file_url', 'like', "%{$search}%")
-                  ->orWhereHas('documentType', function ($sq) use ($search) {
-                      $sq->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('file_url', 'like', "%{$search}%")
+                    ->orWhereHas('documentType', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
         $sortField = $request->get('sort', 'created_at');
         $sortDirection = $request->get('direction', 'desc');
         $allowedSortFields = ['issue_date', 'expiry_date', 'created_at', 'updated_at', 'status'];
-        if (!in_array($sortField, $allowedSortFields)) {
+        if (! in_array($sortField, $allowedSortFields)) {
             $sortField = 'created_at';
         }
         $documentsQuery->orderBy($sortField, $sortDirection);
 
         $perPage = (int) $request->get('per_page', 10);
         $documents = $documentsQuery->paginate($perPage)->appends($request->only(['search', 'sort', 'direction', 'per_page']));
-        
+
         $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
             ->orderBy('name')
             ->get();
@@ -176,13 +176,12 @@ class SubjectController extends Controller
         $docStatusMap = [];
         foreach ($subjectDocs as $d) {
             $docTypeId = $d->document_type_id;
-            if (!isset($docStatusMap[$docTypeId])) {
+            if (! isset($docStatusMap[$docTypeId])) {
                 $docStatusMap[$docTypeId] = [];
             }
             $docStatusMap[$docTypeId][] = (int) $d->status;
         }
 
-     
         $requiredDocumentTypes = $requiredDocumentTypes->map(function ($req) use ($docStatusMap) {
             $docTypeId = $req->document_type_id;
             if (empty($docStatusMap[$docTypeId])) {
@@ -224,11 +223,11 @@ class SubjectController extends Controller
      */
     public function edit($id)
     {
-        if (!Auth::user()->hasPermission('subjects-edit')) {
+        if (! Auth::user()->hasPermission('subjects-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
-        
+
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -240,7 +239,7 @@ class SubjectController extends Controller
 
         return Inertia::render('subjects/Edit', [
             'subject' => $subject,
-            'subjectTypes' => $subjectTypes
+            'subjectTypes' => $subjectTypes,
         ]);
     }
 
@@ -249,11 +248,11 @@ class SubjectController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->hasPermission('subjects-edit')) {
+        if (! Auth::user()->hasPermission('subjects-edit')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
-        
+
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');
@@ -281,11 +280,11 @@ class SubjectController extends Controller
      */
     public function destroy($id)
     {
-        if (!Auth::user()->hasPermission('subjects-delete')) {
+        if (! Auth::user()->hasPermission('subjects-delete')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
         $subject = is_numeric($id) ? Subject::findOrFail($id) : Subject::findBySlugOrFail($id);
-        
+
         // Make sure the subject belongs to the user's company
         if ($subject->company_id !== Auth::user()->company_id) {
             return redirect()->back()->with('error', 'Unauthorized action.');

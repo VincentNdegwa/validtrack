@@ -23,11 +23,11 @@ class DocumentFactory extends Factory
         $company = Company::factory()->create();
         $subject = Subject::factory()->create(['company_id' => $company->id]);
         $documentType = DocumentType::factory()->create(['company_id' => $company->id]);
-        
+
         return [
             'subject_id' => $subject->id,
             'document_type_id' => $documentType->id,
-            'file_url' => 'documents/' . $this->faker->uuid() . '.pdf',
+            'file_url' => 'documents/'.$this->faker->uuid().'.pdf',
             'issue_date' => $this->faker->dateTimeBetween('-2 years', '-1 month'),
             'expiry_date' => $this->faker->dateTimeBetween('+1 month', '+2 years'),
             'status' => 1, // Active
@@ -36,7 +36,7 @@ class DocumentFactory extends Factory
             'company_id' => $company->id,
         ];
     }
-    
+
     /**
      * Configure the factory to use existing related models.
      */
@@ -50,7 +50,7 @@ class DocumentFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Configure the factory to use an existing subject.
      */
@@ -64,7 +64,7 @@ class DocumentFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Configure the factory to use an existing document type.
      */
@@ -78,7 +78,7 @@ class DocumentFactory extends Factory
             ];
         });
     }
-    
+
     /**
      * Configure the factory for a specific uploaded by user.
      */
@@ -88,7 +88,7 @@ class DocumentFactory extends Factory
             'uploaded_by' => $user->id,
         ]);
     }
-    
+
     /**
      * Configure the factory for an expired document.
      */
@@ -98,7 +98,7 @@ class DocumentFactory extends Factory
             'expiry_date' => $this->faker->dateTimeBetween('-6 months', '-1 day'),
         ]);
     }
-    
+
     /**
      * Configure the factory for a document expiring soon (within 30 days).
      */
@@ -108,7 +108,7 @@ class DocumentFactory extends Factory
             'expiry_date' => $this->faker->dateTimeBetween('+1 day', '+30 days'),
         ]);
     }
-    
+
     /**
      * Configure the factory for an inactive document.
      */

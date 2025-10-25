@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('webhook_configuration_url')->nullable();
             $table->text('webhook_url')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['company_id']);
         });
     }

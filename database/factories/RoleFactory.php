@@ -17,11 +17,12 @@ class RoleFactory extends Factory
     public function definition(): array
     {
         $company = \App\Models\Company::factory()->create();
+
         return [
-            'name'=> $this->faker->unique()->word(),
-            'display_name'=> $this->faker->unique()->word(),
-            'description'=> $this->faker->unique()->word(),
-            'company_id'=> $company->id,
+            'name' => $this->faker->unique()->word(),
+            'display_name' => $this->faker->unique()->word(),
+            'description' => $this->faker->unique()->word(),
+            'company_id' => $company->id,
         ];
     }
 }

@@ -13,7 +13,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/plans/{plan}/edit', [BillingController::class, 'editPlan'])->name('plans.edit');
         Route::put('/plans/{plan}', [BillingController::class, 'updatePlan'])->name('plans.update');
         Route::delete('/plans/{plan}', [BillingController::class, 'destroyPlan'])->name('plans.destroy');
-        
+
         // Feature management
         Route::get('/features', [BillingController::class, 'indexFeatures'])->name('features.index');
         Route::get('/features/create', [BillingController::class, 'createFeature'])->name('features.create');

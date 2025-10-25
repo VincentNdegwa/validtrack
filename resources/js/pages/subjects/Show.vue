@@ -260,14 +260,12 @@ const getStatusText = (status: number) => {
             return 'Pending';
         case 3:
             return 'Inactive';
-        case 4: 
+        case 4:
             return 'Warning';
         default:
             return 'Unknown';
     }
 };
-
-
 
 const compliance = computed(() => {
     if (!props.requiredDocumentTypes || props.requiredDocumentTypes.length === 0) {

@@ -21,9 +21,9 @@ return new class extends Migration
 
             $table->unique(
                 ['subject_type_id', 'document_type_id', 'company_id'],
-                'req_doc_types_subj_doc_comp_unique' 
-            );       
- });
+                'req_doc_types_subj_doc_comp_unique'
+            );
+        });
     }
 
     /**

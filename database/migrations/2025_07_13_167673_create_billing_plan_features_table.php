@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('billing_feature_id')->constrained()->cascadeOnDelete();
             $table->string('value')->default('true');
             $table->timestamps();
-            
+
             $table->unique(['billing_plan_id', 'billing_feature_id']);
         });
     }

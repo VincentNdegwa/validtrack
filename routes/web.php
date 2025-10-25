@@ -13,7 +13,6 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\SubjectTypeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -36,23 +35,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('document-types', DocumentTypeController::class);
     Route::resource('required-documents', RequiredDocumentTypeController::class)->only(['store', 'destroy']);
     Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show']);
-    
+
     // User management routes
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
     Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
-    
+
     // Company management routes for super admins
     Route::middleware('super-admin')->group(function () {
         Route::resource('companies', CompanyController::class);
         Route::post('companies/switch', [CompanyController::class, 'switchCompany'])->name('companies.switch');
         Route::post('impersonate', [CompanyController::class, 'impersonateUser'])->name('impersonate.start');
     });
-    
+
     Route::post('impersonate/stop', [CompanyController::class, 'stopImpersonation'])->name('impersonate.stop');
-    Route::get('test-slack', function(){
+    Route::get('test-slack', function () {
         $user = \Illuminate\Support\Facades\Auth::user();
-        $user->notify(new \App\Notifications\TestSlackNotification());
+        $user->notify(new \App\Notifications\TestSlackNotification);
+
         return response()->json(['message' => 'Slack notification sent successfully.']);
     });
 });

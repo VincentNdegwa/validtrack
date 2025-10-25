@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\User;
-use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,7 +24,7 @@ class CompanyFactory extends Factory
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'website' => fake()->url(),
-            'location' => fake()->city() . ', ' . fake()->country(),
+            'location' => fake()->city().', '.fake()->country(),
             'created_at' => now(),
             'updated_at' => now(),
         ];
@@ -41,16 +40,17 @@ class CompanyFactory extends Factory
                 ]);
                 $company->owner_id = $owner->id;
                 $company->save();
-                
+
                 // First, check if the permissions table exists
-                if (!\Illuminate\Support\Facades\Schema::hasTable('permissions')) {
+                if (! \Illuminate\Support\Facades\Schema::hasTable('permissions')) {
                     \Illuminate\Support\Facades\Log::warning('Permissions table does not exist. Skipping permission creation.');
+
                     return;
                 }
-                
+
                 // Get the default permissions list from the static method
                 $permissions = \Database\Seeders\PermissionSeeder::getDefaultPermissions();
-                
+
                 // Create default roles
                 $defaultRoles = [
                     [
@@ -72,7 +72,7 @@ class CompanyFactory extends Factory
                         'company_id' => $company->id,
                     ],
                 ];
-                
+
                 // Create roles for the company
                 foreach ($defaultRoles as $roleData) {
                     \App\Models\Role::firstOrCreate(
@@ -83,7 +83,7 @@ class CompanyFactory extends Factory
                         ]
                     );
                 }
-                
+
                 // Create or retrieve all permissions
                 $createdPermissions = [];
                 foreach ($permissions as $permission) {
@@ -97,21 +97,21 @@ class CompanyFactory extends Factory
                     );
                     $createdPermissions[] = $permObject->id;
                 }
-                
+
                 // Get admin role
                 $adminRole = \App\Models\Role::where('name', 'admin')
                     ->where('company_id', $company->id)
                     ->first();
-                    
+
                 if ($adminRole && count($createdPermissions) > 0) {
                     // Attach all permissions to admin role
                     $existingPermissions = \Illuminate\Support\Facades\DB::table('permission_role')
                         ->where('role_id', $adminRole->id)
                         ->pluck('permission_id')
                         ->toArray();
-                    
+
                     $newPermissions = array_diff($createdPermissions, $existingPermissions);
-                    
+
                     foreach ($newPermissions as $permId) {
                         \Illuminate\Support\Facades\DB::table('permission_role')->insert([
                             'permission_id' => $permId,
@@ -122,7 +122,7 @@ class CompanyFactory extends Factory
                 }
             } catch (\Exception $e) {
                 // Log error but continue - prevent tests from failing if permissions can't be created
-                \Illuminate\Support\Facades\Log::error('Error creating permissions for company: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Error creating permissions for company: '.$e->getMessage());
             }
         });
     }

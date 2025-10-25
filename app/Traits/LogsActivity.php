@@ -36,14 +36,12 @@ trait LogsActivity
     /**
      * Log activity for the model.
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
-     * @param string $action
      * @return void
      */
     protected static function logActivity(Model $model, string $action)
     {
         // Skip logging if we're in a non-user context (like seeding or testing)
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return;
         }
 
@@ -51,14 +49,14 @@ trait LogsActivity
         $user = Auth::user();
         $company_id = $user->company_id;
 
-        //activity_logging
+        // activity_logging
         $hasAccess = check_if_company_has_feature($company_id, 'activity_logging');
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return;
         }
         // Create the payload based on the action
         $payload = static::createPayload($model, $action);
-        
+
         // Create the activity log entry
         ActivityLog::create([
             'user_id' => $user->id,
@@ -72,36 +70,32 @@ trait LogsActivity
 
     /**
      * Create the payload for the activity log.
-     *
-     * @param \Illuminate\Database\Eloquent\Model $model
-     * @param string $action
-     * @return array
      */
     protected static function createPayload(Model $model, string $action): array
     {
         $payload = [];
-        
+
         // For 'created', include all attributes
         if ($action === 'created') {
             $payload['attributes'] = $model->getAttributes();
             // Remove any sensitive data
             static::removeSensitiveData($payload['attributes']);
         }
-        
+
         // For 'updated', include changed attributes
-        else if ($action === 'updated') {
+        elseif ($action === 'updated') {
             $payload['old'] = collect($model->getOriginal())->intersectByKeys($model->getDirty())->toArray();
             $payload['new'] = $model->getDirty();
             // Remove any sensitive data
             static::removeSensitiveData($payload['old']);
             static::removeSensitiveData($payload['new']);
         }
-        
+
         // For 'deleted', include some identifying info
-        else if ($action === 'deleted') {
+        elseif ($action === 'deleted') {
             // Get key attributes to identify what was deleted
             $identifiers = ['id' => $model->id];
-            
+
             // Also include name/title/etc. if available
             foreach (['name', 'title', 'email', 'username'] as $field) {
                 if (isset($model->{$field})) {
@@ -109,39 +103,34 @@ trait LogsActivity
                     break;
                 }
             }
-            
+
             $payload['attributes'] = $identifiers;
         }
-        
+
         return $payload;
     }
-    
+
     /**
      * Remove sensitive data from the payload.
-     *
-     * @param array &$data
-     * @return void
      */
     protected static function removeSensitiveData(array &$data): void
     {
         // Define sensitive fields that should be redacted
         $sensitiveFields = [
-            'password', 'password_hash', 'token', 'remember_token', 
-            'api_token', 'secret', 'verification_code'
+            'password', 'password_hash', 'token', 'remember_token',
+            'api_token', 'secret', 'verification_code',
         ];
-        
+
         foreach ($sensitiveFields as $field) {
             if (isset($data[$field])) {
                 $data[$field] = '[REDACTED]';
             }
         }
     }
-    
+
     /**
      * Define which attributes should be included in the activity log.
      * Override this method in your model to customize.
-     *
-     * @return array
      */
     public function getActivityLogAttributes(): array
     {

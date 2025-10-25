@@ -51,7 +51,7 @@ class SubjectType extends Model
     {
         return $this->hasMany(RequiredDocumentType::class);
     }
-    
+
     /**
      * Get the document types that are required for this subject type.
      */

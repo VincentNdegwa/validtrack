@@ -60,7 +60,7 @@ class DocumentType extends Model
             ->withPivot(['is_required', 'validity_period', 'notify_on_expiry'])
             ->withTimestamps();
     }
-    
+
     /**
      * Get the documents for the document type.
      */

@@ -10,13 +10,13 @@ class UserCompanyHelper
 {
     /**
      * Create user, company, and assign permissions
-     * @param array $userData
+     *
      * @return User
      */
     public static function createUserWithCompanyAndPermissions(array $userData)
     {
-        $companyName = $userData['name'] . "'s Workspace";
-        $companyEmail = 'company_' . \Illuminate\Support\Str::slug($userData['name']) . '@' . explode('@', $userData['email'])[1];
+        $companyName = $userData['name']."'s Workspace";
+        $companyEmail = 'company_'.\Illuminate\Support\Str::slug($userData['name']).'@'.explode('@', $userData['email'])[1];
         $company = Company::create([
             'name' => $companyName,
             'email' => $companyEmail,
@@ -26,6 +26,7 @@ class UserCompanyHelper
         $company->owner_id = $user->id;
         $company->save();
         self::giveCompanyPermissions($company);
+
         return $user;
     }
 

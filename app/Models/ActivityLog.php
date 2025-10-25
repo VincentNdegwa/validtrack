@@ -69,8 +69,6 @@ class ActivityLog extends Model
 
     /**
      * Get a human-readable message for this activity log.
-     *
-     * @return string
      */
     public function getMessageAttribute(): string
     {
@@ -83,8 +81,6 @@ class ActivityLog extends Model
 
     /**
      * Get a user-friendly target name.
-     * 
-     * @return string
      */
     public function getFriendlyTargetNameAttribute(): string
     {
@@ -93,8 +89,6 @@ class ActivityLog extends Model
 
     /**
      * Get a formatted date for the activity.
-     * 
-     * @return string
      */
     public function getFriendlyDateAttribute(): string
     {
@@ -103,8 +97,6 @@ class ActivityLog extends Model
 
     /**
      * Convert the action type to a human-readable form.
-     *
-     * @return string
      */
     protected function getReadableAction(): string
     {
@@ -119,8 +111,6 @@ class ActivityLog extends Model
 
     /**
      * Get a human-readable name for the target model.
-     *
-     * @return string
      */
     protected function getFriendlyTargetName(): string
     {
@@ -128,23 +118,21 @@ class ActivityLog extends Model
         $readableClassName = preg_replace('/(?<!^)([A-Z])/', ' $1', $className);
         // Try to get a name/title field from the payload
         $name = $this->getNameFromPayload();
-        
+
         if ($name) {
             return "{$readableClassName} \"{$name}\"";
         }
-        
+
         return "{$readableClassName} #{$this->target_id}";
     }
 
     /**
      * Extract a meaningful name from the payload.
-     *
-     * @return string|null
      */
     protected function getNameFromPayload(): ?string
     {
         $payload = $this->payload;
-        
+
         // For created/deleted actions
         if (isset($payload['attributes'])) {
             foreach (['name', 'title', 'email', 'username', 'subject', 'description'] as $field) {
@@ -153,7 +141,7 @@ class ActivityLog extends Model
                 }
             }
         }
-        
+
         // For updated actions
         if (isset($payload['new'])) {
             foreach (['name', 'title', 'email', 'username', 'subject', 'description'] as $field) {
@@ -162,31 +150,29 @@ class ActivityLog extends Model
                 }
             }
         }
-        
+
         // If we couldn't find a name in the payload
         return null;
     }
-    
+
     /**
      * Get the changes made during an update.
-     *
-     * @return array|null
      */
     public function getChanges(): ?array
     {
-        if ($this->action_type !== 'updated' || !isset($this->payload['new']) || !isset($this->payload['old'])) {
+        if ($this->action_type !== 'updated' || ! isset($this->payload['new']) || ! isset($this->payload['old'])) {
             return null;
         }
-        
+
         $changes = [];
         foreach ($this->payload['new'] as $key => $newValue) {
             $oldValue = $this->payload['old'][$key] ?? null;
             $changes[$key] = [
                 'from' => $oldValue,
-                'to' => $newValue
+                'to' => $newValue,
             ];
         }
-        
+
         return $changes;
     }
 }

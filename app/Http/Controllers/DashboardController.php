@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Document;
-use App\Models\Subject;
-use App\Models\User;
-use App\Models\DocumentType;
-use App\Models\SubjectType;
 use App\Models\ActivityLog;
-use Illuminate\Http\Request;
+use App\Models\Document;
+use App\Models\DocumentType;
+use App\Models\Subject;
+use App\Models\SubjectType;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -24,9 +23,9 @@ class DashboardController extends Controller
         // }
         $user = Auth::user();
         $companyId = $user->company_id;
-        
+
         $isSuperAdmin = $user->roles()->where('name', 'super-admin')->exists();
-        
+
         if ($isSuperAdmin) {
             return $this->superAdminDashboard();
         }
@@ -37,73 +36,76 @@ class DashboardController extends Controller
         $currentMonthStart = $currentMonth->copy()->startOfMonth();
         $previousMonthStart = $previousMonth->copy()->startOfMonth();
         $previousMonthEnd = $previousMonth->copy()->endOfMonth();
-        
+
         // Subjects data - current month
         $subjects = Subject::where('company_id', $companyId)->get();
         $totalSubjects = $subjects->count();
-        $compliantSubjects = $subjects->filter(function($subject) {
+        $compliantSubjects = $subjects->filter(function ($subject) {
             return $subject->compliance_status === true;
         })->count();
-        
+
         // Subjects data - previous month
         $previousMonthSubjects = Subject::where('company_id', $companyId)
             ->whereDate('created_at', '<=', $previousMonthEnd)
             ->get();
         $previousMonthSubjectsCount = $previousMonthSubjects->count();
-        
+
         // Documents data
         $currentDocumentsCount = Document::where('company_id', $companyId)->count();
         $previousMonthDocumentsCount = Document::where('company_id', $companyId)
             ->whereDate('created_at', '<=', $previousMonthEnd)
             ->count();
-            
+
         // Subject Types data
         $currentSubjectTypesCount = SubjectType::where('company_id', $companyId)->count();
         $previousMonthSubjectTypesCount = SubjectType::where('company_id', $companyId)
             ->whereDate('created_at', '<=', $previousMonthEnd)
             ->count();
-            
+
         // Document Types data
         $currentDocumentTypesCount = DocumentType::where('company_id', $companyId)->count();
         $previousMonthDocumentTypesCount = DocumentType::where('company_id', $companyId)
             ->whereDate('created_at', '<=', $previousMonthEnd)
             ->count();
-            
+
         // Users data
         $currentUsersCount = User::where('company_id', $companyId)->count();
         $previousMonthUsersCount = User::where('company_id', $companyId)
             ->whereDate('created_at', '<=', $previousMonthEnd)
             ->count();
-            
+
         // Expiring documents data
         $currentExpiringDocsCount = Document::where('company_id', $companyId)
             ->whereNotNull('expiry_date')
             ->whereDate('expiry_date', '>=', $now)
             ->whereDate('expiry_date', '<=', $now->copy()->addDays(30))
             ->count();
-        
+
         // Last month's expiring documents (documents that were expiring in the previous month's window)
         $previousMonthExpiringDocsCount = Document::where('company_id', $companyId)
             ->whereNotNull('expiry_date')
             ->whereDate('expiry_date', '>=', $previousMonth)
             ->whereDate('expiry_date', '<=', $previousMonth->copy()->addDays(30))
             ->count();
-        
-        $calculateTrend = function($current, $previous) {
-            if ($previous == 0) return $current > 0 ? 100 : 0;
+
+        $calculateTrend = function ($current, $previous) {
+            if ($previous == 0) {
+                return $current > 0 ? 100 : 0;
+            }
+
             return round((($current - $previous) / $previous) * 100, 1);
         };
-        
+
         // Compliance percentage current vs previous month
         $previousMonthCompliancePercentage = 0;
         if ($previousMonthSubjectsCount > 0) {
-            $previousMonthCompliantSubjects = $previousMonthSubjects->filter(function($subject) {
+            $previousMonthCompliantSubjects = $previousMonthSubjects->filter(function ($subject) {
                 return $subject->compliance_status === true;
             })->count();
             $previousMonthCompliancePercentage = round(($previousMonthCompliantSubjects / $previousMonthSubjectsCount) * 100, 2);
         }
         $currentCompliancePercentage = $totalSubjects > 0 ? round(($compliantSubjects / $totalSubjects) * 100, 2) : 0;
-        
+
         $stats = [
             'subjects' => $totalSubjects,
             'subjectsTrend' => $calculateTrend($totalSubjects, $previousMonthSubjectsCount),
@@ -120,21 +122,21 @@ class DashboardController extends Controller
             'expiringDocuments' => $currentExpiringDocsCount,
             'expiringDocumentsTrend' => $calculateTrend($currentExpiringDocsCount, $previousMonthExpiringDocsCount),
         ];
-        
+
         // Get recent subjects (last 5)
         $recentSubjects = Subject::where('company_id', $companyId)
             ->with(['subjectType', 'documents', 'documents.documentType'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
-            
+
         // Get recent documents (last 5)
         $recentDocuments = Document::where('company_id', $companyId)
             ->with(['subject', 'documentType'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get();
-            
+
         // Get recent activity logs (last 10)
         $recentActivities = ActivityLog::where('company_id', $companyId)
             ->with('user', 'company')
@@ -162,7 +164,7 @@ class DashboardController extends Controller
                     'updated_at' => $log->updated_at->format('Y-m-d H:i:s'),
                 ];
             });
-            
+
         // Get expiring documents (next 30 days)
         $expiringDocuments = Document::where('company_id', $companyId)
             ->whereNotNull('expiry_date')
@@ -172,24 +174,24 @@ class DashboardController extends Controller
             ->orderBy('expiry_date', 'asc')
             ->limit(5)
             ->get();
-            
+
         // Get all documents with expiry dates for the calendar
         $calendarDocuments = Document::where('company_id', $companyId)
             ->whereNotNull('expiry_date')
             ->with(['subject', 'documentType'])
             ->get();
-        
+
         // Get all documents for charts
         $allDocuments = Document::where('company_id', $companyId)
             ->with(['subject', 'documentType'])
             ->get();
-            
+
         // Get all subjects for charts
         $allSubjects = Subject::where('company_id', $companyId)
             ->select('id', 'name', 'subject_type_id')
             ->with('subjectType:id,name')
             ->get();
-            
+
         // Get document counts by status
         $documentsByStatus = [
             'draft' => Document::where('company_id', $companyId)->where('status', 0)->count(),
@@ -197,10 +199,10 @@ class DashboardController extends Controller
             'expired' => Document::where('company_id', $companyId)->where('status', 2)->count(),
             'archived' => Document::where('company_id', $companyId)->where('status', 3)->count(),
         ];
-            
+
         // Get company info
         $company = $user->company;
-        
+
         return Inertia::render('Dashboard', [
             'stats' => $stats,
             'recentSubjects' => $recentSubjects,
@@ -214,7 +216,7 @@ class DashboardController extends Controller
             'company' => $company,
         ]);
     }
-    
+
     /**
      * Display the super-admin dashboard with system-wide statistics and company management.
      */
@@ -222,7 +224,7 @@ class DashboardController extends Controller
     {
         // Get all companies with user counts
         $companies = \App\Models\Company::withCount('users')->orderBy('name')->get();
-        
+
         // Get total counts across all companies
         $stats = [
             'totalCompanies' => \App\Models\Company::count(),
@@ -232,7 +234,7 @@ class DashboardController extends Controller
             'totalSubjectTypes' => \App\Models\SubjectType::count(),
             'totalDocumentTypes' => \App\Models\DocumentType::count(),
         ];
-        
+
         // Return specialized super-admin dashboard view
         return Inertia::render('SuperAdminDashboard', [
             'stats' => $stats,

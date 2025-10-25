@@ -29,7 +29,7 @@ class SubjectFactory extends Factory
 
         $company->owner_id = $user->id;
         $company->save();
-        
+
         return [
             'name' => $this->faker->name(),
             'company_id' => $company->id,
@@ -43,7 +43,7 @@ class SubjectFactory extends Factory
             'status' => 1, // Active
         ];
     }
-    
+
     /**
      * Configure the factory to use an existing company.
      */
@@ -54,7 +54,7 @@ class SubjectFactory extends Factory
             'subject_type_id' => SubjectType::factory()->create(['company_id' => $company->id]),
         ]);
     }
-    
+
     /**
      * Configure the factory to use an existing subject type.
      */
@@ -65,20 +65,20 @@ class SubjectFactory extends Factory
             'subject_type_id' => $subjectType->id,
         ]);
     }
-    
+
     /**
      * Configure the factory to link to a user.
      */
-    public function withUser(User $user = null): static
+    public function withUser(?User $user = null): static
     {
         $user = $user ?? User::factory()->create();
-        
+
         return $this->state(fn (array $attributes) => [
             'user_id' => $user->id,
             'email' => $user->email,
         ]);
     }
-    
+
     /**
      * Configure the factory to create an inactive subject.
      */

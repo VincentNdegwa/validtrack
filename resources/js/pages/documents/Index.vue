@@ -95,6 +95,8 @@ const getStatusColor = (status: number) => {
             return 'bg-yellow-500';
         case 3:
             return 'bg-red-500';
+        case 4:
+            return 'bg-orange-500';
         default:
             return 'bg-gray-500';
     }
@@ -108,6 +110,8 @@ const getStatusText = (status: number) => {
             return 'Pending';
         case 3:
             return 'Expired';
+        case 4: 
+            return 'Warning';
         default:
             return 'Unknown';
     }

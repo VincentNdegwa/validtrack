@@ -160,6 +160,11 @@ class Company extends Model
         return $this->hasMany(Role::class);
     }
 
+    public function slackIntegration()
+    {
+        return $this->hasOne(SlackIntegration::class);
+    }
+
     public function syncPermissions($permissions, $adminRole)
     {
         foreach ($permissions as $permission) {

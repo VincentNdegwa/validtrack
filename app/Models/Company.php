@@ -35,6 +35,7 @@ class Company extends Model
         'location',
         'description',
         'is_active',
+        'has_slack_integration',
     ];
 
     /**

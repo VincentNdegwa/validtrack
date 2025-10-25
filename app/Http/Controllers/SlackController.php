@@ -48,14 +48,14 @@ class SlackController extends Controller
     public function callback(Request $request)
     {
         if ($request->state !== Session::get('slack_oauth_state')) {
-            return redirect()->back()
+            return redirect()->route('dashboard')
                 ->with('error', 'Invalid state parameter. Please try connecting to Slack again.');
         }
 
         Session::forget('slack_oauth_state');
 
         if ($request->has('error')) {
-            return redirect()->back()
+            return redirect()->route('dashboard')
                 ->with('error', 'Failed to connect to Slack: ' . $request->error);
         }
 
@@ -69,17 +69,17 @@ class SlackController extends Controller
         $data = $response->json();
 
         if (!$data['ok']) {
-            return redirect()->back()
+            return redirect()->route('dashboard')
                 ->with('error', 'Failed to connect to Slack: ' . ($data['error'] ?? 'Unknown error'));
         }
 
         try {
             $this->storeSlackCredentials($data);
             
-            return redirect()->back()
+            return redirect()->route('dashboard')
                 ->with('success', 'Successfully connected to Slack workspace ' . $data['team']['name']);
         } catch (\Exception $e) {
-            return redirect()->back()
+            return redirect()->route('dashboard')
                 ->with('error', 'Failed to save Slack integration: ' . $e->getMessage());
         }
     }
@@ -118,5 +118,14 @@ class SlackController extends Controller
         );
 
         $company->update(['has_slack_integration' => true]);
+    }
+
+    public function disconnect(){
+        $company = Auth::user()->company;
+
+        $company->slackIntegration()->delete();
+        $company->update(['has_slack_integration' => false]);
+
+        return redirect()->back()->with('success', 'Successfully disconnected from Slack.');
     }
 }

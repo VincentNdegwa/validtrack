@@ -29,7 +29,16 @@ class CompanySettingsController extends Controller
                 'timezone' => $company->getSetting(CompanySetting::TIMEZONE),
                 'reminder_default_days' => $company->getSetting(CompanySetting::REMINDER_DEFAULT_DAYS),
                 'notification_email_enabled' => $company->getSetting(CompanySetting::NOTIFICATION_EMAIL_ENABLED),
+
             ];
+
+            if ($company->has_slack_integration) {
+                $settings['has_slack_integration'] = true;
+                $settings['slack'] = [
+                    'channel' => $company->slackIntegration->webhook_channel,
+                    'team' => $company->slackIntegration->team_name,
+                ];
+            }
 
             $timezones = \DateTimeZone::listIdentifiers();
 

@@ -81,7 +81,7 @@
                                         @change="applyBulkStatus"
                                     >
                                         <option value="1">Active</option>
-                                        <option value="0">Inactive</option>
+                                        <option value="3">Inactive</option>
                                     </Select>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@
 
                             <Button 
                                 type="submit" 
-                                :disabled="form.processing || !showPreview || !bulkSubjectType"
+                                :disabled="!isValidForSubmit"
                                 class="bg-primary text-primary-foreground hover:bg-primary/90"
                             >
                                 <Loader2 v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
@@ -149,7 +149,7 @@
                                             @change="form.records = previewData"
                                         >
                                             <option value="1">Active</option>
-                                            <option value="0">Inactive</option>
+                                            <option value="3">Inactive</option>
                                         </Select>
                                     </TableCell>
                                 </TableRow>
@@ -194,7 +194,7 @@
 
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -336,6 +336,16 @@ const downloadTemplate = () => {
     link.click();
     document.body.removeChild(link);
 };
+
+const isValidForSubmit = computed(() => {
+    if (!showPreview.value || form.processing || !previewData.value.length) return false;
+    
+    return previewData.value.every(record => 
+        record.subject_type_id && 
+        record.status !== undefined && 
+        record.name
+    );
+});
 
 const submitForm = () => {
     form.post(route('subjects.bulk-import.store'), {

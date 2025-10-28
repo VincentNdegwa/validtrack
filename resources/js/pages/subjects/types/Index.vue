@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type SubjectType } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Eye, Trash } from 'lucide-vue-next';
+import { Edit, Eye, Import, Plus, Trash } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -199,8 +199,13 @@ const handleMenuAction = (action: string, typeId: string | number) => {
                         </div>
                     </div>
                     <Can permission="subject-types-create">
+                        <Link :href="route('subject-types.bulk-import')"> 
+                        <Button class="bg-primary text-primary-foreground hover:bg-primary/90" >
+                            <Import/>  Bulk Import
+                        </Button>
+                        </Link>
                         <Link href="/subject-types/create">
-                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject Type </Button>
+                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <Plus/>  Add </Button>
                         </Link>
                     </Can>
                 </div>

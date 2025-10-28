@@ -10,6 +10,87 @@ use Inertia\Inertia;
 
 class SubjectTypeController extends Controller
 {
+ 
+    public function showBulkImport()
+    {
+        if (!Auth::user()->hasPermission('subject-types-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
+        return Inertia::render('subjects/types/BulkImport');
+    }
+
+ 
+
+    public function bulkImport(Request $request)
+    {
+        if (!Auth::user()->hasPermission('subject-types-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+
+        $file = $request->file('file');
+        $hasHeader = true; 
+        
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subject_types');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'You have reached the maximum number of subject types allowed for your plan.');
+        }
+
+        $results = [
+            'success' => 0,
+            'failed' => 0,
+            'errors' => [],
+        ];
+
+        $handle = fopen($file->getPathname(), 'r');
+        $lineNumber = 0;
+        $maxRecords = 100; 
+        $processedRecords = 0;
+
+        while (($data = fgetcsv($handle)) !== false) {
+            $lineNumber++;
+            
+            if ($hasHeader && $lineNumber === 1) {
+                continue;
+            }
+
+            if ($processedRecords >= $maxRecords) {
+                $results['errors'][] = "Maximum import limit of {$maxRecords} records reached.";
+                break;
+            }
+
+            if (!isset($data[0]) || empty(trim($data[0]))) {
+                $results['failed']++;
+                $results['errors'][] = "Line {$lineNumber}: Name is required.";
+                continue;
+            }
+
+            $name = trim($data[0]);
+
+            try {
+                SubjectType::updateOrCreate(
+                    ['name' => $name, 'company_id' => Auth::user()->company_id],  
+                    ['name' => $name]  
+                );
+                $results['success']++;
+                $processedRecords++;
+            } catch (\Exception $e) {
+                $results['failed']++;
+                $results['errors'][] = "Line {$lineNumber}: Failed to create subject type - {$e->getMessage()}";
+            }
+        }
+
+        fclose($handle);
+
+        return redirect()->back()->with([
+            'import_results' => $results,
+            'success' => 'Import process completed.',
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */

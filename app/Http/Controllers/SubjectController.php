@@ -69,6 +69,87 @@ class SubjectController extends Controller
     }
 
     /**
+     * Show the bulk import form
+     */
+    public function showBulkImport()
+    {
+        if (!Auth::user()->hasPermission('subjects-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
+        $subjectTypes = SubjectType::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('subjects/BulkImport', [
+            'subjectTypes' => $subjectTypes,
+        ]);
+    }
+
+    /**
+     * Process the bulk import
+     */
+    public function bulkImport(Request $request)
+    {
+        if (!Auth::user()->hasPermission('subjects-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:2048',
+            'records' => 'required|array',
+            'records.*.name' => 'required|string',
+            'records.*.email' => 'nullable|string|email',
+            'records.*.phone' => 'nullable|string',
+            'records.*.address' => 'nullable|string',
+            'records.*.subject_type_id' => 'required|exists:subject_types,id',
+            'records.*.status' => 'required|in:0,1',
+        ]);
+        
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subjects');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'You have reached the maximum number of subjects allowed for your plan.');
+        }
+
+        $results = [
+            'success' => 0,
+            'failed' => 0,
+            'errors' => [],
+        ];
+
+        $maxRecords = 100; // Maximum records per import
+        $records = array_slice($request->records, 0, $maxRecords);
+
+        if (count($request->records) > $maxRecords) {
+            $results['errors'][] = "Maximum import limit of {$maxRecords} records reached. Only processing first {$maxRecords} records.";
+        }
+
+        foreach ($records as $index => $record) {
+            try {
+                Subject::create([
+                    'name' => $record['name'],
+                    'email' => $record['email'] ?? null,
+                    'phone' => $record['phone'] ?? null,
+                    'address' => $record['address'] ?? null,
+                    'subject_type_id' => $record['subject_type_id'],
+                    'status' => $record['status'],
+                    'company_id' => Auth::user()->company_id,
+                    'user_id' => Auth::id(),
+                ]);
+                $results['success']++;
+            } catch (\Exception $e) {
+                $results['failed']++;
+                $results['errors'][] = "Record " . ($index + 1) . ": Failed to create subject - {$e->getMessage()}";
+            }
+        }
+
+        return redirect()->back()->with([
+            'import_results' => $results,
+            'success' => 'Import process completed.',
+        ]);
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -93,29 +174,55 @@ class SubjectController extends Controller
         if (! Auth::user()->hasPermission('subjects-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
-        // max_subjects
+
+        $results = [
+            'success' => 0,
+            'failed' => 0,
+            'errors' => [],
+        ];
+        
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subjects');
         if (! $hasAccess) {
-            return redirect()->back()->with('error', 'You have reached the maximum number of subjects allowed for your plan.');
+            return redirect()->back()->with([
+                'import_results' => array_merge($results, ['errors' => ['You have reached the maximum number of subjects allowed for your plan.']]),
+                'error' => 'You have reached the maximum number of subjects allowed for your plan.'
+            ]);
         }
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'subject_type_id' => 'nullable|exists:subject_types,id',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'category' => 'nullable|string|max:255',
-            'notes' => 'nullable|string',
-            'status' => 'required|integer',
-        ]);
 
-        $validated['company_id'] = Auth::user()->company_id;
-        $validated['user_id'] = Auth::id();
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'subject_type_id' => 'nullable|exists:subject_types,id',
+                'email' => 'nullable|email|max:255',
+                'phone' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'category' => 'nullable|string|max:255',
+                'notes' => 'nullable|string',
+                'status' => 'required|integer',
+            ]);
 
-        $subject = Subject::create($validated);
+            $validated['company_id'] = Auth::user()->company_id;
+            $validated['user_id'] = Auth::id();
 
-        return redirect()->route('subjects.show', Crypt::encrypt($subject->id))
-            ->with('success', 'Subject created successfully.');
+            $subject = Subject::create($validated);
+            
+            $results['success'] = 1;
+            
+            return redirect()->back()
+                ->with([
+                    'import_results' => $results,
+                    'success' => 'Subject created successfully.'
+                ]);
+
+        } catch (\Exception $e) {
+            $results['failed'] = 1;
+            $results['errors'][] = "Failed to create subject - {$e->getMessage()}";
+            
+            return redirect()->back()->with([
+                'import_results' => $results,
+                'error' => 'Failed to create subject.'
+            ]);
+        }
     }
 
     /**

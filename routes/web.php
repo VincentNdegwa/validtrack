@@ -27,11 +27,25 @@ Route::get('dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    // Core application routes
+
+    // Subject routes
+    Route::get('/subjects/bulk-import', [SubjectController::class, 'showBulkImport'])
+        ->name('subjects.bulk-import');
+    Route::post('/subjects/bulk-import', [SubjectController::class, 'bulkImport'])
+        ->name('subjects.bulk-import.store');
     Route::resource('subjects', SubjectController::class);
+
+    // Subject Type routes
+    Route::get('/subject-types/bulk-import', [SubjectTypeController::class, 'showBulkImport'])
+        ->name('subject-types.bulk-import');
+    Route::post('/subject-types/bulk-import', [SubjectTypeController::class, 'bulkImport'])
+        ->name('subject-types.bulk-import.store');
     Route::resource('subject-types', SubjectTypeController::class);
+
     Route::resource('documents', DocumentController::class);
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+
+
     Route::resource('document-types', DocumentTypeController::class);
     Route::resource('required-documents', RequiredDocumentTypeController::class)->only(['store', 'destroy']);
     Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show']);

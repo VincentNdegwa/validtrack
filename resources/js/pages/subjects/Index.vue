@@ -8,7 +8,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Subject, type SubjectType } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Edit, Eye, Trash, Upload } from 'lucide-vue-next';
+import { Edit, Eye, Import, Plus, Trash, Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 // Define props for parent-driven data loading mode
@@ -266,8 +266,13 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                         </Link>
                     </Can>
                     <Can permission="subjects-create">
+                           <Link :href="route('subjects.bulk-import')"> 
+                        <Button class="bg-primary text-primary-foreground hover:bg-primary/90" >
+                            <Import/>  Bulk Import
+                        </Button>
+                        </Link>
                         <Link href="/subjects/create">
-                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> Add Subject </Button>
+                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <Plus/> Add </Button>
                         </Link>
                     </Can>
                 </div>

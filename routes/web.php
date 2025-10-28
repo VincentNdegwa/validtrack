@@ -42,12 +42,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('subject-types.bulk-import.store');
     Route::resource('subject-types', SubjectTypeController::class);
 
+    // Document Type routes
+    Route::get('document-types/bulk-import', [DocumentTypeController::class, 'showBulkImport'])->name('document-types.bulk-import');
+    Route::post('document-types/bulk-import', [DocumentTypeController::class, 'bulkImport'])->name('document-types.bulk-import.store');
+    Route::resource('document-types', DocumentTypeController::class);
+    Route::resource('required-documents', RequiredDocumentTypeController::class)->only(['store', 'destroy']);
+
+
     Route::resource('documents', DocumentController::class);
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
 
-
-    Route::resource('document-types', DocumentTypeController::class);
-    Route::resource('required-documents', RequiredDocumentTypeController::class)->only(['store', 'destroy']);
+    
     Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show']);
 
     // User management routes

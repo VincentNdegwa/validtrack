@@ -9,6 +9,87 @@ use Inertia\Inertia;
 
 class DocumentTypeController extends Controller
 {
+    /**
+     * Show the bulk import form
+     */
+    public function showBulkImport()
+    {
+        if (!Auth::user()->hasPermission('document-types-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
+        return Inertia::render('documents/types/BulkImport');
+    }
+
+    /**
+     * Process the bulk import
+     */
+    public function bulkImport(Request $request)
+    {
+        if (!Auth::user()->hasPermission('document-types-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt|max:2048',
+            'records' => 'required|array',
+            'records.*.name' => 'required|string|max:255',
+            'records.*.description' => 'nullable|string|max:1000',
+            'records.*.icon' => 'nullable|string|max:255',
+            'records.*.is_active' => 'required|boolean',
+        ]);
+        
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_document_types');
+        if (!$hasAccess) {
+            return redirect()->back()->with('error', 'You have reached the maximum number of document types allowed for your plan.');
+        }
+
+        $results = [
+            'success' => 0,
+            'failed' => 0,
+            'errors' => [],
+        ];
+
+        $maxRecords = 100; // Maximum records per import
+        $records = array_slice($request->records, 0, $maxRecords);
+
+        if (count($request->records) > $maxRecords) {
+            $results['errors'][] = "Maximum import limit of {$maxRecords} records reached. Only processing first {$maxRecords} records.";
+        }
+
+        foreach ($records as $index => $record) {
+            try {
+
+                $exists = DocumentType::where('company_id', Auth::user()->company_id)
+                    ->where('name', $record['name'])
+                    ->exists();
+
+                if ($exists) {
+                    $results['failed']++;
+                    $results['errors'][] = "Record " . ($index + 1) . ": A document type with this name already exists.";
+                    continue;
+                }
+
+                DocumentType::create([
+                    'name' => $record['name'],
+                    'description' => $record['description'] ?? null,
+                    'icon' => $record['icon'] ?? null,
+                    'is_active' => $record['is_active'],
+                    'company_id' => Auth::user()->company_id,
+                ]);
+                $results['success']++;
+            } catch (\Exception $e) {
+                $results['failed']++;
+                $results['errors'][] = "Record " . ($index + 1) . ": Failed to create document type - {$e->getMessage()}";
+            }
+        }
+
+        return redirect()->back()->with([
+            'import_results' => $results,
+            'success' => 'Import process completed.',
+        ]);
+    }
+
     public function index(Request $request)
     {
         if (! Auth::user()->hasPermission('document-types-view')) {

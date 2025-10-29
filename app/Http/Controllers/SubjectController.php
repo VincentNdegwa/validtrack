@@ -73,7 +73,7 @@ class SubjectController extends Controller
      */
     public function showBulkImport()
     {
-        if (!Auth::user()->hasPermission('subjects-create')) {
+        if (! Auth::user()->hasPermission('subjects-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
 
@@ -91,7 +91,7 @@ class SubjectController extends Controller
      */
     public function bulkImport(Request $request)
     {
-        if (!Auth::user()->hasPermission('subjects-create')) {
+        if (! Auth::user()->hasPermission('subjects-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
 
@@ -105,9 +105,9 @@ class SubjectController extends Controller
             'records.*.subject_type_id' => 'required|exists:subject_types,id',
             'records.*.status' => 'required|in:0,1',
         ]);
-        
+
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subjects');
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return redirect()->back()->with('error', 'You have reached the maximum number of subjects allowed for your plan.');
         }
 
@@ -139,7 +139,7 @@ class SubjectController extends Controller
                 $results['success']++;
             } catch (\Exception $e) {
                 $results['failed']++;
-                $results['errors'][] = "Record " . ($index + 1) . ": Failed to create subject - {$e->getMessage()}";
+                $results['errors'][] = 'Record '.($index + 1).": Failed to create subject - {$e->getMessage()}";
             }
         }
 
@@ -180,12 +180,12 @@ class SubjectController extends Controller
             'failed' => 0,
             'errors' => [],
         ];
-        
+
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subjects');
         if (! $hasAccess) {
             return redirect()->back()->with([
                 'import_results' => array_merge($results, ['errors' => ['You have reached the maximum number of subjects allowed for your plan.']]),
-                'error' => 'You have reached the maximum number of subjects allowed for your plan.'
+                'error' => 'You have reached the maximum number of subjects allowed for your plan.',
             ]);
         }
 
@@ -205,22 +205,22 @@ class SubjectController extends Controller
             $validated['user_id'] = Auth::id();
 
             $subject = Subject::create($validated);
-            
+
             $results['success'] = 1;
-            
+
             return redirect()->back()
                 ->with([
                     'import_results' => $results,
-                    'success' => 'Subject created successfully.'
+                    'success' => 'Subject created successfully.',
                 ]);
 
         } catch (\Exception $e) {
             $results['failed'] = 1;
             $results['errors'][] = "Failed to create subject - {$e->getMessage()}";
-            
+
             return redirect()->back()->with([
                 'import_results' => $results,
-                'error' => 'Failed to create subject.'
+                'error' => 'Failed to create subject.',
             ]);
         }
     }

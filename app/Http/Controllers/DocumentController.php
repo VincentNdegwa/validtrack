@@ -141,7 +141,7 @@ class DocumentController extends Controller
 
         try {
             $records = $request->input('records', []);
-            
+
             if (empty($records)) {
                 return redirect()->back()->with('error', 'No records provided for import.');
             }
@@ -153,8 +153,8 @@ class DocumentController extends Controller
             foreach ($records as $index => $recordData) {
                 try {
                     $file = $request->file("records.{$index}.file");
-                    if (!$file) {
-                        throw new \Exception("File is required for record " . ($index + 1));
+                    if (! $file) {
+                        throw new \Exception('File is required for record '.($index + 1));
                     }
 
                     $data = array_merge($recordData, ['file' => $file]);
@@ -171,7 +171,7 @@ class DocumentController extends Controller
 
                     $subject = Subject::findOrFail($validated['subject_id']);
                     if ($subject->company_id !== Auth::user()->company_id) {
-                        throw new \Exception("Subject at record " . ($index + 1) . " does not belong to your company.");
+                        throw new \Exception('Subject at record '.($index + 1).' does not belong to your company.');
                     }
 
                     $path = $file->store('documents/'.$subject->id, 'public');
@@ -191,14 +191,14 @@ class DocumentController extends Controller
                     $success++;
                 } catch (\Exception $e) {
                     $failed++;
-                    $errors[] = "Record " . ($index + 1) . ": " . $e->getMessage();
+                    $errors[] = 'Record '.($index + 1).': '.$e->getMessage();
                 }
             }
 
             return redirect()->back()->with('success', "Import completed: {$success} succeeded, {$failed} failed.");
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Error processing import: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error processing import: '.$e->getMessage());
         }
     }
 

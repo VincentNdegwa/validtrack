@@ -266,13 +266,11 @@ const handleMenuAction = (action: string, subjectId: string | number) => {
                         </Link>
                     </Can>
                     <Can permission="subjects-create">
-                           <Link :href="route('subjects.bulk-import')"> 
-                        <Button class="bg-primary text-primary-foreground hover:bg-primary/90" >
-                            <Import/>  Bulk Import
-                        </Button>
+                        <Link :href="route('subjects.bulk-import')">
+                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <Import /> Bulk Import </Button>
                         </Link>
                         <Link href="/subjects/create">
-                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <Plus/> Add </Button>
+                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <Plus /> Add </Button>
                         </Link>
                     </Can>
                 </div>

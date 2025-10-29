@@ -14,7 +14,7 @@ class DocumentTypeController extends Controller
      */
     public function showBulkImport()
     {
-        if (!Auth::user()->hasPermission('document-types-create')) {
+        if (! Auth::user()->hasPermission('document-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
 
@@ -26,7 +26,7 @@ class DocumentTypeController extends Controller
      */
     public function bulkImport(Request $request)
     {
-        if (!Auth::user()->hasPermission('document-types-create')) {
+        if (! Auth::user()->hasPermission('document-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
 
@@ -38,9 +38,9 @@ class DocumentTypeController extends Controller
             'records.*.icon' => 'nullable|string|max:255',
             'records.*.is_active' => 'required|boolean',
         ]);
-        
+
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_document_types');
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return redirect()->back()->with('error', 'You have reached the maximum number of document types allowed for your plan.');
         }
 
@@ -66,7 +66,8 @@ class DocumentTypeController extends Controller
 
                 if ($exists) {
                     $results['failed']++;
-                    $results['errors'][] = "Record " . ($index + 1) . ": A document type with this name already exists.";
+                    $results['errors'][] = 'Record '.($index + 1).': A document type with this name already exists.';
+
                     continue;
                 }
 
@@ -80,7 +81,7 @@ class DocumentTypeController extends Controller
                 $results['success']++;
             } catch (\Exception $e) {
                 $results['failed']++;
-                $results['errors'][] = "Record " . ($index + 1) . ": Failed to create document type - {$e->getMessage()}";
+                $results['errors'][] = 'Record '.($index + 1).": Failed to create document type - {$e->getMessage()}";
             }
         }
 

@@ -205,9 +205,7 @@ const handleMenuAction = (action: string, typeId: string | number) => {
                     </div>
                     <Can permission="document-types-create">
                         <Link :href="route('document-types.bulk-import')">
-                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90">
-                                <Import /> Bulk Import
-                            </Button>
+                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <Import /> Bulk Import </Button>
                         </Link>
                         <Link href="/document-types/create">
                             <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <PlusIcon /> Add </Button>

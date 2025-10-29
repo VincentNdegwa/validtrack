@@ -16,7 +16,7 @@
                 </CardHeader>
                 <CardContent>
                     <div class="space-y-4">
-                        <ul class="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                        <ul class="list-inside list-disc space-y-2 text-sm text-muted-foreground">
                             <li>Upload a CSV file with subject type data</li>
                             <li>The CSV should have the following columns: name</li>
                             <li>Each row represents a new subject type</li>
@@ -43,28 +43,21 @@
                         <div class="grid gap-4">
                             <div>
                                 <Label for="file">CSV File</Label>
-                                <Input 
-                                class="mt-2"
-                                    id="file"
-                                    ref="fileInput"
-                                    type="file"
-                                    accept=".csv"
-                                    @change="handleFileChange"
-                                />
+                                <Input class="mt-2" id="file" ref="fileInput" type="file" accept=".csv" @change="handleFileChange" />
                                 <div v-if="form.errors.file" class="mt-1 text-sm text-destructive">
                                     {{ form.errors.file }}
                                 </div>
                             </div>
 
-                            <div v-if="previewError" class="p-4 border border-destructive/50 rounded-lg bg-destructive/10">
+                            <div v-if="previewError" class="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
                                 <div class="flex items-center gap-2 text-sm text-destructive">
                                     <FileWarning class="h-4 w-4" />
                                     {{ previewError }}
                                 </div>
                             </div>
 
-                            <Button 
-                                type="submit" 
+                            <Button
+                                type="submit"
                                 :disabled="form.processing || !showPreview"
                                 class="bg-primary text-primary-foreground hover:bg-primary/90"
                             >
@@ -95,7 +88,7 @@
                                 </TableRow>
                             </TableBody>
                         </Table>
-                        <div v-if="previewData.length > 5" class="p-4 text-sm text-muted-foreground text-center border-t">
+                        <div v-if="previewData.length > 5" class="border-t p-4 text-center text-sm text-muted-foreground">
                             ... and {{ previewData.length - 5 }} more records
                         </div>
                     </div>
@@ -109,17 +102,13 @@
                 <CardContent>
                     <div class="space-y-4">
                         <div class="grid gap-2">
-                            <div class="text-sm text-green-600 dark:text-green-400">
-                                Successfully imported: {{ importResults.success }}
-                            </div>
-                            <div v-if="importResults.failed > 0" class="text-sm text-destructive">
-                                Failed to import: {{ importResults.failed }}
-                            </div>
+                            <div class="text-sm text-green-600 dark:text-green-400">Successfully imported: {{ importResults.success }}</div>
+                            <div v-if="importResults.failed > 0" class="text-sm text-destructive">Failed to import: {{ importResults.failed }}</div>
                         </div>
 
                         <div v-if="importResults.errors?.length" class="mt-4">
-                            <h4 class="font-medium mb-2">Errors:</h4>
-                            <ul class="list-disc list-inside space-y-1 text-sm text-destructive">
+                            <h4 class="mb-2 font-medium">Errors:</h4>
+                            <ul class="list-inside list-disc space-y-1 text-sm text-destructive">
                                 <li v-for="error in importResults.errors" :key="error">
                                     {{ error }}
                                 </li>
@@ -133,16 +122,16 @@
 </template>
 
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2, ArrowDownToLine, FileWarning } from 'lucide-vue-next';
+import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ArrowDownToLine, FileWarning, Loader2 } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const importResults = ref<{
@@ -191,12 +180,12 @@ const handleFileChange = async (e: Event) => {
     if (target.files?.length) {
         form.file = target.files[0];
         resetPreview();
-        
+
         try {
             const text = await target.files[0].text();
             const lines = text.split('\n');
-            const headers = lines[0].split(',').map(h => h.trim());
-            
+            const headers = lines[0].split(',').map((h) => h.trim());
+
             if (!headers.includes('name')) {
                 previewError.value = 'Invalid CSV format. Required columns: name';
                 return;
@@ -204,13 +193,13 @@ const handleFileChange = async (e: Event) => {
 
             const data: PreviewData[] = lines
                 .slice(1)
-                .filter(line => line.trim())
-                .map(line => {
-                    const values = line.split(',').map(v => v.trim());
+                .filter((line) => line.trim())
+                .map((line) => {
+                    const values = line.split(',').map((v) => v.trim());
                     return {
                         name: values[headers.indexOf('name')],
                         description: values[headers.indexOf('description')],
-                        company_id: parseInt(values[headers.indexOf('company_id')])
+                        company_id: parseInt(values[headers.indexOf('company_id')]),
                     };
                 });
 
@@ -222,6 +211,8 @@ const handleFileChange = async (e: Event) => {
             previewData.value = data;
             showPreview.value = true;
         } catch (error) {
+            console.log(error);
+
             previewError.value = 'Error reading file. Please make sure it is a valid CSV file.';
         }
     }

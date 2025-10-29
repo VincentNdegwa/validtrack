@@ -10,21 +10,18 @@ use Inertia\Inertia;
 
 class SubjectTypeController extends Controller
 {
- 
     public function showBulkImport()
     {
-        if (!Auth::user()->hasPermission('subject-types-create')) {
+        if (! Auth::user()->hasPermission('subject-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
 
         return Inertia::render('subjects/types/BulkImport');
     }
 
- 
-
     public function bulkImport(Request $request)
     {
-        if (!Auth::user()->hasPermission('subject-types-create')) {
+        if (! Auth::user()->hasPermission('subject-types-create')) {
             return redirect()->back()->with('error', 'Permission denied.');
         }
 
@@ -33,10 +30,10 @@ class SubjectTypeController extends Controller
         ]);
 
         $file = $request->file('file');
-        $hasHeader = true; 
-        
+        $hasHeader = true;
+
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subject_types');
-        if (!$hasAccess) {
+        if (! $hasAccess) {
             return redirect()->back()->with('error', 'You have reached the maximum number of subject types allowed for your plan.');
         }
 
@@ -48,12 +45,12 @@ class SubjectTypeController extends Controller
 
         $handle = fopen($file->getPathname(), 'r');
         $lineNumber = 0;
-        $maxRecords = 100; 
+        $maxRecords = 100;
         $processedRecords = 0;
 
         while (($data = fgetcsv($handle)) !== false) {
             $lineNumber++;
-            
+
             if ($hasHeader && $lineNumber === 1) {
                 continue;
             }
@@ -63,9 +60,10 @@ class SubjectTypeController extends Controller
                 break;
             }
 
-            if (!isset($data[0]) || empty(trim($data[0]))) {
+            if (! isset($data[0]) || empty(trim($data[0]))) {
                 $results['failed']++;
                 $results['errors'][] = "Line {$lineNumber}: Name is required.";
+
                 continue;
             }
 
@@ -73,8 +71,8 @@ class SubjectTypeController extends Controller
 
             try {
                 SubjectType::updateOrCreate(
-                    ['name' => $name, 'company_id' => Auth::user()->company_id],  
-                    ['name' => $name]  
+                    ['name' => $name, 'company_id' => Auth::user()->company_id],
+                    ['name' => $name]
                 );
                 $results['success']++;
                 $processedRecords++;
@@ -91,6 +89,7 @@ class SubjectTypeController extends Controller
             'success' => 'Import process completed.',
         ]);
     }
+
     /**
      * Display a listing of the resource.
      */

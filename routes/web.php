@@ -48,12 +48,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('document-types', DocumentTypeController::class);
     Route::resource('required-documents', RequiredDocumentTypeController::class)->only(['store', 'destroy']);
 
-
     Route::get('documents/bulk-import', [DocumentController::class, 'showBulkImport'])->name('documents.bulk-import');
     Route::post('documents/bulk-import', [DocumentController::class, 'bulkImport'])->name('documents.bulk-import.store');
     Route::resource('documents', DocumentController::class);
     Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
-
 
     Route::resource('activity-logs', ActivityLogController::class)->only(['index', 'show']);
 

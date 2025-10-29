@@ -98,6 +98,131 @@ class DocumentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    public function showBulkImport()
+    {
+        if (! Auth::user()->hasPermission('documents-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
+        $subjects = Subject::where('company_id', Auth::user()->company_id)
+            ->orderBy('name')
+            ->get();
+
+        $documentTypes = DocumentType::where('company_id', Auth::user()->company_id)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return Inertia::render('documents/BulkImport', [
+            'subjects' => $subjects,
+            'documentTypes' => $documentTypes,
+        ]);
+    }
+
+    public function bulkImport(Request $request)
+    {
+        if (! Auth::user()->hasPermission('documents-create')) {
+            return redirect()->back()->with('error', 'Permission denied.');
+        }
+
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_documents');
+        if (! $hasAccess) {
+            return redirect()->back()->with('error', 'You have reached the maximum number of documents allowed for your plan.');
+        }
+
+        $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'manual_document_upload');
+        if (! $hasAccess) {
+            return redirect()->back()->with('error', 'You do not have permission to upload documents manually.');
+        }
+
+        $success = 0;
+        $failed = 0;
+        $errors = [];
+
+        try {
+            $records = $request->input('records', []);
+            
+            if (empty($records)) {
+                return redirect()->back()->with('error', 'No records provided for import.');
+            }
+
+            if (count($records) > 10) {
+                return redirect()->back()->with('error', 'Maximum 10 records allowed per import.');
+            }
+
+            foreach ($records as $index => $recordData) {
+                try {
+                    $file = $request->file("records.{$index}.file");
+                    if (!$file) {
+                        throw new \Exception("File is required for record " . ($index + 1));
+                    }
+
+                    $data = array_merge($recordData, ['file' => $file]);
+
+                    $validated = validator($data, [
+                        'subject_id' => 'required|exists:subjects,id',
+                        'document_type_id' => 'required|exists:document_types,id',
+                        'file' => 'required|file|max:10240', // Max 10MB
+                        'issue_date' => 'required|date',
+                        'expiry_date' => 'nullable|date|after_or_equal:issue_date',
+                        'status' => 'required|integer|in:0,1,2,3',
+                        'notes' => 'nullable|string',
+                    ])->validate();
+
+                    $subject = Subject::findOrFail($validated['subject_id']);
+                    if ($subject->company_id !== Auth::user()->company_id) {
+                        throw new \Exception("Subject at record " . ($index + 1) . " does not belong to your company.");
+                    }
+
+                    $path = $file->store('documents/'.$subject->id, 'public');
+
+                    Document::create([
+                        'subject_id' => $validated['subject_id'],
+                        'document_type_id' => $validated['document_type_id'],
+                        'file_url' => $path,
+                        'issue_date' => $validated['issue_date'],
+                        'expiry_date' => $validated['expiry_date'] ?? null,
+                        'status' => $validated['status'],
+                        'uploaded_by' => Auth::id(),
+                        'notes' => $validated['notes'] ?? null,
+                        'company_id' => Auth::user()->company_id,
+                    ]);
+
+                    $success++;
+                } catch (\Exception $e) {
+                    $failed++;
+                    $errors[] = "Record " . ($index + 1) . ": " . $e->getMessage();
+                }
+            }
+
+            return redirect()->back()->with('success', "Import completed: {$success} succeeded, {$failed} failed.");
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error processing import: ' . $e->getMessage());
+        }
+    }
+
+    protected function validateRecord($record, $index)
+    {
+        return validator($record, [
+            'subject_id' => 'required|exists:subjects,id',
+            'document_type_id' => 'required|exists:document_types,id',
+            'file' => 'required|file|max:10240',
+            'issue_date' => 'required|date',
+            'expiry_date' => 'nullable|date|after_or_equal:issue_date',
+            'status' => 'required|integer|in:0,1,2,3',
+            'notes' => 'nullable|string',
+        ], [], [
+            'subject_id' => 'subject',
+            'document_type_id' => 'document type',
+            'file' => 'document file',
+            'issue_date' => 'issue date',
+            'expiry_date' => 'expiry date',
+            'status' => 'status',
+            'notes' => 'notes',
+        ])->validate();
+    }
+
     public function store(Request $request)
     {
         if (! Auth::user()->hasPermission('documents-create')) {

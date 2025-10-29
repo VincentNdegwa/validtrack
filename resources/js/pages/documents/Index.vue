@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { type Document } from '@/types/models';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Download, Edit, Eye, Trash, Upload } from 'lucide-vue-next';
+import { Download, Edit, Eye, Import, Trash, Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { route } from 'ziggy-js';
 
@@ -250,6 +250,9 @@ const handleMenuAction = (action: string, documentId: string | number) => {
                         </Link>
                     </Can>
                     <Can permission="documents-create">
+                        <Link :href="route('documents.bulk-import')">
+                            <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <Import /> Bulk Import </Button>
+                        </Link>
                         <Link :href="route('documents.create')">
                             <Button class="bg-primary text-primary-foreground hover:bg-primary/90"> <Upload /> Document </Button>
                         </Link>

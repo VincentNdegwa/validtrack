@@ -175,54 +175,29 @@ class SubjectController extends Controller
             return redirect()->back()->with('error', 'Permission denied.');
         }
 
-        $results = [
-            'success' => 0,
-            'failed' => 0,
-            'errors' => [],
-        ];
-
         $hasAccess = check_if_company_has_feature(Auth::user()->company_id, 'max_subjects');
         if (! $hasAccess) {
-            return redirect()->back()->with([
-                'import_results' => array_merge($results, ['errors' => ['You have reached the maximum number of subjects allowed for your plan.']]),
-                'error' => 'You have reached the maximum number of subjects allowed for your plan.',
-            ]);
+            return redirect()->back()->with('error', 'You have reached the maximum number of subjects allowed for your plan.');
         }
 
-        try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'subject_type_id' => 'nullable|exists:subject_types,id',
-                'email' => 'nullable|email|max:255',
-                'phone' => 'nullable|string|max:255',
-                'address' => 'nullable|string|max:255',
-                'category' => 'nullable|string|max:255',
-                'notes' => 'nullable|string',
-                'status' => 'required|integer',
-            ]);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'subject_type_id' => 'nullable|exists:subject_types,id',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:255',
+            'category' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
+            'status' => 'required|integer',
+        ]);
 
-            $validated['company_id'] = Auth::user()->company_id;
-            $validated['user_id'] = Auth::id();
+        $validated['company_id'] = Auth::user()->company_id;
+        $validated['user_id'] = Auth::id();
 
-            $subject = Subject::create($validated);
+        $subject = Subject::create($validated);
 
-            $results['success'] = 1;
-
-            return redirect()->back()
-                ->with([
-                    'import_results' => $results,
-                    'success' => 'Subject created successfully.',
-                ]);
-
-        } catch (\Exception $e) {
-            $results['failed'] = 1;
-            $results['errors'][] = "Failed to create subject - {$e->getMessage()}";
-
-            return redirect()->back()->with([
-                'import_results' => $results,
-                'error' => 'Failed to create subject.',
-            ]);
-        }
+        return redirect()->route('subjects.show', Crypt::encrypt($subject->id))
+            ->with('success', 'Subject created successfully.');
     }
 
     /**

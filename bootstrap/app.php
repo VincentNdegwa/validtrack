@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             \App\Http\Middleware\CompanyContext::class,
+            \App\Http\Middleware\ConfigureSeo::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

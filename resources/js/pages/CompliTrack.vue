@@ -220,45 +220,6 @@ onMounted(() => {
         loaded.value = true;
     }, 100);
 });
-
-onMounted(() => {
-    const productScript = document.createElement('script');
-    productScript.type = 'application/ld+json';
-    productScript.text = JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Product',
-        name: 'ValidTrack',
-        image: ['/logo-blue.svg'],
-        description:
-            'Track, manage, and ensure compliance for all your documents easily with ValidTrack. Upload, get expiry reminders, and automate compliance for any subject type.',
-        brand: { '@type': 'Brand', name: 'ValidTrack' },
-        offers: {
-            '@type': 'Offer',
-            url: 'http://validtrack.tech360.systems/',
-            priceCurrency: 'USD',
-            availability: 'https://schema.org/InStock',
-        },
-    });
-    document.head.appendChild(productScript);
-
-    const faqScript = document.createElement('script');
-    faqScript.type = 'application/ld+json';
-    faqScript.text = JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: [
-            {
-                '@type': 'Question',
-                name: 'Can I track documents for employees and vendors?',
-                acceptedAnswer: {
-                    '@type': 'Answer',
-                    text: "Yes! ValidTrack is designed to manage documents for any entity type. You can create custom subject types like 'Employee', 'Vendor', 'Asset', or any other category specific to your organization's needs.",
-                },
-            },
-        ],
-    });
-    document.head.appendChild(faqScript);
-});
 </script>
 
 <template>

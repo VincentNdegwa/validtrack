@@ -57,7 +57,7 @@ onMounted(() => {
                     <p class="max-w-md text-lg text-muted-foreground">Track your compliance documents securely and never miss critical deadlines.</p>
                     <div class="relative mt-8 overflow-hidden rounded-xl border border-border">
                         <img
-                            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop"
+                            src="images/landing.jpg"
                             alt="ValidTrack Dashboard"
                             class="aspect-video w-full object-cover"
                         />

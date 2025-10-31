@@ -112,7 +112,7 @@
     --radius: 0.75rem;
     --sidebar-background: hsl(220 20% 90%);
     --sidebar-foreground: hsl(220 25% 20%);
-    --sidebar-primary: hsl(160 60% 30%);
+    --sidebar-primary: hsl(160, 59%, 30%);
     --sidebar-primary-foreground: hsl(0 0% 100%);
     --sidebar-accent: hsl(160 80% 45%);
     --sidebar-accent-foreground: hsl(0 0% 100%);
@@ -128,7 +128,7 @@
     --card-foreground: hsl(220 20% 98%);
     --popover: hsl(220 30% 12%);
     --popover-foreground: hsl(220 20% 98%);
-    --primary: hsl(160 50% 45%);
+    --primary: hsl(160, 50%, 45%);
     --primary-foreground: hsl(0 0% 100%);
     --secondary: hsl(160 30% 20%);
     --secondary-foreground: hsl(160 40% 90%);
@@ -148,7 +148,7 @@
     --chart-5: hsl(320 40% 50%);
     --sidebar-background: hsl(220 30% 6%);
     --sidebar-foreground: hsl(220 20% 98%);
-    --sidebar-primary: hsl(160 50% 45%);
+    --sidebar-primary: hsl(160, 59%, 30%);
     --sidebar-primary-foreground: hsl(0 0% 100%);
     --sidebar-accent: hsl(160 70% 55%);
     --sidebar-accent-foreground: hsl(0 0% 100%);

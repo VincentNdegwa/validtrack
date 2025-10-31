@@ -63,6 +63,7 @@
                                 <div class="space-y-2">
                                     <Label for="bulk_status">Bulk Status</Label>
                                     <Select id="bulk_status" v-model="bulkStatus" :disabled="!showPreview" @change="applyBulkStatus">
+                                        <option value="">Select a status</option>
                                         <option value="1">Active</option>
                                         <option value="3">Inactive</option>
                                     </Select>
@@ -119,6 +120,7 @@
                                     </TableCell>
                                     <TableCell>
                                         <Select v-model="row.status" :disabled="form.processing" @change="form.records = previewData">
+                                            <option value="">Select a status</option>
                                             <option value="1">Active</option>
                                             <option value="3">Inactive</option>
                                         </Select>
@@ -170,7 +172,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowDownToLine, FileWarning, Loader2 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const importResults = ref<{
@@ -199,7 +201,7 @@ const form = useForm({
 });
 
 const bulkSubjectType = ref('');
-const bulkStatus = ref('1');
+const bulkStatus = ref('');
 
 const applyBulkSubjectType = () => {
     if (bulkSubjectType.value) {
@@ -212,11 +214,13 @@ const applyBulkSubjectType = () => {
 };
 
 const applyBulkStatus = () => {
-    previewData.value = previewData.value.map((record) => ({
-        ...record,
-        status: bulkStatus.value,
-    }));
-    form.records = previewData.value;
+    if (bulkStatus.value) {
+        previewData.value = previewData.value.map((record) => ({
+            ...record,
+            status: bulkStatus.value,
+        }));
+        form.records = previewData.value;
+    }
 };
 
 const resetPreview = () => {
@@ -231,6 +235,8 @@ defineProps<{
         name: string;
     }>;
 }>();
+
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
